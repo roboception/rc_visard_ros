@@ -78,14 +78,12 @@ before_script:
 ##############
 gen_dox:
   <<: *amd64_job
-  variables:
-    TESTING_DEBS: "true"
   stage: deploy
   script:
     - apt-get install -y doxygen ncftp
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake ../rc_visard_driver
     - make doc
     - upload_dox.sh doc/html
   only:
