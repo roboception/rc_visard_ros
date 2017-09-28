@@ -1,0 +1,12 @@
+<library path="lib/librc_visard_driver_nodelet">
+  <class name="rc_visard_driver"
+         type="rc::DeviceNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Nodelet that connects to a Roboception sensor and provides ROS topics for
+      sensor data like rectified stereo images, but also for disparity,
+      confidence and error images. Furthermore, the nodelet can stream poses from
+      the sensor via the rc_dynamics interface.
+    </description>
+  </class>
+</library>

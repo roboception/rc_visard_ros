@@ -1,0 +1,8 @@
+<launch>
+  <node pkg="nodelet" type="nodelet" name="rc_visard_driver"
+    args="standalone rc_visard_driver" output="screen">
+
+    <param name="device" value="00_1e_06_32_03_40"/>
+    <param name="access" value="exclusive"/>
+  </node>
+</launch>

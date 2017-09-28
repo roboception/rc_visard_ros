@@ -1,0 +1,10 @@
+build
+cmake-build*
+
+*~
+*.swp
+
+.*
+!.gitignore
+!.gitlab-ci.yml
+!.gitmodules

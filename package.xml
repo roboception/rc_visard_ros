@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rc_visard_driver</name>
+  <version>0.1.0</version>
+  <description>The rc_visard_driver package</description>
+
+  <maintainer email="heiko.hirschmueller@roboception.de">Heiko Hirschmueller</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://roboception.com/rc_visard</url>
+
+  <author email="heiko.hirschmueller@roboception.de">Heiko Hirschmueller</author>
+  <author email="christian.emmerich@roboception.de">Christian Emmerich</author>
+  <author email="felix.ruess@roboception.de">Felix Ruess</author>
+
+  <!-- system dependencies -->
+  <build_depend>protobuf-dev</build_depend>
+  <exec_depend>protobuf</exec_depend>
+  <depend>curl</depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <!-- depend is a shorthand for build_depend, build_export_depend and exec_depend -->
+  <depend>nodelet</depend>
+  <depend>roscpp</depend>
+  <depend>std_srvs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>image_transport</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf</depend>
+  
+  <doc_depend>doxygen</doc_depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <nodelet plugin="${prefix}/rc_visard_driver_nodelet.xml"/>
+  </export>
+</package>
