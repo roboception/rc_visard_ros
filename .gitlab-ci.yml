@@ -36,7 +36,7 @@ before_script:
   script:
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake ../rc_visard_driver
     - make -j 4
     - CTEST_OUTPUT_ON_FAILURE=1 make test
 
@@ -49,7 +49,7 @@ before_script:
   script:
     - mkdir build
     - cd build
-    - cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ..
+    - cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ../rc_visard_driver
     - make -j 4
     - make package
     - upload_deb.sh $DISTRO_CODENAME-testing *.deb
@@ -63,7 +63,7 @@ before_script:
   script:
     - mkdir build
     - cd build
-    - cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ..
+    - cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ../rc_visard_driver
     - make -j 4
     - make package
     - upload_deb.sh $DISTRO_CODENAME-stable *.deb

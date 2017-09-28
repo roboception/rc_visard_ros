@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rc_visard</name>
+  <version>0.1.0</version>
+  <description>Roboception rc_visard support meta package</description>
+
+  <maintainer email="heiko.hirschmueller@roboception.de">Heiko Hirschmueller</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://roboception.com/rc_visard</url>
+  <url type="repository">https://github.com/roboception/rc_visard_ros</url>
+  <url type="bugtracker">https://github.com/roboception/rc_visard_ros/issues</url>
+
+  <author email="heiko.hirschmueller@roboception.de">Heiko Hirschmueller</author>
+  <author email="christian.emmerich@roboception.de">Christian Emmerich</author>
+  <author email="felix.ruess@roboception.de">Felix Ruess</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>rc_visard_driver</exec_depend>
+
+  <export>
+    <metapackage />
+  </export>
+</package>
