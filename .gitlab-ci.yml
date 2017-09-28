@@ -1,6 +1,7 @@
 before_script:
   - export DISTRO_CODENAME=`lsb_release -cs` && echo Using distro $DISTRO_CODENAME
-  - apt-get update -yq && apt-get install -y libprotobuf-dev protobuf-compiler libcurl4-openssl-dev lintian ros-${ROS_DISTRO}-tf
+  - apt-get update -yq && apt-get install -y lintian
+  - rosdep install --from-paths . --ignore-src -r -y
   - git submodule sync --recursive
   - git submodule update --init --recursive
 
