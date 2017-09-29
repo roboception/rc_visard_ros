@@ -42,7 +42,7 @@ namespace rc
 
 Points2Publisher::Points2Publisher(ros::NodeHandle &nh, std::string frame_id,
                                    double _f, double _t, double _scale)
-        : Publisher(frame_id)
+        : Publisher(frame_id), left_list(50)
 {
   f=_f;
   t=_t;
