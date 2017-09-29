@@ -88,9 +88,19 @@ These parameters can be changed during runtime via dynamic reconfigure:
 
 - depth_quality
 
-  Integer factor for reducing the quality by downscaling based on the static
-  downscale parameter above, which results in faster processing. Values can
-  be "H", "M", "L".
+  Quality can be "Low", "Medium", "High" and "StaticHigh". Only the first
+  letter will be checked, thus specification of "L", "M", "H" or "S" is
+  sufficient.
+  
+  + StaticHigh quality means computation with 640x480 pixel, limited to 3 Hz
+    and accumulation input images. The scene must be static during image
+    accumulation! The timestamp of the disparity image is taken from the first
+    image that was used for accumulation.
+  + High quality means computation with 640x480 pixel.
+  + Medium quality means computation with 320x240 pixel.
+  + Low quality means computation with 214x160 pixel.
+  
+  Default: "High".
 
 - depth_disprange
 
