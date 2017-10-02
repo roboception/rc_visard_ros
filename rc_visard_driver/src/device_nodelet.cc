@@ -351,11 +351,12 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig &c, uin
 {
   mtx.lock();
 
-  c.quality=c.quality.substr(0, 1);
+  c.depth_quality=c.depth_quality.substr(0, 1);
 
-  if (c.quality[0] != 'L' && c.quality[0] != 'M' && c.quality[0] != 'H' && c.quality[0] != 'S')
+  if (c.depth_quality[0] != 'L' && c.depth_quality[0] != 'M' && c.depth_quality[0] != 'H' &&
+      c.depth_quality[0] != 'S')
   {
-    c.quality="H";
+    c.depth_quality="H";
   }
 
   config=c;

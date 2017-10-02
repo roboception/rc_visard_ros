@@ -1,5 +1,3 @@
 device: "00_1e_06_32_03_40"
 access: "exclusive"
 enable_tf: 0
-tf_parent: "world"
-tf_child: "camera"
