@@ -682,6 +682,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         // enter grabbing loop
 
         int missing=0;
+        ros::Time tlastimage=ros::Time::now();
 
         while (!stopImageThread)
         {
@@ -692,6 +693,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             // reset counter of consecutive missing images and failures
 
             missing=0;
+            tlastimage=ros::Time::now();
             cntConsecutiveFails=0;
             imageSuccess = true;
 
@@ -726,6 +728,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           }
           else if (buffer != 0 && buffer->getIsIncomplete())
           {
+            missing=0;
             ROS_WARN("rc_visard_driver: Received incomplete buffer");
           }
           else if (buffer == 0)
@@ -733,16 +736,18 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             // throw an expection if components are enabled and there is no
             // data for 6*0.5 seconds
 
-            // this will not work if access is readonly, is there a way to
-            // check if components are enabled without setting the component
-            // selector?
-
             if (cintensity || cintensitycombined || cdisparity || cconfidence || cerror)
             {
               missing++;
               if (missing >= 6) // report error
               {
-                throw std::underflow_error("No images received!");
+                std::ostringstream out;
+
+                out << "No images received for ";
+                out << (ros::Time::now()-tlastimage).toSec();
+                out << " seconds!";
+
+                throw std::underflow_error(out.str());
               }
             }
           }
