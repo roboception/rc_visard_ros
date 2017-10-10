@@ -86,6 +86,8 @@ ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(
 DeviceNodelet::DeviceNodelet()
 {
   reconfig=0;
+  dev_supports_gain=false;
+  dev_supports_wb=false;
   level=0;
 
   stopImageThread = imageRequested = imageSuccess = false;
@@ -307,6 +309,47 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   cfg.camera_exp_value=rcg::getFloat(nodemap, "ExposureTime", 0, 0, true)/1000000;
   cfg.camera_exp_max=rcg::getFloat(nodemap, "ExposureTimeAutoMax", 0, 0, true)/1000000;
 
+  // get optional gain value
+
+  v=rcg::getEnum(nodemap, "GainSelector", false);
+  if (v.size() > 0)
+  {
+    dev_supports_gain=true;
+    dev_supports_gain=rcg::setEnum(nodemap, "GainSelector", "All", true);
+    cfg.camera_gain_value=rcg::getFloat(nodemap, "Gain", 0, 0, true);
+  }
+  else
+  {
+    ROS_WARN("rc_visard_driver: Device does not support setting gain. gain_value is without function.");
+
+    dev_supports_gain=false;
+    cfg.camera_gain_value=0;
+  }
+
+  // get optional white balancing values (only for color camera)
+
+  v=rcg::getEnum(nodemap, "BalanceWhiteAuto", false);
+  if (v.size() > 0)
+  {
+    dev_supports_wb=true;
+    cfg.camera_wb_auto=(v != "Off");
+    rcg::setEnum(nodemap, "BalanceRatioSelector", "Red", true);
+    cfg.camera_wb_ratio_red=rcg::getFloat(nodemap, "BalanceRatio", 0, 0, true);
+    rcg::setEnum(nodemap, "BalanceRatioSelector", "Blue", true);
+    cfg.camera_wb_ratio_blue=rcg::getFloat(nodemap, "BalanceRatio", 0, 0, true);
+  }
+  else
+  {
+    ROS_WARN("rc_visard_driver: Not a color camera. wb_auto, wb_ratio_red and wb_ratio_blue are without function.");
+
+    dev_supports_wb=false;
+    cfg.camera_wb_auto=true;
+    cfg.camera_wb_ratio_red=1;
+    cfg.camera_wb_ratio_blue=1;
+  }
+
+  // get current depth image configuration
+
   v=rcg::getEnum(nodemap, "DepthQuality", true);
   cfg.depth_quality=v.substr(0, 1);
 
@@ -328,7 +371,11 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     pnh.setParam("camera_fps", cfg.camera_fps);
     pnh.setParam("camera_exp_auto", cfg.camera_exp_auto);
     pnh.setParam("camera_exp_value", cfg.camera_exp_value);
+    pnh.setParam("camera_gain_value", cfg.camera_gain_value);
     pnh.setParam("camera_exp_max", cfg.camera_exp_max);
+    pnh.setParam("camera_wb_auto", cfg.camera_wb_auto);
+    pnh.setParam("camera_wb_ratio_red", cfg.camera_wb_ratio_red);
+    pnh.setParam("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue);
     pnh.setParam("depth_quality", cfg.depth_quality);
     pnh.setParam("depth_disprange", cfg.depth_disprange);
     pnh.setParam("depth_seg", cfg.depth_seg);
@@ -351,6 +398,22 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig &c, uin
 {
   mtx.lock();
 
+  // check and correct parameters
+
+  if (!dev_supports_gain)
+  {
+    c.camera_gain_value=0;
+    l&=~8192;
+  }
+
+  if (!dev_supports_wb)
+  {
+    c.camera_wb_auto=true;
+    c.camera_wb_ratio_red=1;
+    c.camera_wb_ratio_blue=1;
+    l&=~(16384|32768|65536);
+  }
+
   c.depth_quality=c.depth_quality.substr(0, 1);
 
   if (c.depth_quality[0] != 'L' && c.depth_quality[0] != 'M' && c.depth_quality[0] != 'H' &&
@@ -358,6 +421,8 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig &c, uin
   {
     c.depth_quality="H";
   }
+
+  // copy config for using it in the grabbing thread
 
   config=c;
   level|=l;
@@ -413,10 +478,44 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef> &nodemap,
         rcg::setFloat(nodemap, "ExposureTime", 1000000*cfg.camera_exp_value, true);
       }
 
+      if (lvl&8192)
+      {
+        lvl&=~8192;
+        rcg::setFloat(nodemap, "Gain", cfg.camera_gain_value, true);
+      }
+
       if (lvl&8)
       {
         lvl&=~8;
         rcg::setFloat(nodemap, "ExposureTimeAutoMax", 1000000*cfg.camera_exp_max, true);
+      }
+
+      if (lvl&16384)
+      {
+        lvl&=~16384;
+
+        if (cfg.camera_wb_auto)
+        {
+          rcg::setEnum(nodemap, "BalanceWhiteAuto", "Continuous", true);
+        }
+        else
+        {
+          rcg::setEnum(nodemap, "BalanceWhiteAuto", "Off", true);
+        }
+      }
+
+      if (lvl&32768)
+      {
+        lvl&=~32768;
+        rcg::setEnum(nodemap, "BalanceRatioSelector", "Red", true);
+        rcg::setFloat(nodemap, "BalanceRatio", cfg.camera_wb_ratio_red, true);
+      }
+
+      if (lvl&65536)
+      {
+        lvl&=~65536;
+        rcg::setEnum(nodemap, "BalanceRatioSelector", "Blue", true);
+        rcg::setFloat(nodemap, "BalanceRatio", cfg.camera_wb_ratio_blue, true);
       }
 
       if (lvl&16)

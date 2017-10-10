@@ -87,6 +87,9 @@ class DeviceNodelet : public nodelet::Nodelet
 
     dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig> *reconfig;
 
+    bool dev_supports_gain;
+    bool dev_supports_wb;
+
     std::shared_ptr<rcg::Device> rcgdev;
     std::shared_ptr<GenApi::CNodeMapRef> rcgnodemap;
 

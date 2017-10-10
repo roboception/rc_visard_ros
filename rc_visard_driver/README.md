@@ -86,12 +86,29 @@ These parameters can be changed during runtime via dynamic reconfigure:
 
   Exposure time in seconds if exp_auto is false.
 
+- camera_gain_value
+
+  Gain factor in decibel if exp_auto is false.
+
+- camera_wb_auto (only for color camera)
+
+  If true, then white balancing is done automatically. If false, then the red
+  and blue to green ratios can be chosen manually.
+
+- camera_wb_ratio_red (only for color camera)
+
+  Red to green ratio for color balancing if camera_wb_auto is false.
+
+- camera_wb_ratio_blue (only for color camera)
+
+  Blue to green ratio for color balancing if camera_wb_auto is false.
+
 - depth_quality
 
   Quality can be "Low", "Medium", "High" and "StaticHigh". Only the first
   letter will be checked, thus specification of "L", "M", "H" or "S" is
   sufficient.
-  
+
   + StaticHigh quality means computation with 640x480 pixel, limited to 3 Hz
     and accumulation input images. The scene must be static during image
     accumulation! The timestamp of the disparity image is taken from the first
@@ -99,7 +116,7 @@ These parameters can be changed during runtime via dynamic reconfigure:
   + High quality means computation with 640x480 pixel.
   + Medium quality means computation with 320x240 pixel.
   + Low quality means computation with 214x160 pixel.
-  
+
   Default: "High".
 
 - depth_disprange
