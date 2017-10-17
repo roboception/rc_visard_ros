@@ -414,6 +414,8 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig &c, uin
     l&=~8192;
   }
 
+  c.camera_gain_value=round(c.camera_gain_value/6)*6;
+
   if (!dev_supports_wb)
   {
     c.camera_wb_auto=true;
