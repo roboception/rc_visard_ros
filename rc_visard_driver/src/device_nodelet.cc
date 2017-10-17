@@ -315,8 +315,16 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   if (v.size() > 0)
   {
     dev_supports_gain=true;
-    dev_supports_gain=rcg::setEnum(nodemap, "GainSelector", "All", true);
-    cfg.camera_gain_value=rcg::getFloat(nodemap, "Gain", 0, 0, true);
+
+    if (v != "All")
+    {
+      dev_supports_gain=rcg::setEnum(nodemap, "GainSelector", "All", true);
+    }
+
+    if(dev_supports_gain)
+    {
+      cfg.camera_gain_value=rcg::getFloat(nodemap, "Gain", 0, 0, true);
+    }
   }
   else
   {
