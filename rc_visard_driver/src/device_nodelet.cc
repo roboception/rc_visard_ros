@@ -786,7 +786,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         stream[0]->open();
         stream[0]->startStreaming();
 
-        ROS_INFO("rc_visard_driver: Image streams ready");
+        ROS_INFO_STREAM("rc_visard_driver: Image streams ready (Package size " <<
+                        rcg::getString(rcgnodemap, "GevSCPSPacketSize") << ")");
 
         // enter grabbing loop
 
