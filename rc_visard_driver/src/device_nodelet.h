@@ -112,6 +112,7 @@ class DeviceNodelet : public nodelet::Nodelet
     ros::ServiceServer dynamicsStartService;
     ros::ServiceServer dynamicsRestartService;
     ros::ServiceServer dynamicsStopService;
+    bool autostartDynamics, autostopDynamics;
 
     /// should poses published also via tf?
     bool tfEnabled;

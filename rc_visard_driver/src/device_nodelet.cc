@@ -135,6 +135,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   std::string access="control";
 
   tfEnabled = false;
+  autostartDynamics = autostopDynamics = false;
   std::string ns = tf::strip_leading_slash(ros::this_node::getNamespace());
   std::string tfprefix = (ns != "") ? ns + "_" : "";
   tfChildFrame = tfprefix + "camera";
@@ -142,6 +143,8 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   pnh.param("device", device, device);
   pnh.param("gev_access", access, access);
   pnh.param("enable_tf", tfEnabled, tfEnabled);
+  pnh.param("autostart_dynamics", autostartDynamics, autostartDynamics);
+  pnh.param("autostop_dynamics", autostopDynamics, autostopDynamics);
 
   rcg::Device::ACCESS access_id;
   if (access == "exclusive")
@@ -240,6 +243,17 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
         std::string currentIPAddress = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
         dynamicsInterface = rcd::RemoteInterface::create(currentIPAddress);
+        if (autostartDynamics)
+        {
+          std_srvs::Trigger::Request dummyreq;
+          std_srvs::Trigger::Response dummyresp;
+          if (!this->startDynamics(dummyreq, dummyresp))
+          { // autostart failed!
+            ROS_ERROR("rc_visard_driver: Could not auto-start dynamics module!");
+            cntConsecutiveRecoveryFails++;
+            continue; // to next trial!
+          }
+        }
 
         // add streaming thread for each available stream on rc_visard device
 
@@ -291,6 +305,15 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
     dynamicsStreams->start_all();
   }
 
+  if (autostopDynamics)
+  {
+    std_srvs::Trigger::Request dummyreq;
+    std_srvs::Trigger::Response dummyresp;
+    if (!this->stopDynamics(dummyreq, dummyresp))
+    { // autostop failed!
+      ROS_ERROR("rc_visard_driver: Could not auto-stop dynamics module!");
+    }
+  }
   std::cout << "rc_visard_driver: stopped." << std::endl;
 }
 
