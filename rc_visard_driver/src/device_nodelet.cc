@@ -782,8 +782,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       // add color image publishers if the camera supports color
 
-      std::shared_ptr<Publisher> limage_color;
-      std::shared_ptr<Publisher> rimage_color;
+      std::shared_ptr<GenICam2RosPublisher> limage_color;
+      std::shared_ptr<GenICam2RosPublisher> rimage_color;
 
       {
         std::vector<std::string> format;
@@ -793,8 +793,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         {
           if (format[i] == "YCbCr411_8")
           {
-            limage_color=std::shared_ptr<Publisher>(new ImagePublisher(it, tfChildFrame, true, true));
-            rimage_color=std::shared_ptr<Publisher>(new ImagePublisher(it, tfChildFrame, false, true));
+            limage_color=std::make_shared<ImagePublisher>(it, tfChildFrame, true, true);
+            rimage_color=std::make_shared<ImagePublisher>(it, tfChildFrame, false, true);
             break;
           }
         }

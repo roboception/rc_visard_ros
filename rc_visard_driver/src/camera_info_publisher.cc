@@ -40,7 +40,7 @@ namespace rc
 
 CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle &nh, std::string frame_id,
                                          double _f, double t, bool left)
-        : Publisher(frame_id)
+        : GenICam2RosPublisher(frame_id)
 {
   f=_f;
 

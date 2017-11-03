@@ -42,7 +42,7 @@ namespace rc
 
 ErrorDepthPublisher::ErrorDepthPublisher(ros::NodeHandle &nh, std::string frame_id, double _f, double _t,
                                          double _scale)
-        : Publisher(frame_id)
+        : GenICam2RosPublisher(frame_id)
 {
   f=_f;
   t=_t;

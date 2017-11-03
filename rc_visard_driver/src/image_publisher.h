@@ -43,7 +43,7 @@
 namespace rc
 {
 
-class ImagePublisher : public Publisher
+class ImagePublisher : public GenICam2RosPublisher
 {
   public:
 

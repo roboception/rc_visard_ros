@@ -42,7 +42,7 @@ namespace rc
 
 DepthPublisher::DepthPublisher(ros::NodeHandle &nh, std::string frame_id,
                                double f, double t, double _scale)
-        : Publisher(frame_id)
+        : GenICam2RosPublisher(frame_id)
 {
   scale=f*t/_scale;
 

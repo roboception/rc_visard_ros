@@ -42,7 +42,7 @@
 namespace rc
 {
 
-class ConfidencePublisher : public Publisher
+class ConfidencePublisher : public GenICam2RosPublisher
 {
   public:
 

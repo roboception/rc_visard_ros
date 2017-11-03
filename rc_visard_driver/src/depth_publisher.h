@@ -42,7 +42,7 @@
 namespace rc
 {
 
-class DepthPublisher : public Publisher
+class DepthPublisher : public GenICam2RosPublisher
 {
   public:
 

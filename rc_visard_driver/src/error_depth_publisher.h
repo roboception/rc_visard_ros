@@ -44,7 +44,7 @@
 namespace rc
 {
 
-class ErrorDepthPublisher : public Publisher
+class ErrorDepthPublisher : public GenICam2RosPublisher
 {
   public:
 

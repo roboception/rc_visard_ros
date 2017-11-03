@@ -42,7 +42,7 @@
 namespace rc
 {
 
-class CameraInfoPublisher : public Publisher
+class CameraInfoPublisher : public GenICam2RosPublisher
 {
   public:
 

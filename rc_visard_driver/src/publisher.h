@@ -41,12 +41,12 @@
 namespace rc
 {
 
-class Publisher
+class GenICam2RosPublisher
 {
   public:
 
-    Publisher(std::string frame_id) : frame_id(frame_id) {}
-    virtual ~Publisher() {}
+    GenICam2RosPublisher(std::string frame_id) : frame_id(frame_id) {}
+    virtual ~GenICam2RosPublisher() {}
 
     /**
       Returns true if there are subscribers to the topic.
@@ -73,7 +73,7 @@ class Publisher
 
   private:
 
-    Publisher &operator=(const Publisher &); // forbidden
+    GenICam2RosPublisher &operator=(const GenICam2RosPublisher &); // forbidden
 };
 
 }

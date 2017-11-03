@@ -44,7 +44,7 @@
 namespace rc
 {
 
-class Points2Publisher : public Publisher
+class Points2Publisher : public GenICam2RosPublisher
 {
   public:
 

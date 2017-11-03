@@ -42,7 +42,7 @@
 namespace rc
 {
 
-class DisparityPublisher : public Publisher
+class DisparityPublisher : public GenICam2RosPublisher
 {
   public:
 

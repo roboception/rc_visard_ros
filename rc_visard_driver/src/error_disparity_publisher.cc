@@ -43,7 +43,7 @@ namespace rc
 ErrorDisparityPublisher::ErrorDisparityPublisher(ros::NodeHandle &nh,
                                                  std::string frame_id,
                                                  double _scale)
-        : Publisher(frame_id)
+        : GenICam2RosPublisher(frame_id)
 {
   scale=_scale;
 
