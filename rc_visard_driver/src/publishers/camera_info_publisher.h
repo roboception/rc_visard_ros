@@ -34,7 +34,7 @@
 #ifndef RC_CAMERAINFOPUBLISHER_H
 #define RC_CAMERAINFOPUBLISHER_H
 
-#include "publisher.h"
+#include "genicam2ros_publisher.h"
 
 #include <ros/ros.h>
 #include <sensor_msgs/CameraInfo.h>

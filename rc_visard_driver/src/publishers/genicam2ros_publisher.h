@@ -31,8 +31,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_PUBLISHER_H
-#define RC_PUBLISHER_H
+#ifndef RC_VISARD_ROS_GENICAM2ROS_PUBLISHER_H
+#define RC_VISARD_ROS_GENICAM2ROS_PUBLISHER_H
 
 #include <string>
 
@@ -43,7 +43,7 @@ namespace rc
 
 
 /**
- * Interface for all publishers relating to stereo data
+ * Interface for all publishers relating to stereo data or image data
  */
 class GenICam2RosPublisher
 {
@@ -78,8 +78,6 @@ class GenICam2RosPublisher
 
     GenICam2RosPublisher &operator=(const GenICam2RosPublisher &); // forbidden
 };
-
-
 
 
 }

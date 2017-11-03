@@ -34,7 +34,7 @@
 #ifndef RC_DISPARITYCOLORPUBLISHER_H
 #define RC_DISPARITYCOLORPUBLISHER_H
 
-#include "publisher.h"
+#include "genicam2ros_publisher.h"
 
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>

@@ -34,7 +34,7 @@
 #ifndef RC_ERRORDISPARITYPUBLISHER_H
 #define RC_ERRORDISPARITYPUBLISHER_H
 
-#include "publisher.h"
+#include "genicam2ros_publisher.h"
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>

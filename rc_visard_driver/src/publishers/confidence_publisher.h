@@ -34,7 +34,7 @@
 #ifndef RC_CONFIDENCEPUBLISHER_H
 #define RC_CONFIDENCEPUBLISHER_H
 
-#include "publisher.h"
+#include "genicam2ros_publisher.h"
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>

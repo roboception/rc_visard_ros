@@ -34,7 +34,7 @@
 #ifndef RC_DISPARITYPUBLISHER_H
 #define RC_DISPARITYPUBLISHER_H
 
-#include "publisher.h"
+#include "genicam2ros_publisher.h"
 
 #include <ros/ros.h>
 #include <stereo_msgs/DisparityImage.h>
