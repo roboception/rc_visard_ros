@@ -41,9 +41,9 @@ namespace rc
 {
 
 DisparityPublisher::DisparityPublisher(ros::NodeHandle &nh,
-                                       std::string frame_id, double _f,
+                                       std::string frame_id_prefix, double _f,
                                        double _t, double _scale)
-        : GenICam2RosPublisher(frame_id)
+        : GenICam2RosPublisher(frame_id_prefix)
 {
   seq=0;
   f=_f;

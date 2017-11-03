@@ -41,9 +41,9 @@ namespace rc
 {
 
 DisparityColorPublisher::DisparityColorPublisher(image_transport::ImageTransport &it,
-                                                 std::string frame_id,
+                                                 std::string frame_id_prefix,
                                                  double _scale)
-        : GenICam2RosPublisher(frame_id)
+        : GenICam2RosPublisher(frame_id_prefix)
 {
   scale=_scale;
   disprange=0;

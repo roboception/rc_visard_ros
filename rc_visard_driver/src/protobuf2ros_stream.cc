@@ -55,7 +55,7 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
   unsigned int timeoutMillis = 500;
   string pbMsgType = _rcdyn->getPbMsgTypeOfStream(_stream);
 
-  Protobuf2RosPublisher rosPublisher(_nh, _stream, pbMsgType);
+  Protobuf2RosPublisher rosPublisher(_nh, _stream, pbMsgType, _tfPrefix);
 
   unsigned int cntNoListener = 0;
   bool failed = false;
@@ -137,8 +137,6 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
 
       ROS_DEBUG_STREAM_THROTTLE(1, "Received protobuf message: "
               << pbMsg->DebugString());
-
-      // TODO: overwrite frame name/ids?
 
       // convert to ROS message and publish
       rosPublisher.publish(pbMsg);
@@ -241,7 +239,10 @@ bool PoseStream::startReceivingAndPublishingAsRos()
       ROS_DEBUG_STREAM_THROTTLE(1, "Received protoFrame: "
               << protoFrame->DebugString());
 
-      // TODO: overwrite frame name/ids?
+
+      // overwrite frame name/ids
+      protoFrame->set_parent(_tfPrefix+protoFrame->parent());
+      protoFrame->set_name(_tfPrefix+protoFrame->name());
 
       auto rosPose = toRosPoseStamped(protoFrame);
       pub.publish(rosPose);

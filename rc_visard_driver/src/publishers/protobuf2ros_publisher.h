@@ -55,7 +55,8 @@ class Protobuf2RosPublisher
      * Internally creates a corresponding ros publisher
      */
     Protobuf2RosPublisher(ros::NodeHandle &nh, const std::string &topic,
-                          const std::string &pbMsgType);
+                          const std::string &pbMsgType,
+                          const std::string &frame_id_prefix);
 
     /**
       Returns true if there are subscribers to the topic.
@@ -71,6 +72,7 @@ class Protobuf2RosPublisher
 
   protected:
     ros::Publisher pub; // needs to be constructed properly by child classes
+    const std::string _tfPrefix;
 
   private:
     Protobuf2RosPublisher &

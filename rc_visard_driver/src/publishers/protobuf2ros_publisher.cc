@@ -21,7 +21,9 @@ namespace rc
 
 Protobuf2RosPublisher::Protobuf2RosPublisher(ros::NodeHandle &nh,
                                              const string &topic,
-                                             const string &pbMsgType)
+                                             const string &pbMsgType,
+                                             const string &frame_id_prefix)
+        : _tfPrefix(frame_id_prefix)
 {
   if (pbMsgType == "Imu")
   {
@@ -60,6 +62,7 @@ void Protobuf2RosPublisher::publish(shared_ptr<::google::protobuf::Message> pbMs
     }
 
     auto rosImu = toRosImu(protoImu);
+    rosImu->header.frame_id = _tfPrefix + rosImu->header.frame_id;
     pub.publish(rosImu);
   }
   else if (msg_name == "Frame")
@@ -74,6 +77,7 @@ void Protobuf2RosPublisher::publish(shared_ptr<::google::protobuf::Message> pbMs
     }
 
     auto rosPose = toRosPoseStamped(protoFrame);
+    rosPose->header.frame_id = _tfPrefix + rosPose->header.frame_id;
     pub.publish(rosPose);
   }
   else

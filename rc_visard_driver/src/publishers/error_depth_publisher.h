@@ -57,7 +57,7 @@ class ErrorDepthPublisher : public GenICam2RosPublisher
       @param scale  Factor for raw disparities.
     */
 
-    ErrorDepthPublisher(ros::NodeHandle &nh, std::string frame_id, double f, double t, double scale);
+    ErrorDepthPublisher(ros::NodeHandle &nh, std::string frame_id_prefix, double f, double t, double scale);
 
     bool used() override;
 

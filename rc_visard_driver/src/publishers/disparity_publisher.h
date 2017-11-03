@@ -55,7 +55,7 @@ class DisparityPublisher : public GenICam2RosPublisher
       @param scale  Factor for raw disparities.
     */
 
-    DisparityPublisher(ros::NodeHandle &nh, std::string frame_id, double f, double t, double scale);
+    DisparityPublisher(ros::NodeHandle &nh, std::string frame_id_prefix, double f, double t, double scale);
 
     /**
       Set the disparity range for scaling of images.

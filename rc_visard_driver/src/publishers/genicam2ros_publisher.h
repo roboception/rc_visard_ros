@@ -43,14 +43,22 @@ namespace rc
 
 
 /**
- * Interface for all publishers relating to stereo data or image data
+ * Interface for all publishers relating to images, point clouds or
+ * other stereo-camera data
  */
 class GenICam2RosPublisher
 {
   public:
 
-    GenICam2RosPublisher(std::string frame_id) : frame_id(frame_id) {}
-    virtual ~GenICam2RosPublisher() {}
+    /**
+     * @param frame_id_prefix prefix for frame ids in published ros messages
+     */
+    GenICam2RosPublisher(std::string frame_id_prefix) : frame_id(
+            frame_id_prefix + "camera")
+    {}
+
+    virtual ~GenICam2RosPublisher()
+    {}
 
     /**
       Offers a buffer for publication. It depends on the the kind of buffer
@@ -78,6 +86,7 @@ class GenICam2RosPublisher
 
     GenICam2RosPublisher &operator=(const GenICam2RosPublisher &); // forbidden
 };
+
 
 
 }

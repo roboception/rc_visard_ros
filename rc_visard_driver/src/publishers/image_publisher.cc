@@ -41,9 +41,9 @@
 namespace rc
 {
 
-ImagePublisher::ImagePublisher(image_transport::ImageTransport &it, std::string frame_id,
+ImagePublisher::ImagePublisher(image_transport::ImageTransport &it, std::string frame_id_prefix,
                                bool _left, bool _color)
-        : GenICam2RosPublisher(frame_id)
+        : GenICam2RosPublisher(frame_id_prefix)
 {
   left=_left;
   color=_color;

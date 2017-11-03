@@ -1,19 +1,20 @@
 
 set(SRC
-  device_nodelet.cc
-        publishers/camera_info_publisher.cc
-        publishers/image_publisher.cc
-        publishers/disparity_publisher.cc
-        publishers/disparity_color_publisher.cc
-        publishers/depth_publisher.cc
-        publishers/confidence_publisher.cc
-        publishers/error_disparity_publisher.cc
-        publishers/error_depth_publisher.cc
-        publishers/points2_publisher.cc
-  protobuf2ros_stream.cc
-        publishers/protobuf2ros_publisher.cc
-        publishers/protobuf2ros_conversions.cc
-  ThreadedStream.cc)
+    device_nodelet.cc
+    protobuf2ros_stream.cc
+    ThreadedStream.cc
+    publishers/camera_info_publisher.cc
+    publishers/image_publisher.cc
+    publishers/disparity_publisher.cc
+    publishers/disparity_color_publisher.cc
+    publishers/depth_publisher.cc
+    publishers/confidence_publisher.cc
+    publishers/error_disparity_publisher.cc
+    publishers/error_depth_publisher.cc
+    publishers/points2_publisher.cc
+    publishers/protobuf2ros_publisher.cc
+    publishers/protobuf2ros_conversions.cc
+    publishers/genicam2ros_publisher.h)
 
 # build and install the nodelet
 

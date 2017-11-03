@@ -40,9 +40,9 @@
 namespace rc
 {
 
-Points2Publisher::Points2Publisher(ros::NodeHandle &nh, std::string frame_id,
+Points2Publisher::Points2Publisher(ros::NodeHandle &nh, std::string frame_id_prefix,
                                    double _f, double _t, double _scale)
-        : GenICam2RosPublisher(frame_id), left_list(50)
+        : GenICam2RosPublisher(frame_id_prefix), left_list(50)
 {
   f=_f;
   t=_t;

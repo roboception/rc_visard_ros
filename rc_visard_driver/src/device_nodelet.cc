@@ -68,15 +68,16 @@ namespace rcd = dynamics;
 
 ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(
         rcd::RemoteInterface::Ptr rcdIface,
-        const std::string &stream, ros::NodeHandle& nh, bool tfEnabled)
+        const std::string &stream, ros::NodeHandle& nh,
+        const std::string &frame_id_prefix, bool tfEnabled)
 {
   if (stream=="pose")
   {
-    return ThreadedStream::Ptr(new PoseStream(rcdIface, stream, nh, tfEnabled));
+    return ThreadedStream::Ptr(new PoseStream(rcdIface, stream, nh, frame_id_prefix, tfEnabled));
   }
   if (stream=="pose_ins" || stream=="pose_rt" || stream=="pose_rt_ins" || stream=="imu")
   {
-    return ThreadedStream::Ptr(new Protobuf2RosStream(rcdIface, stream, nh));
+    return ThreadedStream::Ptr(new Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix));
   }
 
   throw std::runtime_error(std::string("Not yet implemented! Stream type: ") + stream);
@@ -137,8 +138,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   tfEnabled = false;
   autostartDynamics = autostopDynamics = false;
   std::string ns = tf::strip_leading_slash(ros::this_node::getNamespace());
-  std::string tfprefix = (ns != "") ? ns + "_" : "";
-  tfChildFrame = tfprefix + "camera";
+  tfPrefix = (ns != "") ? ns + "_" : "";
 
   pnh.param("device", device, device);
   pnh.param("gev_access", access, access);
@@ -266,7 +266,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
             if (streamName != "dynamics" && streamName != "dynamics_ins")
             {
               auto newStream = CreateDynamicsStreamOfType(dynamicsInterface, streamName,
-                                                          getNodeHandle(), tfEnabled);
+                                                          getNodeHandle(), tfPrefix, tfEnabled);
               dynamicsStreams->add(newStream);
             }
             else
@@ -764,21 +764,21 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
       ros::NodeHandle nh(getNodeHandle(), "stereo");
       image_transport::ImageTransport it(nh);
 
-      CameraInfoPublisher lcaminfo(nh, tfChildFrame, f, t, true);
-      CameraInfoPublisher rcaminfo(nh, tfChildFrame, f, t, false);
+      CameraInfoPublisher lcaminfo(nh, tfPrefix, f, t, true);
+      CameraInfoPublisher rcaminfo(nh, tfPrefix, f, t, false);
 
-      ImagePublisher limage(it, tfChildFrame, true, false);
-      ImagePublisher rimage(it, tfChildFrame, false, false);
+      ImagePublisher limage(it, tfPrefix, true, false);
+      ImagePublisher rimage(it, tfPrefix, false, false);
 
-      DisparityPublisher disp(nh, tfChildFrame, f, t, scale);
-      DisparityColorPublisher cdisp(it, tfChildFrame, scale);
-      DepthPublisher depth(nh, tfChildFrame, f, t, scale);
+      DisparityPublisher disp(nh, tfPrefix, f, t, scale);
+      DisparityColorPublisher cdisp(it, tfPrefix, scale);
+      DepthPublisher depth(nh, tfPrefix, f, t, scale);
 
-      ConfidencePublisher confidence(nh, tfChildFrame);
-      ErrorDisparityPublisher error_disp(nh, tfChildFrame, scale);
-      ErrorDepthPublisher error_depth(nh, tfChildFrame, f, t, scale);
+      ConfidencePublisher confidence(nh, tfPrefix);
+      ErrorDisparityPublisher error_disp(nh, tfPrefix, scale);
+      ErrorDepthPublisher error_depth(nh, tfPrefix, f, t, scale);
 
-      Points2Publisher points2(nh, tfChildFrame, f, t, scale);
+      Points2Publisher points2(nh, tfPrefix, f, t, scale);
 
       // add color image publishers if the camera supports color
 
@@ -793,8 +793,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         {
           if (format[i] == "YCbCr411_8")
           {
-            limage_color=std::make_shared<ImagePublisher>(it, tfChildFrame, true, true);
-            rimage_color=std::make_shared<ImagePublisher>(it, tfChildFrame, false, true);
+            limage_color=std::make_shared<ImagePublisher>(it, tfPrefix, true, true);
+            rimage_color=std::make_shared<ImagePublisher>(it, tfPrefix, false, true);
             break;
           }
         }

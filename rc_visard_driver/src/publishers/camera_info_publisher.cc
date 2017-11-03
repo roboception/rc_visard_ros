@@ -38,9 +38,9 @@
 namespace rc
 {
 
-CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle &nh, std::string frame_id,
+CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle &nh, std::string frame_id_prefix,
                                          double _f, double t, bool left)
-        : GenICam2RosPublisher(frame_id)
+        : GenICam2RosPublisher(frame_id_prefix)
 {
   f=_f;
 

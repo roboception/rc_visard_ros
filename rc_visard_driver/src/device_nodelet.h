@@ -74,7 +74,8 @@ class DeviceNodelet : public nodelet::Nodelet
 
     static ThreadedStream::Ptr CreateDynamicsStreamOfType(
             rc::dynamics::RemoteInterface::Ptr rcdIface,
-            const std::string &stream, ros::NodeHandle& nh, bool tfEnabled);
+            const std::string &stream, ros::NodeHandle &nh,
+            const std::string &frame_id_prefix, bool tfEnabled);
 
     void initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef> &nodemap,
       rc_visard_driver::rc_visard_driverConfig &cfg, rcg::Device::ACCESS access);
@@ -114,9 +115,11 @@ class DeviceNodelet : public nodelet::Nodelet
     ros::ServiceServer dynamicsStopService;
     bool autostartDynamics, autostopDynamics;
 
+    /// all frame names must be prefixed when using more than one rc_visard
+    std::string tfPrefix;
+
     /// should poses published also via tf?
     bool tfEnabled;
-    std::string tfChildFrame;
 };
 
 }

@@ -55,12 +55,15 @@ class Protobuf2RosStream : public ThreadedStream
 {
   public:
     Protobuf2RosStream(rc::dynamics::RemoteInterface::Ptr rcdIface,
-               const std::string &stream, ros::NodeHandle &nh)
-            : ThreadedStream(rcdIface, stream, nh)
+                       const std::string &stream, ros::NodeHandle &nh,
+                       const std::string &frame_id_prefix)
+            : ThreadedStream(rcdIface, stream, nh), _tfPrefix(frame_id_prefix)
     {}
 
   protected:
     virtual bool startReceivingAndPublishingAsRos() override;
+
+    const std::string _tfPrefix;
 };
 
 
@@ -70,17 +73,19 @@ class Protobuf2RosStream : public ThreadedStream
  *
  * Again, the resulting ros topic is the dynamics stream name.
  */
-class PoseStream : public ThreadedStream
+class PoseStream : public Protobuf2RosStream
 {
   public:
     PoseStream(rc::dynamics::RemoteInterface::Ptr rcdIface,
-               const std::string &stream, ros::NodeHandle &nh, bool tfEnabled)
-            : ThreadedStream(rcdIface, stream, nh), _tfEnabled(tfEnabled)
+               const std::string &stream, ros::NodeHandle &nh,
+               const std::string &frame_id_prefix, bool tfEnabled)
+            : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix),
+              _tfEnabled(tfEnabled)
     {}
 
+  protected:
     virtual bool startReceivingAndPublishingAsRos() override;
 
-  protected:
     bool _tfEnabled;
 };
 

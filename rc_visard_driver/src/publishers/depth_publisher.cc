@@ -40,9 +40,9 @@
 namespace rc
 {
 
-DepthPublisher::DepthPublisher(ros::NodeHandle &nh, std::string frame_id,
+DepthPublisher::DepthPublisher(ros::NodeHandle &nh, std::string frame_id_prefix,
                                double f, double t, double _scale)
-        : GenICam2RosPublisher(frame_id)
+        : GenICam2RosPublisher(frame_id_prefix)
 {
   scale=f*t/_scale;
 

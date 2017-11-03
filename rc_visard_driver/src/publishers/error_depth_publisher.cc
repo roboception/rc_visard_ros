@@ -40,9 +40,9 @@
 namespace rc
 {
 
-ErrorDepthPublisher::ErrorDepthPublisher(ros::NodeHandle &nh, std::string frame_id, double _f, double _t,
+ErrorDepthPublisher::ErrorDepthPublisher(ros::NodeHandle &nh, std::string frame_id_prefix, double _f, double _t,
                                          double _scale)
-        : GenICam2RosPublisher(frame_id)
+        : GenICam2RosPublisher(frame_id_prefix)
 {
   f=_f;
   t=_t;
