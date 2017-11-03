@@ -57,9 +57,9 @@ class ErrorDisparityPublisher : public GenICam2RosPublisher
 
     ErrorDisparityPublisher(ros::NodeHandle &nh, std::string frame_id, double scale);
 
-    bool used();
+    bool used() override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat);
+    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
 
   private:
 

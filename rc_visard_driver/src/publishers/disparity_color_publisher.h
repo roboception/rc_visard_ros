@@ -31,45 +31,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_DEPTHPUBLISHER_H
-#define RC_DEPTHPUBLISHER_H
+#ifndef RC_DISPARITYCOLORPUBLISHER_H
+#define RC_DISPARITYCOLORPUBLISHER_H
 
 #include "publisher.h"
 
 #include <ros/ros.h>
+#include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 
 namespace rc
 {
 
-class DepthPublisher : public GenICam2RosPublisher
+class DisparityColorPublisher : public GenICam2RosPublisher
 {
   public:
 
     /**
       Initialization of publisher.
 
-      @param nh     Node handle.
-      @param f      Focal length, normalized to image width of 1.
-      @param t      Basline in m.
-      @param scale  Factor for raw disparities.
+      @param it    Image transport handle.
+      @param left  True for left and false for right camera.
+      @param color True for sending color instead of monochrome images.
     */
 
-    DepthPublisher(ros::NodeHandle &nh, std::string frame_id, double f, double t, double scale);
+    DisparityColorPublisher(image_transport::ImageTransport &it, std::string frame_id, double scale);
 
-    bool used();
+    /**
+      Set the disparity range for scaling of images.
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat);
+      @param disprange Disparity range for scaling.
+    */
+
+    void setDisprange(int disprange);
+
+    bool used() override;
+
+    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
 
   private:
 
-    DepthPublisher(const DepthPublisher &); // forbidden
-    DepthPublisher &operator=(const DepthPublisher &); // forbidden
+    DisparityColorPublisher(const DisparityColorPublisher &); // forbidden
+    DisparityColorPublisher &operator=(const DisparityColorPublisher &); // forbidden
 
     uint32_t seq;
-    float  scale;
+    double   scale;
+    int      disprange;
 
-    ros::Publisher pub;
+    image_transport::Publisher pub;
 };
 
 }

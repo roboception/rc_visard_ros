@@ -31,39 +31,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_CONFIDENCEPUBLISHER_H
-#define RC_CONFIDENCEPUBLISHER_H
+#ifndef RC_CAMERAINFOPUBLISHER_H
+#define RC_CAMERAINFOPUBLISHER_H
 
 #include "publisher.h"
 
 #include <ros/ros.h>
-#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
 
 namespace rc
 {
 
-class ConfidencePublisher : public GenICam2RosPublisher
+class CameraInfoPublisher : public GenICam2RosPublisher
 {
   public:
 
     /**
       Initialization of publisher.
 
-      @param nh    Node handle.
+      @param nh   Node handle.
+      @param f    Focal length, normalized to image width 1.
+      @param t    Baseline in m.
+      @param left True for left and false for right camera.
     */
 
-    ConfidencePublisher(ros::NodeHandle &nh, std::string frame_id);
+    CameraInfoPublisher(ros::NodeHandle &nh, std::string _frame_id, double f, double t, bool left);
 
-    bool used();
+    bool used() override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat);
+    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
 
   private:
 
-    ConfidencePublisher(const ConfidencePublisher &); // forbidden
-    ConfidencePublisher &operator=(const ConfidencePublisher &); // forbidden
+    CameraInfoPublisher(const CameraInfoPublisher &); // forbidden
+    CameraInfoPublisher &operator=(const CameraInfoPublisher &); // forbidden
 
-    uint32_t seq;
+    float f;
+
+    sensor_msgs::CameraInfo info;
     ros::Publisher pub;
 };
 

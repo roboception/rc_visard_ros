@@ -31,46 +31,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_IMAGEPUBLISHER_H
-#define RC_IMAGEPUBLISHER_H
+#ifndef RC_ERRORDEPTHPUBLISHER_H
+#define RC_ERROREPTHPUBLISHER_H
 
 #include "publisher.h"
 
 #include <ros/ros.h>
-#include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
+
+#include <rc_genicam_api/imagelist.h>
 
 namespace rc
 {
 
-class ImagePublisher : public GenICam2RosPublisher
+class ErrorDepthPublisher : public GenICam2RosPublisher
 {
   public:
 
     /**
-      Initialization of publisher.
+      Initialization of publisher for depth errors.
 
-      @param it    Image transport handle.
-      @param left  True for left and false for right camera.
-      @param color True for sending color instead of monochrome images.
+      @param nh     Node handle.
+      @param f      Focal length, normalized to image width of 1.
+      @param t      Basline in m.
+      @param scale  Factor for raw disparities.
     */
 
-    ImagePublisher(image_transport::ImageTransport &it, std::string frame_id, bool left, bool color);
+    ErrorDepthPublisher(ros::NodeHandle &nh, std::string frame_id, double f, double t, double scale);
 
-    bool used();
+    bool used() override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat);
+    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
 
   private:
 
-    ImagePublisher(const ImagePublisher &); // forbidden
-    ImagePublisher &operator=(const ImagePublisher &); // forbidden
+    ErrorDepthPublisher(const ErrorDepthPublisher &); // forbidden
+    ErrorDepthPublisher &operator=(const ErrorDepthPublisher &); // forbidden
 
-    bool left;
-    bool color;
+    rcg::ImageList disp_list;
+    rcg::ImageList err_list;
+
     uint32_t seq;
+    float f;
+    float t;
+    float scale;
 
-    image_transport::Publisher pub;
+    ros::Publisher pub;
 };
 
 }

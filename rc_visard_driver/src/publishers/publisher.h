@@ -41,20 +41,16 @@
 namespace rc
 {
 
+
+/**
+ * Interface for all publishers relating to stereo data
+ */
 class GenICam2RosPublisher
 {
   public:
 
     GenICam2RosPublisher(std::string frame_id) : frame_id(frame_id) {}
     virtual ~GenICam2RosPublisher() {}
-
-    /**
-      Returns true if there are subscribers to the topic.
-
-      @return True if there are subscribers.
-    */
-
-    virtual bool used()=0;
 
     /**
       Offers a buffer for publication. It depends on the the kind of buffer
@@ -67,6 +63,13 @@ class GenICam2RosPublisher
 
     virtual void publish(const rcg::Buffer *buffer, uint64_t pixelformat)=0;
 
+    /**
+      Returns true if there are subscribers to the topic.
+
+      @return True if there are subscribers.
+    */
+    virtual bool used()=0;
+
   protected:
 
     std::string frame_id;
@@ -75,6 +78,9 @@ class GenICam2RosPublisher
 
     GenICam2RosPublisher &operator=(const GenICam2RosPublisher &); // forbidden
 };
+
+
+
 
 }
 

@@ -31,44 +31,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_CAMERAINFOPUBLISHER_H
-#define RC_CAMERAINFOPUBLISHER_H
+#ifndef RC_POINTS2PUBLISHER_H
+#define RC_POINTS2PUBLISHER_H
 
 #include "publisher.h"
 
 #include <ros/ros.h>
-#include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/Image.h>
+
+#include <rc_genicam_api/imagelist.h>
 
 namespace rc
 {
 
-class CameraInfoPublisher : public GenICam2RosPublisher
+class Points2Publisher : public GenICam2RosPublisher
 {
   public:
 
     /**
-      Initialization of publisher.
+      Initialization of publisher for depth errors.
 
-      @param nh   Node handle.
-      @param f    Focal length, normalized to image width 1.
-      @param t    Baseline in m.
-      @param left True for left and false for right camera.
+      @param nh     Node handle.
+      @param f      Focal length, normalized to image width of 1.
+      @param t      Basline in m.
+      @param scale  Factor for raw disparities.
+      @param frame_id Parent frame id of points.
     */
 
-    CameraInfoPublisher(ros::NodeHandle &nh, std::string _frame_id, double f, double t, bool left);
+    Points2Publisher(ros::NodeHandle &nh, std::string frame_id, double f, double t, double scale);
 
-    bool used();
+    bool used() override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat);
+    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
 
   private:
 
-    CameraInfoPublisher(const CameraInfoPublisher &); // forbidden
-    CameraInfoPublisher &operator=(const CameraInfoPublisher &); // forbidden
+    Points2Publisher(const Points2Publisher &); // forbidden
+    Points2Publisher &operator=(const Points2Publisher &); // forbidden
 
+    rcg::ImageList left_list;
+    rcg::ImageList disp_list;
+
+    uint32_t seq;
     float f;
+    float t;
+    float scale;
 
-    sensor_msgs::CameraInfo info;
     ros::Publisher pub;
 };
 

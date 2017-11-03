@@ -31,8 +31,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_DISPARITYCOLORPUBLISHER_H
-#define RC_DISPARITYCOLORPUBLISHER_H
+#ifndef RC_IMAGEPUBLISHER_H
+#define RC_IMAGEPUBLISHER_H
 
 #include "publisher.h"
 
@@ -43,7 +43,7 @@
 namespace rc
 {
 
-class DisparityColorPublisher : public GenICam2RosPublisher
+class ImagePublisher : public GenICam2RosPublisher
 {
   public:
 
@@ -55,28 +55,20 @@ class DisparityColorPublisher : public GenICam2RosPublisher
       @param color True for sending color instead of monochrome images.
     */
 
-    DisparityColorPublisher(image_transport::ImageTransport &it, std::string frame_id, double scale);
+    ImagePublisher(image_transport::ImageTransport &it, std::string frame_id, bool left, bool color);
 
-    /**
-      Set the disparity range for scaling of images.
+    bool used() override;
 
-      @param disprange Disparity range for scaling.
-    */
-
-    void setDisprange(int disprange);
-
-    bool used();
-
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat);
+    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
 
   private:
 
-    DisparityColorPublisher(const DisparityColorPublisher &); // forbidden
-    DisparityColorPublisher &operator=(const DisparityColorPublisher &); // forbidden
+    ImagePublisher(const ImagePublisher &); // forbidden
+    ImagePublisher &operator=(const ImagePublisher &); // forbidden
 
+    bool left;
+    bool color;
     uint32_t seq;
-    double   scale;
-    int      disprange;
 
     image_transport::Publisher pub;
 };

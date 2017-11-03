@@ -32,15 +32,15 @@
  */
 
 #include "device_nodelet.h"
-#include "camera_info_publisher.h"
-#include "image_publisher.h"
-#include "disparity_publisher.h"
-#include "disparity_color_publisher.h"
-#include "depth_publisher.h"
-#include "confidence_publisher.h"
-#include "error_disparity_publisher.h"
-#include "error_depth_publisher.h"
-#include "points2_publisher.h"
+#include "publishers/camera_info_publisher.h"
+#include "publishers/image_publisher.h"
+#include "publishers/disparity_publisher.h"
+#include "publishers/disparity_color_publisher.h"
+#include "publishers/depth_publisher.h"
+#include "publishers/confidence_publisher.h"
+#include "publishers/error_disparity_publisher.h"
+#include "publishers/error_depth_publisher.h"
+#include "publishers/points2_publisher.h"
 
 #include <rc_genicam_api/device.h>
 #include <rc_genicam_api/stream.h>

@@ -65,9 +65,9 @@ class DisparityPublisher : public GenICam2RosPublisher
 
     void setDisprange(int disprange);
 
-    bool used();
+    bool used() override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat);
+    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
 
   private:
 

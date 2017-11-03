@@ -31,52 +31,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_POINTS2PUBLISHER_H
-#define RC_POINTS2PUBLISHER_H
+#ifndef RC_CONFIDENCEPUBLISHER_H
+#define RC_CONFIDENCEPUBLISHER_H
 
 #include "publisher.h"
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 
-#include <rc_genicam_api/imagelist.h>
-
 namespace rc
 {
 
-class Points2Publisher : public GenICam2RosPublisher
+class ConfidencePublisher : public GenICam2RosPublisher
 {
   public:
 
     /**
-      Initialization of publisher for depth errors.
+      Initialization of publisher.
 
-      @param nh     Node handle.
-      @param f      Focal length, normalized to image width of 1.
-      @param t      Basline in m.
-      @param scale  Factor for raw disparities.
-      @param frame_id Parent frame id of points.
+      @param nh    Node handle.
     */
 
-    Points2Publisher(ros::NodeHandle &nh, std::string frame_id, double f, double t, double scale);
+    ConfidencePublisher(ros::NodeHandle &nh, std::string frame_id);
 
-    bool used();
+    bool used() override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat);
+    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
 
   private:
 
-    Points2Publisher(const Points2Publisher &); // forbidden
-    Points2Publisher &operator=(const Points2Publisher &); // forbidden
-
-    rcg::ImageList left_list;
-    rcg::ImageList disp_list;
+    ConfidencePublisher(const ConfidencePublisher &); // forbidden
+    ConfidencePublisher &operator=(const ConfidencePublisher &); // forbidden
 
     uint32_t seq;
-    float f;
-    float t;
-    float scale;
-
     ros::Publisher pub;
 };
 

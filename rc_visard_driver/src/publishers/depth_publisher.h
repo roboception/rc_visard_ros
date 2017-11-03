@@ -31,25 +31,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_ERRORDEPTHPUBLISHER_H
-#define RC_ERROREPTHPUBLISHER_H
+#ifndef RC_DEPTHPUBLISHER_H
+#define RC_DEPTHPUBLISHER_H
 
 #include "publisher.h"
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 
-#include <rc_genicam_api/imagelist.h>
-
 namespace rc
 {
 
-class ErrorDepthPublisher : public GenICam2RosPublisher
+class DepthPublisher : public GenICam2RosPublisher
 {
   public:
 
     /**
-      Initialization of publisher for depth errors.
+      Initialization of publisher.
 
       @param nh     Node handle.
       @param f      Focal length, normalized to image width of 1.
@@ -57,24 +55,19 @@ class ErrorDepthPublisher : public GenICam2RosPublisher
       @param scale  Factor for raw disparities.
     */
 
-    ErrorDepthPublisher(ros::NodeHandle &nh, std::string frame_id, double f, double t, double scale);
+    DepthPublisher(ros::NodeHandle &nh, std::string frame_id, double f, double t, double scale);
 
-    bool used();
+    bool used() override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat);
+    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
 
   private:
 
-    ErrorDepthPublisher(const ErrorDepthPublisher &); // forbidden
-    ErrorDepthPublisher &operator=(const ErrorDepthPublisher &); // forbidden
-
-    rcg::ImageList disp_list;
-    rcg::ImageList err_list;
+    DepthPublisher(const DepthPublisher &); // forbidden
+    DepthPublisher &operator=(const DepthPublisher &); // forbidden
 
     uint32_t seq;
-    float f;
-    float t;
-    float scale;
+    float  scale;
 
     ros::Publisher pub;
 };
