@@ -173,6 +173,34 @@ service calls or startup-parameters).
 This topic delivers raw measurements from the on-board IMU sensor:
 - /imu (sensor_msgs/Imu)
 
+#### TF
+
+If the parameter `enable_tf` is set to true, the node subscribes to the 
+rc_visard's pose stream and publishes them on tf.
+
+
+Relevant Coordinate Frames
+--------------------------
+
+The following coordinate frames are relevant for interpreting the data
+provided by the rc_visard:
+
+- `camera`: The pupil's center of the rc_visard's left camera. All stereo-camera
+ data such as images and point clouds are given in this frame.  
+- `world`: Relevant for navigation applications. The world frame’s origin is 
+ located at the origin of the rc_visard’s IMU coordinate frame at the instant
+ when state estimation is switched on. 
+ Estimated poses of the rc_visard are given in this frame, i.e. as the rc_visard moves in the world and
+ state estimation is running, the `camera` frame will change w.r.t. this frame.
+- `imu`: The IMU coordinate frame is inside the rc_visard’s housing. The raw IMU
+ measurements are given in this frame.
+
+#### Running multiple rc_visard's in one ros environment
+
+For operating multiple rc_visard's in one ros environment, each ros node must 
+be started in separate namespaces, e.g., `my_visard`. As a result, all frame_ids in all ros 
+messages will be prefixed, e.g., to `my_visard_world` or `my_visard_camera`.
+
 
 Services
 --------
@@ -184,6 +212,9 @@ dynamic module (which needs to be started for working dynamic-state estimates).
 - `restartDynamics`
 - `stopDynamics`
 
+
+Operating
+--------
 
 
 Example
@@ -197,7 +228,13 @@ Example
 
       rosrun rc_visard_driver rc_visard_driver _device:=00_1e_06_32_03_40 _enable_tf:=True _autostart_dynamics:=True _autostop_dynamics:=True
 
-- As a nodelet:
+- As a nodelet, and in a separate **namespace**:
 
-      rosrun nodelet nodelet standalone rc_visard_driver _device:=00_1e_06_32_03_40
+      ROS_NAMESPACE=my_visard rosrun nodelet nodelet standalone rc_visard_driver _device:=00_1e_06_32_03_40
+      
+  Note that in this setup all frame_ids in all ros messages (including 
+  tf-messages) will be prefixed with `my_visard`, e.g., the frame_id of 
+  the published camera images will be `my_visard_camera`, the frame_id
+  of the poses will be `my_visard_world`, and the frame_id of
+  the Imu messages will be `my_visard_imu`.
 
