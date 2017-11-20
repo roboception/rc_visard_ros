@@ -862,7 +862,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           else if (buffer != 0 && buffer->getIsIncomplete())
           {
             missing=0;
-            ROS_WARN("rc_visard_driver: Received incomplete buffer");
+            ROS_WARN("rc_visard_driver: Received incomplete image buffer");
           }
           else if (buffer == 0)
           {
