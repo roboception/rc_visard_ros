@@ -167,12 +167,16 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
   // setup services for starting and stopping rcdynamics module
 
-  dynamicsStartService = pnh.advertiseService("startDynamics",
-                                              &DeviceNodelet::startDynamics, this);
-  dynamicsRestartService = pnh.advertiseService("restartDynamics",
-                                                &DeviceNodelet::restartDynamics, this);
-  dynamicsStopService = pnh.advertiseService("stopDynamics",
-                                             &DeviceNodelet::stopDynamics, this);
+  dynamicsStartService     = pnh.advertiseService("dynamics_start",
+                                                  &DeviceNodelet::dynamicsStart, this);
+  dynamicsStartSlamService = pnh.advertiseService("dynamics_start_slam",
+                                                  &DeviceNodelet::dynamicsStartSlam, this);
+  dynamicsRestartService   = pnh.advertiseService("dynamics_restart",
+                                                  &DeviceNodelet::dynamicsRestart, this);
+  dynamicsStopService      = pnh.advertiseService("dynamics_stop",
+                                                  &DeviceNodelet::dynamicsStop, this);
+  dynamicsStopSlamService  = pnh.advertiseService("dynamics_stop_slam",
+                                                  &DeviceNodelet::dynamicsStopSlam, this);
 
   // run start-keep-alive-and-recover loop
 
@@ -247,7 +251,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         {
           std_srvs::Trigger::Request dummyreq;
           std_srvs::Trigger::Response dummyresp;
-          if (!this->startDynamics(dummyreq, dummyresp))
+          if (!this->dynamicsStart(dummyreq, dummyresp))
           { // autostart failed!
             ROS_ERROR("rc_visard_driver: Could not auto-start dynamics module!");
             cntConsecutiveRecoveryFails++;
@@ -309,7 +313,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   {
     std_srvs::Trigger::Request dummyreq;
     std_srvs::Trigger::Response dummyresp;
-    if (!this->stopDynamics(dummyreq, dummyresp))
+    if (!this->dynamicsStop(dummyreq, dummyresp))
     { // autostop failed!
       ROS_ERROR("rc_visard_driver: Could not auto-stop dynamics module!");
     }
@@ -984,64 +988,87 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
 }
 
-void handleDynamicsStateChangeRequest(
-        rcd::RemoteInterface::Ptr dynIF,
-        int state, std_srvs::Trigger::Response &resp)
+//Anonymous namespace for local linkage
+namespace
 {
-  resp.success = true;
-  resp.message = "";
+  ///Commands taken by handleDynamicsStateChangeRequest()
+  enum class DynamicsCmd { START = 0, START_SLAM, STOP, STOP_SLAM, RESTART };
 
-  if (dynIF)
+  ///@return whether the service call has been accepted
+  void handleDynamicsStateChangeRequest(
+          rcd::RemoteInterface::Ptr dynIF,
+          DynamicsCmd state, std_srvs::Trigger::Response &resp)
   {
-    try
+    resp.success = true;
+    resp.message = "";
+
+    rcd::RemoteInterface::State new_state;
+
+    if (dynIF)
     {
-      switch (state) {
-        case 0: // STOP
-          dynIF->stop();
-          break;
-        case 1: // START
-          dynIF->start(false);
-          break;
-        case 2: // RESTART
-          dynIF->start(true);
-          break;
-        default:
-          throw std::runtime_error("handleDynamicsStateChangeRequest: unrecognized state change request");
+      try
+      {
+        switch (state)
+        {
+          case DynamicsCmd::STOP:       new_state = dynIF->stop();      break;
+          case DynamicsCmd::STOP_SLAM:  new_state = dynIF->stopSlam();  break;
+          case DynamicsCmd::START:      new_state = dynIF->start();     break;
+          case DynamicsCmd::START_SLAM: new_state = dynIF->startSlam(); break;
+          case DynamicsCmd::RESTART:    new_state = dynIF->restart();   break;
+          default:
+            throw std::runtime_error("handleDynamicsStateChangeRequest: unrecognized state change request");
+        }
+        if(new_state == rcd::RemoteInterface::State::FATAL)
+        {
+          resp.success = false;
+          resp.message = "rc_dynamics module is in FATAL state. Check the log files.";
+        }
+      }
+      catch (std::exception &e)
+      {
+        resp.success = false;
+        resp.message = std::string("Failed to change state of rcdynamics module: ") + e.what();
       }
     }
-    catch (std::exception &e)
+    else
     {
       resp.success = false;
-      resp.message = std::string("Failed to change state of rcdynamics module: ") + e.what();
+      resp.message = "rcdynamics remote interface not yet initialized!";
     }
-  }
-  else
-  {
-    resp.success = false;
-    resp.message = "rcdynamics remote interface not yet initialized!";
-  }
 
-  if (!resp.success) ROS_ERROR_STREAM(resp.message);
+    if (!resp.success) ROS_ERROR_STREAM(resp.message);
+  }
 }
 
-bool DeviceNodelet::startDynamics(std_srvs::Trigger::Request &req,
+bool DeviceNodelet::dynamicsStart(std_srvs::Trigger::Request &req,
                                   std_srvs::Trigger::Response &resp){
-  handleDynamicsStateChangeRequest(dynamicsInterface, 1, resp);
+  handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::START, resp);
   return true;
 }
 
-bool DeviceNodelet::restartDynamics(std_srvs::Trigger::Request &req,
+bool DeviceNodelet::dynamicsStartSlam(std_srvs::Trigger::Request &req,
+                                      std_srvs::Trigger::Response &resp){
+  handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::START_SLAM, resp);
+  return true;
+}
+
+bool DeviceNodelet::dynamicsRestart(std_srvs::Trigger::Request &req,
                                     std_srvs::Trigger::Response &resp){
-  handleDynamicsStateChangeRequest(dynamicsInterface, 2, resp);
+  handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::RESTART, resp);
   return true;
 }
 
-bool DeviceNodelet::stopDynamics(std_srvs::Trigger::Request &req,
+bool DeviceNodelet::dynamicsStop(std_srvs::Trigger::Request &req,
                                  std_srvs::Trigger::Response &resp){
-  handleDynamicsStateChangeRequest(dynamicsInterface, 0, resp);
+  handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::STOP, resp);
   return true;
 }
 
+bool DeviceNodelet::dynamicsStopSlam(std_srvs::Trigger::Request &req,
+                                     std_srvs::Trigger::Response &resp){
+  handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::STOP_SLAM, resp);
+  return true;
+}
 }
 
 PLUGINLIB_EXPORT_CLASS(rc::DeviceNodelet, nodelet::Nodelet)

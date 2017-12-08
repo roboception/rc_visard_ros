@@ -63,15 +63,28 @@ class DeviceNodelet : public nodelet::Nodelet
 
     virtual void onInit();
 
-    bool startDynamics(std_srvs::Trigger::Request &req,
+    ///Start Stereo INS
+    ///@return always true, check resp.success for whether the dynamics service has been called
+    bool dynamicsStart(std_srvs::Trigger::Request &req,
                        std_srvs::Trigger::Response &resp);
-    bool restartDynamics(std_srvs::Trigger::Request &req,
+    ///Start Stereo INS+SLAM
+    ///@return always true, check resp.success for whether the dynamics service has been called
+    bool dynamicsStartSlam(std_srvs::Trigger::Request &req,
+                       std_srvs::Trigger::Response &resp);
+    ///Restart Stereo INS(+SLAM if running)
+    ///@return always true, check resp.success for whether the dynamics service has been called
+    bool dynamicsRestart(std_srvs::Trigger::Request &req,
                          std_srvs::Trigger::Response &resp);
-    bool stopDynamics(std_srvs::Trigger::Request &req,
+    ///Stop Stereo INS(+SLAM if running)
+    ///@return always true, check resp.success for whether the dynamics service has been called
+    bool dynamicsStop(std_srvs::Trigger::Request &req,
                       std_srvs::Trigger::Response &resp);
+    ///Stop SLAM (keep Stereo INS running)
+    ///@return always true, check resp.success for whether the dynamics service has been called
+    bool dynamicsStopSlam(std_srvs::Trigger::Request &req,
+                          std_srvs::Trigger::Response &resp);
 
   private:
-
     static ThreadedStream::Ptr CreateDynamicsStreamOfType(
             rc::dynamics::RemoteInterface::Ptr rcdIface,
             const std::string &stream, ros::NodeHandle &nh,
@@ -111,8 +124,10 @@ class DeviceNodelet : public nodelet::Nodelet
     /// wrapper for REST-API calls relating to rc_visard's dynamics interface
     rc::dynamics::RemoteInterface::Ptr dynamicsInterface;
     ros::ServiceServer dynamicsStartService;
+    ros::ServiceServer dynamicsStartSlamService;
     ros::ServiceServer dynamicsRestartService;
     ros::ServiceServer dynamicsStopService;
+    ros::ServiceServer dynamicsStopSlamService;
     bool autostartDynamics, autostopDynamics;
 
     /// all frame names must be prefixed when using more than one rc_visard
