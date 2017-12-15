@@ -89,5 +89,25 @@ class PoseStream : public Protobuf2RosStream
     bool _tfEnabled;
 };
 
+/**
+ * Specific implementation for roboception::msgs::Dynamics messages. It publishes
+ * the different field of the received message as several messages:
+ * * pose -> PoseStamped (topic is the dynamics stream name)
+ * * velocities and accelerations -> Marker-Arros (goes to pre-defined rviz-topic)
+ *
+ */
+class DynamicsStream : public Protobuf2RosStream
+{
+  public:
+    DynamicsStream(rc::dynamics::RemoteInterface::Ptr rcdIface,
+               const std::string &stream, ros::NodeHandle &nh,
+               const std::string &frame_id_prefix)
+            : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix)
+    {}
+
+  protected:
+    virtual bool startReceivingAndPublishingAsRos() override;
+};
+
 }
 #endif //RC_VISARD_ROS_PROTOBUF2ROS_STREAM_H

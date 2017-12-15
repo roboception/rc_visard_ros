@@ -375,10 +375,9 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
 
       // convert cam2imu_transform to tf and publish it
       auto cam2imu_tf = toRosTfStampedTransform(protoMsg->cam2imu_transform());
-      // from dynamics-module we get camera-pose in imu-frame, but we want to
-      // publish imu-pose in camera frame:
-//      tf::StampedTransform stamped_tf(transform.inverse(), t, frame.name(), frame.parent());
-      tf_pub.sendTransform(cam2imu_tf);
+      // from dynamics-module we get camera-pose in imu-frame, but we want to have imu-pose in camera frame
+      auto cam2imu_tf_inv = tf::StampedTransform(cam2imu_tf.inverse(), msgStamp, cam2imu_tf.child_frame_id_, cam2imu_tf.frame_id_);
+      tf_pub.sendTransform(cam2imu_tf_inv);
 
       // convert velocities and accelerations to visualization Markers
       geometry_msgs::Point start, end;
@@ -406,24 +405,51 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
       lin_vel_marker.color.g = lin_vel_marker.color.b = 1.0; // cyan
       pub_markers.publish(lin_vel_marker);
 
-//      visualization_msgs::Marker ang_vel_marker; // single marker for linear velocity
-//      ang_vel_marker.header.stamp = msg_ros_time;
-//      ang_vel_marker.header.frame_id = protoMsg->angular_velocity_frame();
-//      ang_vel_marker.ns = _tfPrefix;
-//      ang_vel_marker.id = 1;
-//      ang_vel_marker.type = visualization_msgs::Marker::ARROW;
-//      ang_vel_marker.action = visualization_msgs::Marker::MODIFY;
-//      ang_vel_marker.frame_locked = true;
-//      end.x = start.x + protoMsg->angular_velocity().x();
-//      end.y= start.y + protoMsg->angular_velocity().y();
-//      end.z = start.z + protoMsg->angular_velocity().z();
-//      ang_vel_marker.points.push_back(start);
-//      ang_vel_marker.points.push_back(end);
-//      ang_vel_marker.scale.x = 0.005;
-//      ang_vel_marker.scale.y = 0.01;
-//      ang_vel_marker.color.a = 1;
-//      ang_vel_marker.color.r = ang_vel_marker.color.b = 1.0; // cyan
-//      pub_markers.publish(ang_vel_marker);
+      // convert pose to transform to use it for transformations
+      auto pose_tf = toRosTfTransform(protoMsg->pose());
+      pose_tf.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+
+      visualization_msgs::Marker ang_vel_marker; // single marker for linear velocity
+      ang_vel_marker.header.stamp = msgStamp;
+      ang_vel_marker.header.frame_id = protoMsg->pose_frame();
+      ang_vel_marker.ns = _tfPrefix;
+      ang_vel_marker.id = 1;
+      ang_vel_marker.type = visualization_msgs::Marker::ARROW;
+      ang_vel_marker.action = visualization_msgs::Marker::MODIFY;
+      ang_vel_marker.frame_locked = true;
+      auto ang_vel = protoMsg->angular_velocity();
+      auto ang_vel_transformed = pose_tf*tf::Vector3(ang_vel.x(), ang_vel.y(), ang_vel.z());
+      end.x = start.x + ang_vel_transformed.x();
+      end.y= start.y + ang_vel_transformed.y();
+      end.z = start.z + ang_vel_transformed.z();
+      ang_vel_marker.points.push_back(start);
+      ang_vel_marker.points.push_back(end);
+      ang_vel_marker.scale.x = 0.005;
+      ang_vel_marker.scale.y = 0.01;
+      ang_vel_marker.color.a = 1;
+      ang_vel_marker.color.r = ang_vel_marker.color.b = 1.0; // mangenta
+      pub_markers.publish(ang_vel_marker);
+
+      visualization_msgs::Marker lin_accel_marker; // single marker for linear acceleration
+      lin_accel_marker.header.stamp = msgStamp;
+      lin_accel_marker.header.frame_id = protoMsg->pose_frame();
+      lin_accel_marker.ns = _tfPrefix;
+      lin_accel_marker.id = 2;
+      lin_accel_marker.type = visualization_msgs::Marker::ARROW;
+      lin_accel_marker.action = visualization_msgs::Marker::MODIFY;
+      lin_accel_marker.frame_locked = true;
+      auto lin_accel = protoMsg->linear_acceleration();
+      auto lin_accel_transformed = pose_tf*tf::Vector3(lin_accel.x(), lin_accel.y(), lin_accel.z());
+      end.x = start.x + lin_accel_transformed.x();
+      end.y= start.y + lin_accel_transformed.y();
+      end.z = start.z + lin_accel_transformed.z();
+      lin_accel_marker.points.push_back(start);
+      lin_accel_marker.points.push_back(end);
+      lin_accel_marker.scale.x = 0.005;
+      lin_accel_marker.scale.y = 0.01;
+      lin_accel_marker.color.a = 1;
+      lin_accel_marker.color.r = lin_accel_marker.color.g = 1.0; // yellow
+      pub_markers.publish(lin_accel_marker);
 
       // check if still someone is listening
       pub_pose.getNumSubscribers() > 0 || pub_markers.getNumSubscribers() > 0;
