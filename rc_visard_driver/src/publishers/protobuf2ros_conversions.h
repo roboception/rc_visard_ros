@@ -46,15 +46,24 @@
 namespace rc
 {
 
-sensor_msgs::ImuPtr toRosImu(std::shared_ptr<roboception::msgs::Imu> imu);
+ros::Time toRosTime(const roboception::msgs::Time &time);
 
-geometry_msgs::PoseStampedPtr toRosPoseStamped(std::shared_ptr<roboception::msgs::Frame> frame);
+sensor_msgs::ImuPtr toRosImu(const roboception::msgs::Imu  &imu);
 
-geometry_msgs::PoseWithCovarianceStampedPtr toRosPoseWithCovarianceStamped(std::shared_ptr<roboception::msgs::Frame> frame);
+geometry_msgs::PosePtr toRosPose(const roboception::msgs::Pose &pose);
 
-tf::Transform toRosTfTransform(std::shared_ptr<roboception::msgs::Frame> frame);
+geometry_msgs::PoseStampedPtr toRosPoseStamped(const roboception::msgs::Frame &frame);
 
-tf::StampedTransform toRosTfStampedTransform(std::shared_ptr<roboception::msgs::Frame> frame);
+geometry_msgs::PoseStampedPtr
+toRosPoseStamped(const roboception::msgs::Pose &pose,
+                 const roboception::msgs::Time &time,
+                 const std::string &frame_id);
+
+geometry_msgs::PoseWithCovarianceStampedPtr toRosPoseWithCovarianceStamped(const roboception::msgs::Frame &frame);
+
+tf::Transform toRosTfTransform(const roboception::msgs::Pose &pose);
+
+tf::StampedTransform toRosTfStampedTransform(const roboception::msgs::Frame &frame);
 
 }
 

@@ -15,32 +15,48 @@
 
 namespace rc {
 
-sensor_msgs::ImuPtr toRosImu(std::shared_ptr<roboception::msgs::Imu> imu)
+ros::Time toRosTime(const roboception::msgs::Time &time)
+{
+  return ros::Time(time.sec(), time.nsec());
+}
+
+sensor_msgs::ImuPtr toRosImu(const roboception::msgs::Imu  &imu)
 {
   auto rosImu = boost::make_shared<sensor_msgs::Imu>();
   rosImu->header.frame_id = "imu";
-  rosImu->header.stamp.sec = imu->timestamp().sec();
-  rosImu->header.stamp.nsec = imu->timestamp().nsec();
+  rosImu->header.stamp = toRosTime(imu.timestamp());
   rosImu->orientation_covariance[0] = -1; // we dont support orientation
-  rosImu->angular_velocity.x = imu->angular_velocity().x();
-  rosImu->angular_velocity.y = imu->angular_velocity().y();
-  rosImu->angular_velocity.z = imu->angular_velocity().z();
-  rosImu->linear_acceleration.x = imu->linear_acceleration().x();
-  rosImu->linear_acceleration.y = imu->linear_acceleration().y();
-  rosImu->linear_acceleration.z = imu->linear_acceleration().z();
+  rosImu->angular_velocity.x = imu.angular_velocity().x();
+  rosImu->angular_velocity.y = imu.angular_velocity().y();
+  rosImu->angular_velocity.z = imu.angular_velocity().z();
+  rosImu->linear_acceleration.x = imu.linear_acceleration().x();
+  rosImu->linear_acceleration.y = imu.linear_acceleration().y();
+  rosImu->linear_acceleration.z = imu.linear_acceleration().z();
 
   return rosImu;
 }
 
-geometry_msgs::PoseStampedPtr toRosPoseStamped(std::shared_ptr<roboception::msgs::Frame> frame)
+geometry_msgs::PosePtr toRosPose(const roboception::msgs::Pose &pose)
 {
-  auto protoPoseStamped = frame->pose();
+  auto rosPose = boost::make_shared<geometry_msgs::Pose>();
+  rosPose->position.x = pose.position().x();
+  rosPose->position.y = pose.position().y();
+  rosPose->position.z = pose.position().z();
+  rosPose->orientation.x = pose.orientation().x();
+  rosPose->orientation.y = pose.orientation().y();
+  rosPose->orientation.z = pose.orientation().z();
+  rosPose->orientation.w = pose.orientation().w();
+  return rosPose;
+}
+
+geometry_msgs::PoseStampedPtr toRosPoseStamped(const roboception::msgs::Frame &frame)
+{
+  auto protoPoseStamped = frame.pose();
   auto protoPosePose = protoPoseStamped.pose();
 
   auto rosPose = boost::make_shared<geometry_msgs::PoseStamped>();
-  rosPose->header.frame_id = frame->parent();
-  rosPose->header.stamp.sec = protoPoseStamped.timestamp().sec();
-  rosPose->header.stamp.nsec = protoPoseStamped.timestamp().nsec();
+  rosPose->header.frame_id = frame.parent();
+  rosPose->header.stamp = toRosTime(protoPoseStamped.timestamp());
   rosPose->pose.position.x = protoPosePose.position().x();
   rosPose->pose.position.y = protoPosePose.position().y();
   rosPose->pose.position.z = protoPosePose.position().z();
@@ -51,16 +67,33 @@ geometry_msgs::PoseStampedPtr toRosPoseStamped(std::shared_ptr<roboception::msgs
   return rosPose;
 }
 
-geometry_msgs::PoseWithCovarianceStampedPtr toRosPoseWithCovarianceStamped(std::shared_ptr<roboception::msgs::Frame> frame)
+geometry_msgs::PoseStampedPtr
+toRosPoseStamped(const roboception::msgs::Pose &pose,
+                 const roboception::msgs::Time &time,
+                 const std::string &frame_id)
 {
-  auto protoPoseStamped = frame->pose();
+  auto rosPose = boost::make_shared<geometry_msgs::PoseStamped>();
+  rosPose->header.frame_id = frame_id;
+  rosPose->header.stamp = toRosTime(time);
+  rosPose->pose.position.x = pose.position().x();
+  rosPose->pose.position.y = pose.position().y();
+  rosPose->pose.position.z = pose.position().z();
+  rosPose->pose.orientation.x = pose.orientation().x();
+  rosPose->pose.orientation.y = pose.orientation().y();
+  rosPose->pose.orientation.z = pose.orientation().z();
+  rosPose->pose.orientation.w = pose.orientation().w();
+  return rosPose;
+}
+
+geometry_msgs::PoseWithCovarianceStampedPtr toRosPoseWithCovarianceStamped(const roboception::msgs::Frame &frame)
+{
+  auto protoPoseStamped = frame.pose();
   auto protoPosePose = protoPoseStamped.pose();
   auto protoCov = protoPosePose.covariance();
 
   auto rosPose = boost::make_shared<geometry_msgs::PoseWithCovarianceStamped>();
-  rosPose->header.frame_id = frame->parent();
-  rosPose->header.stamp.sec = protoPoseStamped.timestamp().sec();
-  rosPose->header.stamp.nsec = protoPoseStamped.timestamp().nsec();
+  rosPose->header.frame_id = frame.parent();
+  rosPose->header.stamp = toRosTime(protoPoseStamped.timestamp());
   rosPose->pose.pose.position.x = protoPosePose.position().x();
   rosPose->pose.pose.position.y = protoPosePose.position().y();
   rosPose->pose.pose.position.z = protoPosePose.position().z();
@@ -75,9 +108,8 @@ geometry_msgs::PoseWithCovarianceStampedPtr toRosPoseWithCovarianceStamped(std::
   return rosPose;
 }
 
-tf::Transform toRosTfTransform(std::shared_ptr<roboception::msgs::Frame> frame)
+tf::Transform toRosTfTransform(const roboception::msgs::Pose &pose)
 {
-  auto pose = frame->pose().pose();
   tf::Transform transform;
   transform.setOrigin(tf::Vector3(pose.position().x(),
                                   pose.position().y(),
@@ -90,13 +122,12 @@ tf::Transform toRosTfTransform(std::shared_ptr<roboception::msgs::Frame> frame)
   return transform;
 }
 
-tf::StampedTransform toRosTfStampedTransform(std::shared_ptr<roboception::msgs::Frame> frame)
+tf::StampedTransform
+toRosTfStampedTransform(const roboception::msgs::Frame &frame)
 {
-  tf::Transform transform = toRosTfTransform(frame);
-  ros::Time t(frame->pose().timestamp().sec(),
-              frame->pose().timestamp().nsec());
-
-  return tf::StampedTransform(transform, t, frame->parent(), frame->name());
+  return tf::StampedTransform(toRosTfTransform(frame.pose().pose()),
+                              toRosTime(frame.pose().timestamp()),
+                              frame.parent(), frame.name());
 }
 
 

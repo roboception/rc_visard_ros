@@ -61,7 +61,7 @@ void Protobuf2RosPublisher::publish(shared_ptr<::google::protobuf::Message> pbMs
       throw runtime_error("Given protobuf message was not of type Imu!");
     }
 
-    auto rosImu = toRosImu(protoImu);
+    auto rosImu = toRosImu(*protoImu);
     rosImu->header.frame_id = _tfPrefix + rosImu->header.frame_id;
     pub.publish(rosImu);
   }
@@ -76,7 +76,7 @@ void Protobuf2RosPublisher::publish(shared_ptr<::google::protobuf::Message> pbMs
       throw runtime_error("Given protobuf message was not of type Frame!");
     }
 
-    auto rosPose = toRosPoseStamped(protoFrame);
+    auto rosPose = toRosPoseStamped(*protoFrame);
     rosPose->header.frame_id = _tfPrefix + rosPose->header.frame_id;
     pub.publish(rosPose);
   }

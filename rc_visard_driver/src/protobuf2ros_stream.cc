@@ -38,6 +38,7 @@
 
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
+#include <visualization_msgs/Marker.h>
 
 #include <rc_dynamics_api/unexpected_receive_timeout.h>
 
@@ -244,18 +245,188 @@ bool PoseStream::startReceivingAndPublishingAsRos()
       protoFrame->set_parent(_tfPrefix+protoFrame->parent());
       protoFrame->set_name(_tfPrefix+protoFrame->name());
 
-      auto rosPose = toRosPoseStamped(protoFrame);
+      auto rosPose = toRosPoseStamped(*protoFrame);
       pub.publish(rosPose);
 
       // convert to tf and publish
       if (_tfEnabled)
       {
-        tf::StampedTransform transform = toRosTfStampedTransform(protoFrame);
+        tf::StampedTransform transform = toRosTfStampedTransform(*protoFrame);
         tf_pub.sendTransform(transform);
       }
 
       // check if still someone is listening
       someoneListens = _tfEnabled || pub.getNumSubscribers() > 0;
+    }
+
+    ROS_INFO_STREAM("rc_visard_driver: Disabled rc-dynamics stream: " << _stream);
+  }
+
+  // return info about stream being stopped externally or failed internally
+  return !failed;
+}
+
+
+
+bool DynamicsStream::startReceivingAndPublishingAsRos()
+{
+  unsigned int timeoutMillis = 500;
+
+  ros::Publisher pub_pose = _nh.advertise<geometry_msgs::PoseStamped>(_stream, 1000);
+  ros::Publisher pub_markers = _nh.advertise<visualization_msgs::Marker>("visualization_marker", 1000);
+  tf::TransformBroadcaster tf_pub;
+
+  unsigned int cntNoListener = 0;
+  bool failed = false;
+
+  while (!_stop && !failed)
+  {
+    bool someoneListens = pub_pose.getNumSubscribers() > 0 || pub_markers.getNumSubscribers() > 0;
+
+    // start streaming only if someone is listening
+
+    if (!someoneListens)
+    {
+      // ros getNumSubscribers usually takes a while to register the subscribers
+      if (++cntNoListener > 200)
+      {
+        _requested = false;
+      }
+      usleep(1000 * 10);
+      continue;
+    }
+    cntNoListener = 0;
+    _requested = true;
+    _success = false;
+    ROS_INFO_STREAM("rc_visard_driver: Enabled rc-dynamics stream: " << _stream);
+
+    // initialize data stream to this host
+
+    rcd::DataReceiver::Ptr receiver;
+    try
+    {
+      receiver = _rcdyn->createReceiverForStream(_stream);
+    }
+    catch (rcd::UnexpectedReceiveTimeout& e) {
+      stringstream msg;
+      msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
+      ROS_WARN_STREAM_THROTTLE(5, msg.str());
+      continue;
+    }
+    catch (exception &e)
+    {
+      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ")
+                       + _stream + ": " + e.what());
+      failed = true;
+      break;
+    }
+    receiver->setTimeout(timeoutMillis);
+    ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
+
+    // main loop for listening, receiving and republishing data to ROS
+
+    shared_ptr <roboception::msgs::Dynamics> protoMsg;
+    while (!_stop && someoneListens)
+    {
+
+      // try receive msg; blocking call (timeout)
+      try
+      {
+        protoMsg = receiver->receive<roboception::msgs::Dynamics>();
+        _success = true;
+      }
+      catch (std::exception &e)
+      {
+        ROS_ERROR_STREAM("Caught exception during receiving "
+                                 << _stream << ": " << e.what());
+        failed = true;
+        break; // stop receiving loop
+      }
+
+      // timeout happened; if its only small let's put a warning and increasing recv timeout
+      if (!protoMsg)
+      {
+        ROS_ERROR_STREAM("Did not receive any "
+                                 << _stream << " message within the last "
+                                 << timeoutMillis << " ms. "
+                                 << "Either rc_visard stopped streaming or is turned off, "
+                                 << "or you seem to have serious network/connection problems!");
+        failed = true;
+        break; // stop receiving loop
+      }
+
+      ROS_DEBUG_STREAM_THROTTLE(1, "Received protoMsg: "
+              << protoMsg->DebugString());
+
+
+      // prefix all frame ids before
+      protoMsg->set_pose_frame(_tfPrefix+protoMsg->pose_frame());
+      protoMsg->set_linear_velocity_frame(_tfPrefix+protoMsg->linear_velocity_frame());
+      protoMsg->set_angular_velocity_frame(_tfPrefix+protoMsg->angular_velocity_frame());
+      protoMsg->set_linear_acceleration_frame(_tfPrefix+protoMsg->linear_acceleration_frame());
+      protoMsg->mutable_cam2imu_transform()->set_name(_tfPrefix+protoMsg->cam2imu_transform().name());
+      protoMsg->mutable_cam2imu_transform()->set_parent(_tfPrefix+protoMsg->cam2imu_transform().parent());
+
+      // time stamp of this message
+      ros::Time msgStamp = toRosTime(protoMsg->timestamp());
+
+      // create PoseStamped and send out
+      pub_pose.publish(toRosPoseStamped(protoMsg->pose(), protoMsg->timestamp(), protoMsg->pose_frame()));
+
+      // convert cam2imu_transform to tf and publish it
+      auto cam2imu_tf = toRosTfStampedTransform(protoMsg->cam2imu_transform());
+      // from dynamics-module we get camera-pose in imu-frame, but we want to
+      // publish imu-pose in camera frame:
+//      tf::StampedTransform stamped_tf(transform.inverse(), t, frame.name(), frame.parent());
+      tf_pub.sendTransform(cam2imu_tf);
+
+      // convert velocities and accelerations to visualization Markers
+      geometry_msgs::Point start, end;
+      auto protoPosePosition = protoMsg->pose().position();
+      start.x = protoPosePosition.x();
+      start.y = protoPosePosition.y();
+      start.z = protoPosePosition.z();
+
+      visualization_msgs::Marker lin_vel_marker; // single marker for linear velocity
+      lin_vel_marker.header.stamp = msgStamp;
+      lin_vel_marker.header.frame_id = protoMsg->linear_velocity_frame();
+      lin_vel_marker.ns = _tfPrefix;
+      lin_vel_marker.id = 0;
+      lin_vel_marker.type = visualization_msgs::Marker::ARROW;
+      lin_vel_marker.action = visualization_msgs::Marker::MODIFY;
+      lin_vel_marker.frame_locked = true;
+      end.x = start.x + protoMsg->linear_velocity().x();
+      end.y= start.y + protoMsg->linear_velocity().y();
+      end.z = start.z + protoMsg->linear_velocity().z();
+      lin_vel_marker.points.push_back(start);
+      lin_vel_marker.points.push_back(end);
+      lin_vel_marker.scale.x = 0.005;
+      lin_vel_marker.scale.y = 0.01;
+      lin_vel_marker.color.a = 1;
+      lin_vel_marker.color.g = lin_vel_marker.color.b = 1.0; // cyan
+      pub_markers.publish(lin_vel_marker);
+
+//      visualization_msgs::Marker ang_vel_marker; // single marker for linear velocity
+//      ang_vel_marker.header.stamp = msg_ros_time;
+//      ang_vel_marker.header.frame_id = protoMsg->angular_velocity_frame();
+//      ang_vel_marker.ns = _tfPrefix;
+//      ang_vel_marker.id = 1;
+//      ang_vel_marker.type = visualization_msgs::Marker::ARROW;
+//      ang_vel_marker.action = visualization_msgs::Marker::MODIFY;
+//      ang_vel_marker.frame_locked = true;
+//      end.x = start.x + protoMsg->angular_velocity().x();
+//      end.y= start.y + protoMsg->angular_velocity().y();
+//      end.z = start.z + protoMsg->angular_velocity().z();
+//      ang_vel_marker.points.push_back(start);
+//      ang_vel_marker.points.push_back(end);
+//      ang_vel_marker.scale.x = 0.005;
+//      ang_vel_marker.scale.y = 0.01;
+//      ang_vel_marker.color.a = 1;
+//      ang_vel_marker.color.r = ang_vel_marker.color.b = 1.0; // cyan
+//      pub_markers.publish(ang_vel_marker);
+
+      // check if still someone is listening
+      pub_pose.getNumSubscribers() > 0 || pub_markers.getNumSubscribers() > 0;
     }
 
     ROS_INFO_STREAM("rc_visard_driver: Disabled rc-dynamics stream: " << _stream);
