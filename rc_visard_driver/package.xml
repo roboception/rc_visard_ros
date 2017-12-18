@@ -34,6 +34,8 @@
   <depend>dynamic_reconfigure</depend>
   <depend>geometry_msgs</depend>
   <depend>tf</depend>
+  <depend>visualization_msgs</depend>
+  <depend>nav_msgs</depend>
 
   <doc_depend>doxygen</doc_depend>
 

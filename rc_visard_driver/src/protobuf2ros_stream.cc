@@ -39,6 +39,7 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <visualization_msgs/Marker.h>
+#include <nav_msgs/Odometry.h>
 
 #include <rc_dynamics_api/unexpected_receive_timeout.h>
 
@@ -274,6 +275,7 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
 
   ros::Publisher pub_pose = _nh.advertise<geometry_msgs::PoseStamped>(_stream, 1000);
   ros::Publisher pub_markers = _nh.advertise<visualization_msgs::Marker>("visualization_marker", 1000);
+  ros::Publisher pub_odom = _nh.advertise<nav_msgs::Odometry>("odometry", 1000);
   tf::TransformBroadcaster tf_pub;
 
   unsigned int cntNoListener = 0;
@@ -281,7 +283,9 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
 
   while (!_stop && !failed)
   {
-    bool someoneListens = pub_pose.getNumSubscribers() > 0 || pub_markers.getNumSubscribers() > 0;
+    bool someoneListens = pub_pose.getNumSubscribers() > 0 ||
+            pub_markers.getNumSubscribers() > 0 ||
+            pub_odom.getNumSubscribers() > 0;
 
     // start streaming only if someone is listening
 
@@ -394,9 +398,10 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
       lin_vel_marker.type = visualization_msgs::Marker::ARROW;
       lin_vel_marker.action = visualization_msgs::Marker::MODIFY;
       lin_vel_marker.frame_locked = true;
-      end.x = start.x + protoMsg->linear_velocity().x();
-      end.y= start.y + protoMsg->linear_velocity().y();
-      end.z = start.z + protoMsg->linear_velocity().z();
+      auto lin_vel = protoMsg->linear_velocity();
+      end.x = start.x + lin_vel.x();
+      end.y= start.y + lin_vel.y();
+      end.z = start.z + lin_vel.z();
       lin_vel_marker.points.push_back(start);
       lin_vel_marker.points.push_back(end);
       lin_vel_marker.scale.x = 0.005;
@@ -451,8 +456,28 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
       lin_accel_marker.color.r = lin_accel_marker.color.g = 1.0; // yellow
       pub_markers.publish(lin_accel_marker);
 
+      // publish rc dynamics message as ros odometry
+      // for this we need to transform lin velocity from world frame to imu
+      auto lin_vel_transformed = pose_tf.inverse()*tf::Vector3(
+              lin_vel.x(), lin_vel.y(), lin_vel.z());
+      auto odom = boost::make_shared<nav_msgs::Odometry>();
+      odom->header.frame_id = protoMsg->pose_frame(); // "world"
+      odom->header.stamp = msgStamp;
+      odom->child_frame_id = protoMsg->linear_acceleration_frame(); //"imu"
+      odom->pose.pose = *toRosPose(protoMsg->pose());
+      odom->twist.twist.linear.x = lin_vel_transformed.x();
+      odom->twist.twist.linear.y = lin_vel_transformed.y();
+      odom->twist.twist.linear.z = lin_vel_transformed.z();
+      odom->twist.twist.angular.x = ang_vel.x();
+      odom->twist.twist.angular.y = ang_vel.y();
+      odom->twist.twist.angular.z = ang_vel.z();
+      pub_odom.publish(odom);
+
+
       // check if still someone is listening
-      pub_pose.getNumSubscribers() > 0 || pub_markers.getNumSubscribers() > 0;
+      someoneListens = pub_pose.getNumSubscribers() > 0 ||
+                       pub_markers.getNumSubscribers() > 0 ||
+                       pub_odom.getNumSubscribers() > 0;
     }
 
     ROS_INFO_STREAM("rc_visard_driver: Disabled rc-dynamics stream: " << _stream);
