@@ -29,6 +29,8 @@ As an alternative, the cmake build-flow would be something like
     make
     make install
 
+Alternatively, instead of the final `make install`, you can also use `make package` and `sudo dpkg -i install ros-indigo-rc-visard-driver_*.deb`.
+
 ### GenICam GenTL Transport Layer
 
 The rc_visard_driver uses the GenICam/GigE Vision interface of the sensor

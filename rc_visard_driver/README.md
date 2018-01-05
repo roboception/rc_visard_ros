@@ -186,9 +186,12 @@ Services
 The following services are offered to start, stop, and restart the rc_visard's
 dynamic module (which needs to be started for working dynamic-state estimates).
 
-- `startDynamics`
-- `restartDynamics`
-- `stopDynamics`
+- `dynamics_start`
+- `dynamics_restart`
+- `dynamics_stop`
+- `dynamics_start_slam`
+- `dynamics_restart_slam`
+- `dynamics_stop_slam`
 
 
 Launching

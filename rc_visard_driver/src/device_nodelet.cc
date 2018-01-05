@@ -167,18 +167,20 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
   // setup services for starting and stopping rcdynamics module
 
-  dynamicsStartService     = pnh.advertiseService("dynamics_start",
-                                                  &DeviceNodelet::dynamicsStart, this);
-  dynamicsStartSlamService = pnh.advertiseService("dynamics_start_slam",
-                                                  &DeviceNodelet::dynamicsStartSlam, this);
-  dynamicsRestartService   = pnh.advertiseService("dynamics_restart",
-                                                  &DeviceNodelet::dynamicsRestart, this);
-  dynamicsStopService      = pnh.advertiseService("dynamics_stop",
-                                                  &DeviceNodelet::dynamicsStop, this);
-  dynamicsStopSlamService  = pnh.advertiseService("dynamics_stop_slam",
-                                                  &DeviceNodelet::dynamicsStopSlam, this);
+  dynamicsStartService       = pnh.advertiseService("dynamics_start",
+                                                    &DeviceNodelet::dynamicsStart, this);
+  dynamicsStartSlamService   = pnh.advertiseService("dynamics_start_slam",
+                                                    &DeviceNodelet::dynamicsStartSlam, this);
+  dynamicsRestartService     = pnh.advertiseService("dynamics_restart",
+                                                    &DeviceNodelet::dynamicsRestart, this);
+  dynamicsRestartSlamService = pnh.advertiseService("dynamics_restart_slam",
+                                                  &DeviceNodelet::dynamicsRestartSlam, this);
+  dynamicsStopService        = pnh.advertiseService("dynamics_stop",
+                                                    &DeviceNodelet::dynamicsStop, this);
+  dynamicsStopSlamService    = pnh.advertiseService("dynamics_stop_slam",
+                                                    &DeviceNodelet::dynamicsStopSlam, this);
 
-  // run start-keep-alive-and-recover loop
+  // run start-keep-alive-a  nd-recover loop
 
   static int maxNumRecoveryTrials = 5;
 
@@ -992,7 +994,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 namespace
 {
   ///Commands taken by handleDynamicsStateChangeRequest()
-  enum class DynamicsCmd { START = 0, START_SLAM, STOP, STOP_SLAM, RESTART };
+  enum class DynamicsCmd { START = 0, START_SLAM, STOP, STOP_SLAM, RESTART, RESTART_SLAM };
 
   ///@return whether the service call has been accepted
   void handleDynamicsStateChangeRequest(
@@ -1010,11 +1012,12 @@ namespace
       {
         switch (state)
         {
-          case DynamicsCmd::STOP:       new_state = dynIF->stop();      break;
-          case DynamicsCmd::STOP_SLAM:  new_state = dynIF->stopSlam();  break;
-          case DynamicsCmd::START:      new_state = dynIF->start();     break;
-          case DynamicsCmd::START_SLAM: new_state = dynIF->startSlam(); break;
-          case DynamicsCmd::RESTART:    new_state = dynIF->restart();   break;
+          case DynamicsCmd::STOP:         new_state = dynIF->stop();        break;
+          case DynamicsCmd::STOP_SLAM:    new_state = dynIF->stopSlam();    break;
+          case DynamicsCmd::START:        new_state = dynIF->start();       break;
+          case DynamicsCmd::START_SLAM:   new_state = dynIF->startSlam();   break;
+          case DynamicsCmd::RESTART_SLAM: new_state = dynIF->restartSlam(); break;
+          case DynamicsCmd::RESTART:      new_state = dynIF->restart();     break;
           default:
             throw std::runtime_error("handleDynamicsStateChangeRequest: unrecognized state change request");
         }
@@ -1055,6 +1058,12 @@ bool DeviceNodelet::dynamicsStartSlam(std_srvs::Trigger::Request &req,
 bool DeviceNodelet::dynamicsRestart(std_srvs::Trigger::Request &req,
                                     std_srvs::Trigger::Response &resp){
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::RESTART, resp);
+  return true;
+}
+
+bool DeviceNodelet::dynamicsRestartSlam(std_srvs::Trigger::Request &req,
+                                        std_srvs::Trigger::Response &resp){
+  handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::RESTART_SLAM, resp);
   return true;
 }
 

@@ -71,10 +71,14 @@ class DeviceNodelet : public nodelet::Nodelet
     ///@return always true, check resp.success for whether the dynamics service has been called
     bool dynamicsStartSlam(std_srvs::Trigger::Request &req,
                        std_srvs::Trigger::Response &resp);
-    ///Restart Stereo INS(+SLAM if running)
+    ///Restart Stereo INS
     ///@return always true, check resp.success for whether the dynamics service has been called
     bool dynamicsRestart(std_srvs::Trigger::Request &req,
                          std_srvs::Trigger::Response &resp);
+    ///Restart Stereo INS+SLAM
+    ///@return always true, check resp.success for whether the dynamics service has been called
+    bool dynamicsRestartSlam(std_srvs::Trigger::Request &req,
+                             std_srvs::Trigger::Response &resp);
     ///Stop Stereo INS(+SLAM if running)
     ///@return always true, check resp.success for whether the dynamics service has been called
     bool dynamicsStop(std_srvs::Trigger::Request &req,
@@ -126,6 +130,7 @@ class DeviceNodelet : public nodelet::Nodelet
     ros::ServiceServer dynamicsStartService;
     ros::ServiceServer dynamicsStartSlamService;
     ros::ServiceServer dynamicsRestartService;
+    ros::ServiceServer dynamicsRestartSlamService;
     ros::ServiceServer dynamicsStopService;
     ros::ServiceServer dynamicsStopSlamService;
     bool autostartDynamics, autostopDynamics;
