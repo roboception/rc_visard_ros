@@ -1004,7 +1004,7 @@ namespace
     resp.success = true;
     resp.message = "";
 
-    rcd::RemoteInterface::State new_state;
+    std::string new_state;
 
     if (dynIF)
     {
@@ -1024,7 +1024,7 @@ namespace
         if(new_state == rcd::RemoteInterface::State::FATAL)
         {
           resp.success = false;
-          resp.message = "rc_dynamics module is in FATAL state. Check the log files.";
+          resp.message = "rc_dynamics module is in " + new_state + " state. Check the log files.";
         }
       }
       catch (std::exception &e)
