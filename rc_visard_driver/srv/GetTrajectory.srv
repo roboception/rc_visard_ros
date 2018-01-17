@@ -1,0 +1,35 @@
+# Description: Get trajectory for given time period. If all args are left empty (zero), the full trajectory is returned.
+
+# Request: Specifies a time interval. All zero/false
+# will result in the full trajectory.
+
+# Start time of the requested trajectory interval.
+# Can be given as absolute timestamp or
+# as a relative duration (see respective flag below)
+# If the relative duration is negative, it states the
+# time offset from the trajectory end, if zero it
+# defines the time of the trajectory start, if positive it
+# defines the time offset from the trajectory start.
+duration start_time
+
+# End time of the trajectory interval.
+# Can be given as absolute timestamp or
+# as a relative duration (see respective flag below)
+# If the relative duration is negative, it states the
+# time offset from the trajectory end, if zero it
+# defines the time of the trajectory end, if positive it
+# defines the time offset from the trajectory start.
+duration end_time
+
+# Whether the start time is an absolute time (false)
+# or a time offset.
+bool start_time_relative
+
+# Whether the end time is an absolute time (false)
+# or a time offset.
+bool end_time_relative
+
+---
+
+# Response: The requested subsection of the trajectory
+nav_msgs/Path trajectory

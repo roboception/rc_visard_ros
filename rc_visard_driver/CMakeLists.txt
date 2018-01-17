@@ -36,9 +36,23 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   geometry_msgs
   tf
-  visualization_msgs
   nav_msgs
+  visualization_msgs
+  message_generation
 )
+
+## Generate services in the 'srv' folder
+add_service_files(
+    FILES
+    GetTrajectory.srv
+)
+
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+        DEPENDENCIES
+        nav_msgs
+)
+
 
 ## System dependencies are found with CMake's conventions
 find_package(RC_GENICAM_API REQUIRED)
@@ -61,7 +75,7 @@ generate_dynamic_reconfigure_options(cfg/rc_visard_driver.cfg)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rc_stereocamera
-  CATKIN_DEPENDS nodelet roscpp sensor_msgs geometry_msgs std_srvs visualization_msgs nav_msgs
+  CATKIN_DEPENDS nodelet roscpp sensor_msgs geometry_msgs std_srvs nav_msgs
 #  DEPENDS
 )
 

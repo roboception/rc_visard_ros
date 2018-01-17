@@ -23,6 +23,9 @@
   <depend>curl</depend>
   <depend>rc_genicam_api</depend>
 
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
   <buildtool_depend>catkin</buildtool_depend>
   <!-- depend is a shorthand for build_depend, build_export_depend and exec_depend -->
   <depend>nodelet</depend>

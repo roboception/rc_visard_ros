@@ -179,6 +179,8 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
                                                     &DeviceNodelet::dynamicsStop, this);
   dynamicsStopSlamService    = pnh.advertiseService("dynamics_stop_slam",
                                                     &DeviceNodelet::dynamicsStopSlam, this);
+  getSlamTrajectoryService   = pnh.advertiseService("get_trajectory",
+                                                    &DeviceNodelet::getSlamTrajectory, this);
 
   // run start-keep-alive-a  nd-recover loop
 
@@ -1078,6 +1080,33 @@ bool DeviceNodelet::dynamicsStopSlam(std_srvs::Trigger::Request &req,
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::STOP_SLAM, resp);
   return true;
 }
+
+bool DeviceNodelet::getSlamTrajectory(rc_visard_driver::GetTrajectory::Request &req,
+                       rc_visard_driver::GetTrajectory::Response &resp) {
+  auto pbTraj = dynamicsInterface->getSlamTrajectory();
+  resp.trajectory.header.frame_id   = pbTraj.parent();
+  resp.trajectory.header.stamp.sec  = pbTraj.timestamp().sec();
+  resp.trajectory.header.stamp.nsec  = pbTraj.timestamp().nsec();
+
+  for (auto pbPose : pbTraj.poses())
+  {
+    geometry_msgs::PoseStamped rosPose;
+    rosPose.header.frame_id = pbTraj.parent();
+    rosPose.header.stamp.sec = pbPose.timestamp().sec();
+    rosPose.header.stamp.nsec = pbPose.timestamp().nsec();
+    rosPose.pose.position.x = pbPose.pose().position().x();
+    rosPose.pose.position.y = pbPose.pose().position().y();
+    rosPose.pose.position.z = pbPose.pose().position().z();
+    rosPose.pose.orientation.x = pbPose.pose().orientation().x();
+    rosPose.pose.orientation.y = pbPose.pose().orientation().y();
+    rosPose.pose.orientation.z = pbPose.pose().orientation().z();
+    rosPose.pose.orientation.w = pbPose.pose().orientation().w();
+    resp.trajectory.poses.push_back(rosPose);
+  }
+  return true;
+}
+
+
 }
 
 PLUGINLIB_EXPORT_CLASS(rc::DeviceNodelet, nodelet::Nodelet)

@@ -50,6 +50,8 @@
 #include "protobuf2ros_stream.h"
 #include "ThreadedStream.h"
 
+#include <rc_visard_driver/GetTrajectory.h>
+
 
 namespace rc
 {
@@ -87,6 +89,10 @@ class DeviceNodelet : public nodelet::Nodelet
     ///@return always true, check resp.success for whether the dynamics service has been called
     bool dynamicsStopSlam(std_srvs::Trigger::Request &req,
                           std_srvs::Trigger::Response &resp);
+    ///Get the Slam trajectory
+    ///@return always true
+    bool getSlamTrajectory(rc_visard_driver::GetTrajectory::Request &req,
+                           rc_visard_driver::GetTrajectory::Response &resp);
 
   private:
     static ThreadedStream::Ptr CreateDynamicsStreamOfType(
@@ -133,7 +139,9 @@ class DeviceNodelet : public nodelet::Nodelet
     ros::ServiceServer dynamicsRestartSlamService;
     ros::ServiceServer dynamicsStopService;
     ros::ServiceServer dynamicsStopSlamService;
-    bool autostartDynamics, autostopDynamics;
+    ros::ServiceServer getSlamTrajectoryService;
+    ros::Publisher trajPublisher;
+    bool autostartDynamics, autostopDynamics, autostartSlam, autopublishTrajectory;
 
     /// all frame names must be prefixed when using more than one rc_visard
     std::string tfPrefix;
