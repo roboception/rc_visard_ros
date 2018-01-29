@@ -1,5 +1,8 @@
 device: "00_1e_06_32_03_40"
 access: "exclusive"
 enable_tf: 0
+enable_visualization_markers: 0
 autostart_dynamics: 0
+autostart_dynamics_with_slam: 0
 autostop_dynamics: 0
+autopublish_trajectory: 0
