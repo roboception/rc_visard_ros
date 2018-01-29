@@ -29,12 +29,20 @@ Parameters to be set to the ROS param server before run-time.
 
 - `enable_tf`: If true then the node subscribes to the rc_visard's dynamics-pose stream and publishes them on tf.
   Default: false
+  
+- `enable_visualization_markers`: If true, additional visualization markers are 
+  published that visualize the rc_visard's dynamics state (velocities and accelerations),
+  see `/dynamics_visualization_markers` topic. Default: false
 
 - `autostart_dynamics`: If true, the rc_visard's dynamics module is turned on with this ROS node's
   start up. Default: false
 
 - `autostop_dynamics`: If true, the rc_visard's dynamics module is turned off when this ROS node
   shuts down. Default: false
+  
+- `autopublish_trajectory`: If true, results of the `get_trajectory` service 
+  calls are automatically published to `/trajectory` topic. 
+  Default: false 
 
 #### Dynamic-reconfigure Parameters
 
@@ -147,14 +155,17 @@ service calls or startup-parameters).
 - /pose_ins (geometry_msgs/PoseStamped)
 - /pose_rt (geometry_msgs/PoseStamped)
 - /pose_rt_ins (geometry_msgs/PoseStamped)
+- /dynamics (nav_msgs/Odometry)
+- /dynamics_ins (nav_msgs/Odometry)
 
 This topic delivers raw measurements from the on-board IMU sensor:
 - /imu (sensor_msgs/Imu)
 
+
 #### TF
 
 If the parameter `enable_tf` is set to true, the node subscribes to the
-rc_visard's pose stream and publishes them on tf.
+rc_visard's pose stream (same data published on `/pose` topic) and publishes them on tf.
 
 
 Relevant Coordinate Frames
@@ -192,6 +203,12 @@ dynamic module (which needs to be started for working dynamic-state estimates).
 - `dynamics_start_slam`
 - `dynamics_restart_slam`
 - `dynamics_stop_slam`
+
+The trajectory constructed and stored by the `rc_slam` node
+can be retrieved by
+
+- `get_trajectory`
+
 
 
 Launching

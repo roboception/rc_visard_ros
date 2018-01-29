@@ -273,11 +273,11 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
 {
   unsigned int timeoutMillis = 500;
 
-  // read params from NodeHandle
+  // publish visualization markers only if enabled by ros param and only for 'dynamics', not for 'dynamics_ins'
 
   bool publishVisualizationMarkers = false;
   ros::NodeHandle("~").param("enable_visualization_markers", publishVisualizationMarkers, publishVisualizationMarkers);
-  ROS_INFO_STREAM("rc_visard_driver: Loaded param 'autopublish_visualization_markers'=" << publishVisualizationMarkers);
+  publishVisualizationMarkers = publishVisualizationMarkers && (_stream == "dynamics");
 
   // create publishers
 
@@ -286,7 +286,7 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
   tf::TransformBroadcaster tf_pub;
   if (publishVisualizationMarkers)
   {
-    pub_markers = _nh.advertise<visualization_msgs::Marker>("visualization_marker", 1000);
+    pub_markers = _nh.advertise<visualization_msgs::Marker>("dynamics_visualization_markers", 1000);
   }
 
   unsigned int cntNoListener = 0;

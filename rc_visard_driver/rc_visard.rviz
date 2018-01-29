@@ -71,7 +71,7 @@ Visualization Manager:
       Value: false
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: visualization_marker
+      Marker Topic: dynamics_visualization_markers
       Name: Marker
       Namespaces:
         "": true
@@ -143,9 +143,19 @@ Visualization Manager:
       Enabled: true
       Keep: 20
       Length: 0.05
-      Name: dynamics_as_odometry
+      Name: dynamics
       Position Tolerance: 0.01
       Topic: /dynamics
+      Value: true
+    - Angle Tolerance: 0.01
+      Class: rviz/Odometry
+      Color: 255; 170; 255
+      Enabled: false
+      Keep: 20
+      Length: 0.05
+      Name: dynamics_ins
+      Position Tolerance: 0.01
+      Topic: /dynamics_ins
       Value: true
     - Alpha: 0.1
       Buffer Length: 1
@@ -163,7 +173,7 @@ Visualization Manager:
         Y: 0
         Z: 0
       Pose Color: 255; 170; 255
-      Pose Style: Axes
+      Pose Style: None
       Radius: 0.0025
       Shaft Diameter: 0.01
       Shaft Length: 0.05

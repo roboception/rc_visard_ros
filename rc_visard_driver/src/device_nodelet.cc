@@ -46,11 +46,12 @@
 #include <rc_genicam_api/stream.h>
 #include <rc_genicam_api/buffer.h>
 #include <rc_genicam_api/config.h>
+#include <rc_genicam_api/pixel_formats.h>
+
+#include <rc_dynamics_api/trajectory_time.h>
 
 #include <pluginlib/class_list_macros.h>
 #include <exception>
-
-#include <rc_genicam_api/pixel_formats.h>
 
 #include <sstream>
 #include <stdexcept>
@@ -78,6 +79,10 @@ ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(
   if (stream=="pose_ins" || stream=="pose_rt" || stream=="pose_rt_ins" || stream=="imu")
   {
     return ThreadedStream::Ptr(new Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix));
+  }
+  if (stream=="dynamics" || "dynamics_ins")
+  {
+    return ThreadedStream::Ptr(new DynamicsStream(rcdIface, stream, nh, frame_id_prefix));
   }
 
   throw std::runtime_error(std::string("Not yet implemented! Stream type: ") + stream);
@@ -136,7 +141,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   std::string access="control";
 
   tfEnabled = false;
-  autostartDynamics = autostopDynamics = false;
+  autostartDynamics = autostopDynamics = autostartSlam = autopublishTrajectory = false;
   std::string ns = tf::strip_leading_slash(ros::this_node::getNamespace());
   tfPrefix = (ns != "") ? ns + "_" : "";
 
@@ -144,7 +149,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   pnh.param("gev_access", access, access);
   pnh.param("enable_tf", tfEnabled, tfEnabled);
   pnh.param("autostart_dynamics", autostartDynamics, autostartDynamics);
+  pnh.param("autostart_dynamics_with_slam", autostartSlam, autostartSlam);
   pnh.param("autostop_dynamics", autostopDynamics, autostopDynamics);
+  pnh.param("autopublish_trajectory", autopublishTrajectory, autopublishTrajectory);
 
   rcg::Device::ACCESS access_id;
   if (access == "exclusive")
@@ -181,6 +188,10 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
                                                     &DeviceNodelet::dynamicsStopSlam, this);
   getSlamTrajectoryService   = pnh.advertiseService("get_trajectory",
                                                     &DeviceNodelet::getSlamTrajectory, this);
+  if (autopublishTrajectory)
+  {
+    trajPublisher = getNodeHandle().advertise<nav_msgs::Path>("trajectory", 10);
+  }
 
   // run start-keep-alive-a  nd-recover loop
 
@@ -249,13 +260,16 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         rcgdev->open(access_id);
         rcgnodemap=rcgdev->getRemoteNodeMap();
 
+        // instantiating dynamics interface and autostart dynamics on sensor if desired
+
         std::string currentIPAddress = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
         dynamicsInterface = rcd::RemoteInterface::create(currentIPAddress);
-        if (autostartDynamics)
+        if (autostartDynamics || autostartSlam)
         {
           std_srvs::Trigger::Request dummyreq;
           std_srvs::Trigger::Response dummyresp;
-          if (!this->dynamicsStart(dummyreq, dummyresp))
+          if ( !(   (autostartSlam && this->dynamicsStartSlam(dummyreq, dummyresp))
+                  ||(autostartDynamics && this->dynamicsStart(dummyreq, dummyresp)) )  )
           { // autostart failed!
             ROS_ERROR("rc_visard_driver: Could not auto-start dynamics module!");
             cntConsecutiveRecoveryFails++;
@@ -271,16 +285,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         {
           try
           {
-            if (streamName != "dynamics" && streamName != "dynamics_ins")
-            {
-              auto newStream = CreateDynamicsStreamOfType(dynamicsInterface, streamName,
-                                                          getNodeHandle(), tfPrefix, tfEnabled);
-              dynamicsStreams->add(newStream);
-            }
-            else
-            {
-              ROS_INFO_STREAM("Unsupported dynamics stream: " << streamName);
-            }
+            auto newStream = CreateDynamicsStreamOfType(dynamicsInterface, streamName,
+                                                      getNodeHandle(), tfPrefix, tfEnabled);
+            dynamicsStreams->add(newStream);
           } catch(const std::exception &e)
           {
             ROS_WARN_STREAM("Unable to create dynamics stream of type "
@@ -1083,7 +1090,11 @@ bool DeviceNodelet::dynamicsStopSlam(std_srvs::Trigger::Request &req,
 
 bool DeviceNodelet::getSlamTrajectory(rc_visard_driver::GetTrajectory::Request &req,
                        rc_visard_driver::GetTrajectory::Response &resp) {
-  auto pbTraj = dynamicsInterface->getSlamTrajectory();
+
+  TrajectoryTime start(req.start_time.sec, req.start_time.nsec, req.start_time_relative);
+  TrajectoryTime end(req.end_time.sec, req.end_time.nsec, req.end_time_relative);
+
+  auto pbTraj = dynamicsInterface->getSlamTrajectory(start, end);
   resp.trajectory.header.frame_id   = pbTraj.parent();
   resp.trajectory.header.stamp.sec  = pbTraj.timestamp().sec();
   resp.trajectory.header.stamp.nsec  = pbTraj.timestamp().nsec();
@@ -1103,6 +1114,13 @@ bool DeviceNodelet::getSlamTrajectory(rc_visard_driver::GetTrajectory::Request &
     rosPose.pose.orientation.w = pbPose.pose().orientation().w();
     resp.trajectory.poses.push_back(rosPose);
   }
+
+  // additionally publish extracted trajectory on topic
+  if (autopublishTrajectory)
+  {
+    trajPublisher.publish(resp.trajectory);
+  }
+
   return true;
 }
 
