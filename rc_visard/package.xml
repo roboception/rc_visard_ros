@@ -18,6 +18,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <exec_depend>rc_visard_driver</exec_depend>
+  <exec_depend>rc_visard_description</exec_depend>
 
   <export>
     <metapackage />

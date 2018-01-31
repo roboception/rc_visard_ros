@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+
+<robot name="rc_visard_160" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="rc_160" params="prefix parent *origin">
+
+    <joint name="${prefix}camera" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${prefix}camera"/>
+      <xacro:insert_block name="origin"/>
+    </joint>
+
+    <link name="${prefix}camera">
+      <visual>
+          <geometry>
+              <mesh filename="package://rc_visard_description/meshes/visual/rc_visard_160.dae"/>
+          </geometry>
+      </visual>
+      <collision>
+          <geometry>
+              <mesh filename="package://rc_visard_description/meshes/collision/rc_visard_160.stl"/>
+          </geometry>
+      </collision>
+    </link>
+
+  <link name="${prefix}mounting"/>
+
+  <joint name="${prefix}mounting_to_camera" type="fixed">
+    <parent link="${prefix}camera"/>
+    <child link="${prefix}mounting"/>
+    <origin xyz="0.080 0.0375 -0.031" />
+  </joint>
+
+  </xacro:macro>
+  </robot>

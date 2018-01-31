@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<robot name="rc_visard">
+  <link name="camera">
+    <visual>
+      <geometry>
+          <mesh filename="package://rc_visard_description/meshes/visual/rc_visard_160.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+          <mesh filename="package://rc_visard_description/meshes/collision/rc_visard_160.stl"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
