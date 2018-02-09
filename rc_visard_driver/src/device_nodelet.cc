@@ -126,9 +126,19 @@ DeviceNodelet::~DeviceNodelet()
 
 void DeviceNodelet::onInit()
 {
-  // run initialization and recover routine in separate thread
+  std::string device;
+  getPrivateNodeHandle().param("device", device, device);
 
-  recoverThread = std::thread(&DeviceNodelet::keepAliveAndRecoverFromFails, this);
+  if (device.size() > 0)
+  {
+    // run initialization and recover routine in separate thread
+
+    recoverThread = std::thread(&DeviceNodelet::keepAliveAndRecoverFromFails, this);
+  }
+  else
+  {
+    ROS_FATAL("The rc_visard device ID must be given in the private parameter 'device'!");
+  }
 }
 
 void DeviceNodelet::keepAliveAndRecoverFromFails()
@@ -271,7 +281,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
           if ( !(   (autostartSlam && this->dynamicsStartSlam(dummyreq, dummyresp))
                   ||(autostartDynamics && this->dynamicsStart(dummyreq, dummyresp)) )  )
           { // autostart failed!
-            ROS_ERROR("rc_visard_driver: Could not auto-start dynamics module!");
+            ROS_WARN("rc_visard_driver: Could not auto-start dynamics module!");
             cntConsecutiveRecoveryFails++;
             continue; // to next trial!
           }
@@ -285,12 +295,20 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         {
           try
           {
-            auto newStream = CreateDynamicsStreamOfType(dynamicsInterface, streamName,
-                                                      getNodeHandle(), tfPrefix, tfEnabled);
-            dynamicsStreams->add(newStream);
-          } catch(const std::exception &e)
+            if (streamName != "dynamics" && streamName != "dynamics_ins")
+            {
+              auto newStream = CreateDynamicsStreamOfType(dynamicsInterface, streamName,
+                                                          getNodeHandle(), tfPrefix, tfEnabled);
+              dynamicsStreams->add(newStream);
+            }
+            else
+            {
+              ROS_WARN_STREAM("rc_visard_driver: Unsupported dynamics stream: " << streamName);
+            }
+          }
+          catch(const std::exception &e)
           {
-            ROS_WARN_STREAM("Unable to create dynamics stream of type "
+            ROS_WARN_STREAM("rc_visard_driver: Unable to create dynamics stream of type "
                             << streamName << ": " << e.what());
           }
         }
@@ -326,7 +344,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
     std_srvs::Trigger::Response dummyresp;
     if (!this->dynamicsStop(dummyreq, dummyresp))
     { // autostop failed!
-      ROS_ERROR("rc_visard_driver: Could not auto-stop dynamics module!");
+      ROS_WARN("rc_visard_driver: Could not auto-stop dynamics module!");
     }
   }
   std::cout << "rc_visard_driver: stopped." << std::endl;
