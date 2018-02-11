@@ -69,7 +69,7 @@ before_script:
     - make package
     - upload_deb.sh $DISTRO_CODENAME-stable *.deb
   only:
-    - /^v[0-9]+\.[0-9]+\.[0-9]+/
+    - /^v?[0-9]+\.[0-9]+\.[0-9]+/
   except:
     - branches
 
