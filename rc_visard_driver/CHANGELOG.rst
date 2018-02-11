@@ -1,7 +1,11 @@
-Not released
-------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package rc_visard_driver
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Setting default of median to 1 instead of 0, which also means off 
+1.2.0 (2018-02-11)
+------------------
+
+- Setting default of median to 1 instead of 0, which also means off
 - install rc_visard_driver node in package lib dir, so start it with `rosrun rc_visard_driver rc_visard_driver`
 
 1.1.3 (2017-04-13)
@@ -32,4 +36,3 @@ Not released
 ------------------
 
 - Initial release
-
