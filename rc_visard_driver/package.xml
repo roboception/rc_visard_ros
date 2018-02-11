@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rc_visard_driver</name>
-  <version>0.1.0</version>
+  <version>1.2.0</version>
   <description>The rc_visard_driver package</description>
 
   <maintainer email="heiko.hirschmueller@roboception.de">Heiko Hirschmueller</maintainer>
@@ -29,7 +29,7 @@
   <depend>dynamic_reconfigure</depend>
   <depend>geometry_msgs</depend>
   <depend>tf</depend>
-  
+
   <doc_depend>doxygen</doc_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
