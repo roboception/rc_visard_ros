@@ -212,12 +212,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   {
     // check if everything is running smoothly
 
-    recoveryRequested = recoveryRequested || dynamicsStreams->any_failed();
-
     if (!recoveryRequested)
     {
       bool allSucceeded = (!imageRequested || imageSuccess);
-      allSucceeded = allSucceeded && dynamicsStreams->all_succeeded();
       if ( (cntConsecutiveRecoveryFails > 0) && allSucceeded )
       {
         cntConsecutiveRecoveryFails = 0;

@@ -125,16 +125,15 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
         break; // stop receiving loop
       }
 
-      // timeout happened; if its only small let's put a warning and increasing recv timeout
+      // timeout happened
       if (!pbMsg)
       {
-        ROS_ERROR_STREAM("Did not receive any "
+        ROS_WARN_STREAM("Did not receive any "
                                  << _stream << " message within the last "
                                  << timeoutMillis << " ms. "
                                  << "Either rc_visard stopped streaming or is turned off, "
                                  << "or you seem to have serious network/connection problems!");
-        failed = true;
-        break; // stop receiving loop
+        continue; // wait for next packet
       }
 
       ROS_DEBUG_STREAM_THROTTLE(1, "Received protobuf message: "
@@ -226,16 +225,15 @@ bool PoseStream::startReceivingAndPublishingAsRos()
         break; // stop receiving loop
       }
 
-      // timeout happened; if its only small let's put a warning and increasing recv timeout
+      // timeout happened
       if (!protoFrame)
       {
-        ROS_ERROR_STREAM("Did not receive any "
+        ROS_WARN_STREAM("Did not receive any "
                                  << _stream << " message within the last "
                                  << timeoutMillis << " ms. "
                                  << "Either rc_visard stopped streaming or is turned off, "
                                  << "or you seem to have serious network/connection problems!");
-        failed = true;
-        break; // stop receiving loop
+        continue; // wait for next packet
       }
 
       ROS_DEBUG_STREAM_THROTTLE(1, "Received protoFrame: "
@@ -357,16 +355,15 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
         break; // stop receiving loop
       }
 
-      // timeout happened; if its only small let's put a warning and increasing recv timeout
+      // timeout happened
       if (!protoMsg)
       {
-        ROS_ERROR_STREAM("Did not receive any "
+        ROS_WARN_STREAM("Did not receive any "
                                  << _stream << " message within the last "
                                  << timeoutMillis << " ms. "
                                  << "Either rc_visard stopped streaming or is turned off, "
                                  << "or you seem to have serious network/connection problems!");
-        failed = true;
-        break; // stop receiving loop
+        continue; // wait for next packet
       }
 
       ROS_DEBUG_STREAM_THROTTLE(1, "Received protoMsg: "
