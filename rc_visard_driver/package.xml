@@ -2,12 +2,16 @@
 <package format="2">
   <name>rc_visard_driver</name>
   <version>1.2.0</version>
-  <description>The rc_visard_driver package</description>
+  <description>
+    The rc_visard_driver provides data from a Roboception rc_visard 3D sensor on several ROS topics.
+  </description>
 
-  <maintainer email="heiko.hirschmueller@roboception.de">Heiko Hirschmueller</maintainer>
+  <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>
   <license>BSD</license>
 
   <url type="website">http://roboception.com/rc_visard</url>
+  <url type="repository">https://github.com/roboception/rc_visard_ros</url>
+  <url type="bugtracker">https://github.com/roboception/rc_visard_ros/issues</url>
 
   <author email="heiko.hirschmueller@roboception.de">Heiko Hirschmueller</author>
   <author email="christian.emmerich@roboception.de">Christian Emmerich</author>
@@ -17,6 +21,7 @@
   <build_depend>protobuf-dev</build_depend>
   <exec_depend>protobuf</exec_depend>
   <depend>curl</depend>
+  <depend>rc_genicam_api</depend>
 
   <buildtool_depend>catkin</buildtool_depend>
   <!-- depend is a shorthand for build_depend, build_export_depend and exec_depend -->

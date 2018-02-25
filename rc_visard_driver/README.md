@@ -194,10 +194,6 @@ dynamic module (which needs to be started for working dynamic-state estimates).
 Launching
 ---------
 
-- Using launch-file:
-
-      roslaunch rc_visard_driver.launch
-
 - Using command line parameters:
 
       rosrun rc_visard_driver rc_visard_driver _device:=00_1e_06_32_03_40 _enable_tf:=True _autostart_dynamics:=True _autostop_dynamics:=True
@@ -211,4 +207,3 @@ Launching
   the published camera images will be `my_visard_camera`, the frame_id
   of the poses will be `my_visard_world`, and the frame_id of
   the Imu messages will be `my_visard_imu`.
-

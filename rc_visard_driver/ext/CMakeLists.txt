@@ -15,7 +15,5 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(rc_dynamics_api)
-add_subdirectory(rc_genicam_api)
 
-set(RC_GENICAM_API_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/rc_genicam_api ${CMAKE_CURRENT_SOURCE_DIR}/rc_genicam_api/genicam/library/CPP/include PARENT_SCOPE)
 set(RC_DYNAMICS_API_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/rc_dynamics_api ${CMAKE_CURRENT_BINARY_DIR}/rc_dynamics_api/rc_dynamics_api PARENT_SCOPE)

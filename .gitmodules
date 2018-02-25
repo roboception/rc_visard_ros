@@ -1,6 +1,3 @@
 [submodule "ext/rc_dynamics_api"]
 	path = rc_visard_driver/ext/rc_dynamics_api
 	url = ../rc_dynamics_api
-[submodule "ext/rc_genicam_api"]
-	path = rc_visard_driver/ext/rc_genicam_api
-	url = ../rc_genicam_api

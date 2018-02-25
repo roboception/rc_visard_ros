@@ -39,7 +39,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(RC_GENICAM_API REQUIRED)
 
 #########################################
 ## Definitions for dynamic reconfigure ##
@@ -60,7 +60,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rc_stereocamera
   CATKIN_DEPENDS nodelet roscpp sensor_msgs geometry_msgs std_srvs
-#  DEPENDS 
+#  DEPENDS
 )
 
 ###########
@@ -71,12 +71,12 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${RC_GENICAM_API_INCLUDE_DIRS}
 )
 
 add_subdirectory(ext)
 
 # add include dirs from submodules
-include_directories(${RC_GENICAM_API_INCLUDE_DIRS})
 include_directories(${RC_DYNAMICS_API_INCLUDE_DIRS})
 
 add_subdirectory(src)
@@ -92,7 +92,6 @@ add_subdirectory(src)
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 install(FILES
         rc_visard_driver_nodelet.xml
-        rc_visard_driver.launch
         README.md
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
