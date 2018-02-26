@@ -2,8 +2,8 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2018-02-26)
+------------------
 * use rc_genicam_api as dependency
   instead of including as submodule
   also remove launchfile, as the device is a required parameter anyway...
