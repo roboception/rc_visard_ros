@@ -1,8 +1,16 @@
 # unset the project version from parent project
 remove_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
+remove_definitions(-DPROJECT_VERSION_INT=${PROJECT_VERSION_INT})
 remove_definitions(-DPACKAGE_VERSION="${PACKAGE_VERSION}")
+remove_definitions(-DPACKAGE_VERSION_MAJOR=${PACKAGE_VERSION_MAJOR})
+remove_definitions(-DPACKAGE_VERSION_MINOR=${PACKAGE_VERSION_MINOR})
+remove_definitions(-DPACKAGE_VERSION_PATCH=${PACKAGE_VERSION_PATCH})
 unset(PROJECT_VERSION)
+unset(PROJECT_VERSION_INT)
 unset(PACKAGE_VERSION)
+unset(PACKAGE_VERSION_MAJOR)
+unset(PACKAGE_VERSION_MINOR)
+unset(PACKAGE_VERSION_PATCH)
 unset(abiversion)
 
 # don't build unneeded stuff
