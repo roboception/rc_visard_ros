@@ -2,7 +2,8 @@
 rc_visard_driver
 ----------------
 
-This nodelet provides data from a Roboception rc_visard sensor on several ROS topics.
+This nodelet provides data from a Roboception rc_visard sensor on several ROS
+topics.
 
 Build/Installation
 ------------------
@@ -17,7 +18,10 @@ Configuration
 
 Parameters to be set to the ROS param server before run-time.
 
-- `device`: The ID of the device, i.e. Roboception rc_visard sensor.
+- `device`: The ID of the device, i.e. Roboception rc_visard sensor. If the
+   provided GenTL library is used, then the ID is the MAC address of the
+   rc_visard, but with ':' replaced by '_'. This can be different if another
+   GenTL library is used.
 
 - `gev_access`:  The gev_access mode, i.e.:
   - 'control'   Configuration and streaming with the possibility of other
@@ -27,33 +31,39 @@ Parameters to be set to the ROS param server before run-time.
   - 'off'       Switches gev access completely off. The node only streams pose
                 information if switched on.
 
-- `enable_tf`: If true then the node subscribes to the rc_visard's dynamics-pose stream and publishes them on tf.
-  Default: false
-  
-- `enable_visualization_markers`: If true, additional visualization markers are 
+- `enable_tf`: If true then the node subscribes to the rc_visard's
+  dynamics-pose stream and publishes them on tf. Default: false
+
+- `enable_visualization_markers`: If true, additional visualization markers are
   published that visualize the rc_visard's dynamics state (velocities and accelerations),
   see `/dynamics_visualization_markers` topic. Default: false
 
-- `autostart_dynamics`: If true, the rc_visard's dynamics module is turned on with this ROS node's
-  start up. Default: false
+- `autostart_dynamics`: If true, the rc_visard's dynamics module is turned on
+  with this ROS node's start up. In this case, it is first tried to start SLAM.
+  If SLAM is not available, stereo INS without SLAM is started. Default: false
 
-- `autostop_dynamics`: If true, the rc_visard's dynamics module is turned off when this ROS node
-  shuts down. Default: false
-  
-- `autopublish_trajectory`: If true, results of the `get_trajectory` service 
-  calls are automatically published to `/trajectory` topic. 
-  Default: false 
+- `autostart_dynamics_with_slam`: If true, the rc_visard's dynamics module tries
+  to turn on SLAM with this ROS node's start up.
+  If SLAM is not available (no license) only a warning is printed. Default: false
+
+- `autostop_dynamics`: If true, the rc_visard's dynamics module is turned off
+  when this ROS node shuts down. Default: false
+
+- `autopublish_trajectory`: If true, results of the `get_trajectory` service
+  calls are automatically published to `/trajectory` topic.
+  Default: false
 
 #### Dynamic-reconfigure Parameters
 
   These parameters can be changed during runtime via dynamic reconfigure:
 
-  - `camera_fps`: Frames per second that are published by this nodelet. Publishing frames will
-    be slowed down depending on this setting. Setting it higher than the real
-    framerate of the specific device has no effect.
+  - `camera_fps`: Frames per second that are published by this nodelet.
+    Publishing frames will be slowed down depending on this setting. Setting
+    it higher than the real framerate of the specific device has no effect.
 
-  - `camera_exp_auto`: If true, then the exposure time is chosen automatically, up to exp_max as
-    maximum. If false, then exp_value is used as exposure time in seconds.
+  - `camera_exp_auto`: If true, then the exposure time is chosen automatically,
+    up to exp_max as maximum. If false, then exp_value is used as exposure
+    time in seconds.
 
   - `camera_exp_max`: Maximum exposure time in seconds if exp_auto is true.
 
@@ -61,10 +71,9 @@ Parameters to be set to the ROS param server before run-time.
 
   - `camera_gain_value`: Gain factor in decibel if exp_auto is false.
 
-  - `depth_quality`:
-    Quality can be `Low`, `Medium`, `High` and `StaticHigh`. Only the first
-    letter will be checked, thus specification of `L`, `M`, `H` or `S` is
-    sufficient.
+  - `depth_quality`: Quality can be `Low`, `Medium`, `High` and `StaticHigh`.
+    Only the first letter will be checked, thus specification of `L`, `M`,
+    `H` or `S` is sufficient.
 
     + `StaticHigh` quality means computation with 640x480 pixel, limited to 3 Hz
       and accumulation input images. The scene must be static during image
@@ -76,35 +85,28 @@ Parameters to be set to the ROS param server before run-time.
 
     Default: `High`.
 
-  - `depth_disprange`:
-    Disparity range in pixel, related to the downscaled image at quality=H. The
-    range is adapted to the quality.
+  - `depth_disprange`: Disparity range in pixel, related to the downscaled
+    image at quality=H. The range is adapted to the quality.
 
-  - `depth_fill`:
-    Higher numbers fill gaps with measurments with potentielly higher errors.
+  - `depth_fill`: Higher numbers fill gaps with measurments with potentielly
+    higher errors.
 
-  - `depth_seg`:
-    Maximum size of isolated disparity regions that will be invalidated,
-    related to full resolution.
+  - `depth_seg`: Maximum size of isolated disparity regions that will be
+    invalidated, related to full resolution.
 
-  - `depth_median`:
-    Performs median filtering with the given window size.
+  - `depth_median`: Performs median filtering with the given window size.
 
-  - `depth_minconf`:
-    Minimal confidence. All disparities with lower confidence will be set to
-    invalid.
+  - `depth_minconf`: Minimal confidence. All disparities with lower confidence
+    will be set to invalid.
 
-  - `depth_mindepth`:
-    Minimum depth in meter. All disparities with lower depth will be set to
-    invalid.
+  - `depth_mindepth`: Minimum depth in meter. All disparities with lower depth
+    will be set to invalid.
 
-  - `depth_maxdepth`:
-    Maximum depth in meter. All disparities with higher depth will be set to
-    invalid.
+  - `depth_maxdepth`: Maximum depth in meter. All disparities with higher depth
+    will be set to invalid.
 
-  - `depth_maxdeptherr`:
-    Maximum depth error in meter. All disparities with a higher depth error will
-    be set to invalid.
+  - `depth_maxdeptherr`: Maximum depth error in meter. All disparities with a
+    higher depth error will be set to invalid.
 
 For color sensors, the following dynamic-reconfigure parameters are additionally
 available:
@@ -112,11 +114,11 @@ available:
   - `camera_wb_auto`: If true, then white balancing is done automatically. If
     false, then the red and blue to green ratios can be chosen manually.
 
-  - `camera_wb_ratio_red`:
-    Red to green ratio for color balancing if `camera_wb_auto` is false.
+  - `camera_wb_ratio_red`: Red to green ratio for color balancing if
+    `camera_wb_auto` is false.
 
-  - `camera_wb_ratio_blue`:
-    Blue to green ratio for color balancing if `camera_wb_auto` is false.
+  - `camera_wb_ratio_blue`: Blue to green ratio for color balancing if
+    `camera_wb_auto` is false.
 
 Provided Topics
 ---------------
@@ -151,7 +153,8 @@ position, orientation, and velocity. For these topics to work properly,
 the rc_visard's dynamics module must be turned on (see respective
 service calls or startup-parameters).
 
-- /pose (geometry_msgs/PoseStamped; same data as provided via tf if `enable_tf` is set to true)
+- /pose (geometry_msgs/PoseStamped; same data as provided via tf if
+  `enable_tf` is set to true)
 - /pose_ins (geometry_msgs/PoseStamped)
 - /pose_rt (geometry_msgs/PoseStamped)
 - /pose_rt_ins (geometry_msgs/PoseStamped)
@@ -160,7 +163,6 @@ service calls or startup-parameters).
 
 This topic delivers raw measurements from the on-board IMU sensor:
 - /imu (sensor_msgs/Imu)
-
 
 #### TF
 
@@ -174,21 +176,22 @@ Relevant Coordinate Frames
 The following coordinate frames are relevant for interpreting the data
 provided by the rc_visard:
 
-- `camera`: The pupil's center of the rc_visard's left camera. All stereo-camera
- data such as images and point clouds are given in this frame.
+- `camera`: The pupil's center of the rc_visard's left camera. All
+  stereo-camera data such as images and point clouds are given in this frame.
 - `world`: Relevant for navigation applications. The world frame’s origin is
- located at the origin of the rc_visard’s IMU coordinate frame at the instant
- when state estimation is switched on.
- Estimated poses of the rc_visard are given in this frame, i.e. as the rc_visard moves in the world and
- state estimation is running, the `camera` frame will change w.r.t. this frame.
-- `imu`: The IMU coordinate frame is inside the rc_visard’s housing. The raw IMU
- measurements are given in this frame.
+  located at the origin of the rc_visard’s IMU coordinate frame at the instant
+  when state estimation is switched on. Estimated poses of the rc_visard are
+  given in this frame, i.e. as the rc_visard moves in the world and state
+  estimation is running, the `camera` frame will change w.r.t. this frame.
+- `imu`: The IMU coordinate frame is inside the rc_visard’s housing. The raw
+  IMU measurements are given in this frame.
 
 #### Running multiple rc_visard's in one ros environment
 
 For operating multiple rc_visard's in one ros environment, each ros node must
-be started in separate namespaces, e.g., `my_visard`. As a result, all frame_ids in all ros
-messages will be prefixed, e.g., to `my_visard_world` or `my_visard_camera`.
+be started in separate namespaces, e.g., `my_visard`. As a result, all
+frame_ids in all ros messages will be prefixed, e.g., to `my_visard_world` or
+`my_visard_camera`.
 
 
 Services
@@ -206,9 +209,7 @@ dynamic module (which needs to be started for working dynamic-state estimates).
 
 The trajectory constructed and stored by the `rc_slam` node
 can be retrieved by
-
 - `get_trajectory`
-
 
 
 Launching

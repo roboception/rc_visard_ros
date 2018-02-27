@@ -292,16 +292,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         {
           try
           {
-            if (streamName != "dynamics" && streamName != "dynamics_ins")
-            {
-              auto newStream = CreateDynamicsStreamOfType(dynamicsInterface, streamName,
-                                                          getNodeHandle(), tfPrefix, tfEnabled);
-              dynamicsStreams->add(newStream);
-            }
-            else
-            {
-              ROS_WARN_STREAM("rc_visard_driver: Unsupported dynamics stream: " << streamName);
-            }
+            auto newStream = CreateDynamicsStreamOfType(dynamicsInterface, streamName,
+                                                        getNodeHandle(), tfPrefix, tfEnabled);
+            dynamicsStreams->add(newStream);
           }
           catch(const std::exception &e)
           {
@@ -311,7 +304,8 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         }
 
         successfullyOpened = true;
-      } catch (std::exception &ex)
+      }
+      catch (std::exception &ex)
       {
         cntConsecutiveRecoveryFails++;
         ROS_ERROR_STREAM("rc_visard_driver: " << ex.what());
@@ -339,6 +333,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   {
     std_srvs::Trigger::Request dummyreq;
     std_srvs::Trigger::Response dummyresp;
+    ROS_INFO("rc_visard_driver: Autostop dynamics ...");
     if (!this->dynamicsStop(dummyreq, dummyresp))
     { // autostop failed!
       ROS_WARN("rc_visard_driver: Could not auto-stop dynamics module!");
@@ -1068,44 +1063,50 @@ namespace
 }
 
 bool DeviceNodelet::dynamicsStart(std_srvs::Trigger::Request &req,
-                                  std_srvs::Trigger::Response &resp){
+                                  std_srvs::Trigger::Response &resp)
+{
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::START, resp);
   return true;
 }
 
 bool DeviceNodelet::dynamicsStartSlam(std_srvs::Trigger::Request &req,
-                                      std_srvs::Trigger::Response &resp){
+                                      std_srvs::Trigger::Response &resp)
+{
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::START_SLAM, resp);
   return true;
 }
 
 bool DeviceNodelet::dynamicsRestart(std_srvs::Trigger::Request &req,
-                                    std_srvs::Trigger::Response &resp){
+                                    std_srvs::Trigger::Response &resp)
+{
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::RESTART, resp);
   return true;
 }
 
 bool DeviceNodelet::dynamicsRestartSlam(std_srvs::Trigger::Request &req,
-                                        std_srvs::Trigger::Response &resp){
+                                        std_srvs::Trigger::Response &resp)
+{
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::RESTART_SLAM, resp);
   return true;
 }
 
 bool DeviceNodelet::dynamicsStop(std_srvs::Trigger::Request &req,
-                                 std_srvs::Trigger::Response &resp){
+                                 std_srvs::Trigger::Response &resp)
+{
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::STOP, resp);
   return true;
 }
 
 bool DeviceNodelet::dynamicsStopSlam(std_srvs::Trigger::Request &req,
-                                     std_srvs::Trigger::Response &resp){
+                                     std_srvs::Trigger::Response &resp)
+{
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::STOP_SLAM, resp);
   return true;
 }
 
 bool DeviceNodelet::getSlamTrajectory(rc_visard_driver::GetTrajectory::Request &req,
-                       rc_visard_driver::GetTrajectory::Response &resp) {
-
+                                      rc_visard_driver::GetTrajectory::Response &resp)
+{
   TrajectoryTime start(req.start_time.sec, req.start_time.nsec, req.start_time_relative);
   TrajectoryTime end(req.end_time.sec, req.end_time.nsec, req.end_time_relative);
 
