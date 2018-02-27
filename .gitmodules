@@ -1,3 +1,0 @@
-[submodule "ext/rc_dynamics_api"]
-	path = rc_visard_driver/ext/rc_dynamics_api
-	url = ../rc_dynamics_api

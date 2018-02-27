@@ -3,7 +3,7 @@ before_script:
   - echo "deb http://apt.roboception.de/stable $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-stable.list
   - if [ "$TESTING_DEBS" = "true" ]; then echo "deb http://apt.roboception.de/testing $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-testing.list ; fi
   - curl http://apt.roboception.de/archive.key | apt-key add -
-  - apt-get update -yq && apt-get install -y lintian rc-genicam-api
+  - apt-get update -yq && apt-get install -y lintian rc-genicam-api rc-dynamics-api
   - rosdep install --from-paths . --ignore-src -r -y
   - git submodule sync --recursive
   - git submodule update --init --recursive

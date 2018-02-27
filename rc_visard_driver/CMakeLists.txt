@@ -56,6 +56,7 @@ generate_messages(
 
 ## System dependencies are found with CMake's conventions
 find_package(RC_GENICAM_API REQUIRED)
+find_package(RC_DYNAMICS_API REQUIRED)
 
 #########################################
 ## Definitions for dynamic reconfigure ##
@@ -88,12 +89,8 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${RC_GENICAM_API_INCLUDE_DIRS}
+  ${RC_DYNAMICS_API_INCLUDE_DIRS}
 )
-
-add_subdirectory(ext)
-
-# add include dirs from submodules
-include_directories(${RC_DYNAMICS_API_INCLUDE_DIRS})
 
 add_subdirectory(src)
 
@@ -115,4 +112,7 @@ install(FILES
 ######################################
 ## Define information for packaging ##
 ######################################
+# optionally specify dependencies of the debian package here (comma separated!)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "rc-genicam-api | ros-$ENV{ROS_DISTRO}-rc-genicam-api, rc-dynamics-api | ros-$ENV{ROS_DISTRO}-rc-dynamics-api")
+
 include(cmake/package_debian.cmake)
