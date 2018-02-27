@@ -2,6 +2,11 @@
 Changelog for package rc_visard
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2018-02-27)
+------------------
+* rc_visard_description package added
+* Contributors: Felix Ruess, florek
+
 1.2.1 (2018-02-26)
 ------------------
 

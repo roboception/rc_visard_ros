@@ -2,6 +2,21 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2018-02-27)
+------------------
+* rc_genicam_api and rc_dynamics_api as dependency instead of submodule
+* don't reset if datastreams time out
+* added get_trajectory service
+* Use new statemachine interface
+  Return codes are now strings.
+* Add services start_slam, restart_slam and stop_slam
+* Publishing dynamics as odometry message
+* visualizing dynamics message
+  - angular velocity, linear accelerarion published as marker
+  for visualization
+  - cam2imu-transform is published with re-created timestamp
+* Contributors: Christian Emmerich, Felix Endres, Felix Ruess, Heiko Hirschmueller
+
 1.2.1 (2018-02-26)
 ------------------
 * use rc_genicam_api as dependency
