@@ -89,6 +89,10 @@ class DeviceNodelet : public nodelet::Nodelet
     ///@return always true, check resp.success for whether the dynamics service has been called
     bool dynamicsStopSlam(std_srvs::Trigger::Request &req,
                           std_srvs::Trigger::Response &resp);
+    ///Reset SLAM (keep Stereo INS running)
+    ///@return always true, check resp.success for whether the dynamics service has been called
+    bool dynamicsResetSlam(std_srvs::Trigger::Request &req,
+                          std_srvs::Trigger::Response &resp);
     ///Get the Slam trajectory
     ///@return always true
     bool getSlamTrajectory(rc_visard_driver::GetTrajectory::Request &req,
@@ -139,6 +143,7 @@ class DeviceNodelet : public nodelet::Nodelet
     ros::ServiceServer dynamicsRestartSlamService;
     ros::ServiceServer dynamicsStopService;
     ros::ServiceServer dynamicsStopSlamService;
+    ros::ServiceServer dynamicsResetSlamService;
     ros::ServiceServer getSlamTrajectoryService;
     ros::Publisher trajPublisher;
     bool autostartDynamics, autostopDynamics, autostartSlam, autopublishTrajectory;
