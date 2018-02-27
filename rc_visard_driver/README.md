@@ -39,8 +39,7 @@ Parameters to be set to the ROS param server before run-time.
   see `/dynamics_visualization_markers` topic. Default: false
 
 - `autostart_dynamics`: If true, the rc_visard's dynamics module is turned on
-  with this ROS node's start up. In this case, it is first tried to start SLAM.
-  If SLAM is not available, stereo INS without SLAM is started. Default: false
+  with this ROS node's start up. Default: false
 
 - `autostart_dynamics_with_slam`: If true, the rc_visard's dynamics module tries
   to turn on SLAM with this ROS node's start up.
