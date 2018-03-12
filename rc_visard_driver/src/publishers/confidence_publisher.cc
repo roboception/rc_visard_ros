@@ -41,7 +41,7 @@ namespace rc
 {
 
 ConfidencePublisher::ConfidencePublisher(ros::NodeHandle &nh,
-                                         std::string frame_id_prefix)
+                                         const std::string &frame_id_prefix)
         : GenICam2RosPublisher(frame_id_prefix)
 {
   pub=nh.advertise<sensor_msgs::Image>("confidence", 1);

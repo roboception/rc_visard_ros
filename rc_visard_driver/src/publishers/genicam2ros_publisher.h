@@ -53,7 +53,7 @@ class GenICam2RosPublisher
     /**
      * @param frame_id_prefix prefix for frame ids in published ros messages
      */
-    GenICam2RosPublisher(std::string frame_id_prefix) : frame_id(
+    GenICam2RosPublisher(const std::string &frame_id_prefix) : frame_id(
             frame_id_prefix + "camera")
     {}
 

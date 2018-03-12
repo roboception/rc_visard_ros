@@ -58,7 +58,7 @@ class Points2Publisher : public GenICam2RosPublisher
       @param frame_id Parent frame id of points.
     */
 
-    Points2Publisher(ros::NodeHandle &nh, std::string frame_id_prefix, double f, double t, double scale);
+    Points2Publisher(ros::NodeHandle &nh, const std::string &frame_id_prefix, double f, double t, double scale);
 
     bool used() override;
 

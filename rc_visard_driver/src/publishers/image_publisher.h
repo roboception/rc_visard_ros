@@ -55,7 +55,7 @@ class ImagePublisher : public GenICam2RosPublisher
       @param color True for sending color instead of monochrome images.
     */
 
-    ImagePublisher(image_transport::ImageTransport &it, std::string frame_id_prefix, bool left, bool color);
+    ImagePublisher(image_transport::ImageTransport &it, const std::string &frame_id_prefix, bool left, bool color);
 
     bool used() override;
 

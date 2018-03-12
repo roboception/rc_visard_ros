@@ -40,7 +40,8 @@
 namespace rc
 {
 
-DepthPublisher::DepthPublisher(ros::NodeHandle &nh, std::string frame_id_prefix,
+DepthPublisher::DepthPublisher(ros::NodeHandle &nh,
+                               const std::string &frame_id_prefix,
                                double f, double t, double _scale)
         : GenICam2RosPublisher(frame_id_prefix)
 {

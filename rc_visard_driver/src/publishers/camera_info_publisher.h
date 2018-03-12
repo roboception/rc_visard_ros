@@ -55,7 +55,7 @@ class CameraInfoPublisher : public GenICam2RosPublisher
       @param left True for left and false for right camera.
     */
 
-    CameraInfoPublisher(ros::NodeHandle &nh, std::string _frame_id, double f, double t, bool left);
+    CameraInfoPublisher(ros::NodeHandle &nh, const std::string &frame_id_prefix, double f, double t, bool left);
 
     bool used() override;
 

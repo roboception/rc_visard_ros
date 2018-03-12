@@ -55,7 +55,7 @@ class DisparityColorPublisher : public GenICam2RosPublisher
       @param color True for sending color instead of monochrome images.
     */
 
-    DisparityColorPublisher(image_transport::ImageTransport &it, std::string frame_id_prefix, double scale);
+    DisparityColorPublisher(image_transport::ImageTransport &it, const std::string &frame_id_prefix, double scale);
 
     /**
       Set the disparity range for scaling of images.

@@ -52,7 +52,7 @@ class ConfidencePublisher : public GenICam2RosPublisher
       @param nh    Node handle.
     */
 
-    ConfidencePublisher(ros::NodeHandle &nh, std::string frame_id_prefix);
+    ConfidencePublisher(ros::NodeHandle &nh, const std::string &frame_id_prefix);
 
     bool used() override;
 
