@@ -80,7 +80,7 @@ ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(
   {
     return ThreadedStream::Ptr(new Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix));
   }
-  if (stream=="dynamics" || "dynamics_ins")
+  if (stream=="dynamics" || stream=="dynamics_ins")
   {
     return ThreadedStream::Ptr(new DynamicsStream(rcdIface, stream, nh, frame_id_prefix));
   }
