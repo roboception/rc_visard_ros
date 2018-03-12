@@ -56,6 +56,8 @@ Parameters to be set to the ROS param server before run-time.
 
   These parameters can be changed during runtime via dynamic reconfigure:
 
+  - `ptp_enabled`: Enable PTP slave (PrecisionTimeProtocol, IEEE1588)
+
   - `camera_fps`: Frames per second that are published by this nodelet.
     Publishing frames will be slowed down depending on this setting. Setting
     it higher than the real framerate of the specific device has no effect.
