@@ -418,6 +418,8 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   cfg.depth_maxdepth=rcg::getFloat(nodemap, "DepthMaxDepth", 0, 0, true);
   cfg.depth_maxdeptherr=rcg::getFloat(nodemap, "DepthMaxDepthErr", 0, 0, true);
 
+  cfg.ptp_enabled = rcg::getBoolean(nodemap, "GevIEEE1588", false);
+
   // setup reconfigure server
 
   if (reconfig == 0)
@@ -441,6 +443,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     pnh.setParam("depth_mindepth", cfg.depth_mindepth);
     pnh.setParam("depth_maxdepth", cfg.depth_maxdepth);
     pnh.setParam("depth_maxdeptherr", cfg.depth_maxdeptherr);
+    pnh.setParam("ptp_enabled", cfg.ptp_enabled);
 
     // TODO: we need to dismangle initialization of dynreconfserver from not-READONLY-access-condition
     reconfig=new dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>(pnh);
@@ -644,6 +647,12 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef> &nodemap,
       {
         lvl&=~4096;
         rcg::setFloat(nodemap, "DepthMaxDepthErr", cfg.depth_maxdeptherr, true);
+      }
+
+      if (lvl&131072)
+      {
+        lvl&=~131072;
+        rcg::setBoolean(nodemap, "GevIEEE1588", cfg.ptp_enabled, true);
       }
     }
     catch (const std::exception &ex)
