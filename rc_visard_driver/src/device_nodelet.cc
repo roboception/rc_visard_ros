@@ -126,19 +126,8 @@ DeviceNodelet::~DeviceNodelet()
 
 void DeviceNodelet::onInit()
 {
-  std::string device;
-  getPrivateNodeHandle().param("device", device, device);
-
-  if (device.size() > 0)
-  {
-    // run initialization and recover routine in separate thread
-
-    recoverThread = std::thread(&DeviceNodelet::keepAliveAndRecoverFromFails, this);
-  }
-  else
-  {
-    ROS_FATAL("The rc_visard device ID must be given in the private parameter 'device'!");
-  }
+  // run initialization and recover routine in separate thread
+  recoverThread = std::thread(&DeviceNodelet::keepAliveAndRecoverFromFails, this);
 }
 
 void DeviceNodelet::keepAliveAndRecoverFromFails()
@@ -147,7 +136,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
   ros::NodeHandle pnh(getPrivateNodeHandle());
 
-  std::string device;
+  // device defaults to `rc_visard`, which is the default user defined name
+  // and works as long as only one sensor with that name is connected
+  std::string device="rc_visard";
   std::string access="control";
 
   tfEnabled = false;
@@ -162,6 +153,11 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   pnh.param("autostart_dynamics_with_slam", autostartSlam, autostartSlam);
   pnh.param("autostop_dynamics", autostopDynamics, autostopDynamics);
   pnh.param("autopublish_trajectory", autopublishTrajectory, autopublishTrajectory);
+
+  if (device.size() == 0)
+  {
+    ROS_FATAL("The rc_visard device ID must be given in the private parameter 'device'!");
+  }
 
   rcg::Device::ACCESS access_id;
   if (access == "exclusive")
@@ -262,7 +258,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         rcgdev=rcg::getDevice(device.c_str());
         if (!rcgdev)
         {
-          throw std::invalid_argument("Unknown device '" + device + "'");
+          throw std::invalid_argument("Unknown or non-unique device '" + device + "'");
         }
 
         ROS_INFO_STREAM("rc_visard_driver: Opening connection to '" << rcgdev->getID() << "'");
