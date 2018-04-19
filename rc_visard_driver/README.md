@@ -19,9 +19,10 @@ Configuration
 Parameters to be set to the ROS param server before run-time.
 
 - `device`: The ID of the device, i.e. Roboception rc_visard sensor. If the
-   provided GenTL library is used, then the ID is the MAC address of the
-   rc_visard, but with ':' replaced by '_'. This can be different if another
-   GenTL library is used.
+   provided GenTL library is used, then the ID is the lower case MAC address
+   of the rc_visard, but with ':' replaced by '_'. This can be different if
+   another GenTL library is used.
+   See https://github.com/roboception/rc_genicam_api#device-id for more details.
 
 - `gev_access`:  The gev_access mode, i.e.:
   - 'control'   Configuration and streaming with the possibility of other
