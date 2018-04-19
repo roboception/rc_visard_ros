@@ -40,55 +40,48 @@
 
 namespace rc
 {
-
-
 /**
  * Interface for all publishers relating to images, point clouds or
  * other stereo-camera data
  */
 class GenICam2RosPublisher
 {
-  public:
+public:
+  /**
+   * @param frame_id_prefix prefix for frame ids in published ros messages
+   */
+  GenICam2RosPublisher(const std::string& frame_id_prefix) : frame_id(frame_id_prefix + "camera")
+  {
+  }
 
-    /**
-     * @param frame_id_prefix prefix for frame ids in published ros messages
-     */
-    GenICam2RosPublisher(const std::string &frame_id_prefix) : frame_id(
-            frame_id_prefix + "camera")
-    {}
+  virtual ~GenICam2RosPublisher()
+  {
+  }
 
-    virtual ~GenICam2RosPublisher()
-    {}
+  /**
+    Offers a buffer for publication. It depends on the the kind of buffer
+    data and the implementation and configuration of the sub-class if the
+    data is published.
 
-    /**
-      Offers a buffer for publication. It depends on the the kind of buffer
-      data and the implementation and configuration of the sub-class if the
-      data is published.
+    @param buffer      Buffer with data to be published.
+    @param pixelformat The pixelformat as given by buffer.getPixelFormat().
+  */
 
-      @param buffer      Buffer with data to be published.
-      @param pixelformat The pixelformat as given by buffer.getPixelFormat().
-    */
+  virtual void publish(const rcg::Buffer* buffer, uint64_t pixelformat) = 0;
 
-    virtual void publish(const rcg::Buffer *buffer, uint64_t pixelformat)=0;
+  /**
+    Returns true if there are subscribers to the topic.
 
-    /**
-      Returns true if there are subscribers to the topic.
+    @return True if there are subscribers.
+  */
+  virtual bool used() = 0;
 
-      @return True if there are subscribers.
-    */
-    virtual bool used()=0;
+protected:
+  std::string frame_id;
 
-  protected:
-
-    std::string frame_id;
-
-  private:
-
-    GenICam2RosPublisher &operator=(const GenICam2RosPublisher &); // forbidden
+private:
+  GenICam2RosPublisher& operator=(const GenICam2RosPublisher&);  // forbidden
 };
-
-
-
 }
 
 #endif

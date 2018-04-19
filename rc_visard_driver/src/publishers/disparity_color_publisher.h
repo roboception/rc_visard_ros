@@ -42,45 +42,41 @@
 
 namespace rc
 {
-
 class DisparityColorPublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  /**
+    Initialization of publisher.
 
-    /**
-      Initialization of publisher.
+    @param it    Image transport handle.
+    @param left  True for left and false for right camera.
+    @param color True for sending color instead of monochrome images.
+  */
 
-      @param it    Image transport handle.
-      @param left  True for left and false for right camera.
-      @param color True for sending color instead of monochrome images.
-    */
+  DisparityColorPublisher(image_transport::ImageTransport& it, const std::string& frame_id_prefix, double scale);
 
-    DisparityColorPublisher(image_transport::ImageTransport &it, const std::string &frame_id_prefix, double scale);
+  /**
+    Set the disparity range for scaling of images.
 
-    /**
-      Set the disparity range for scaling of images.
+    @param disprange Disparity range for scaling.
+  */
 
-      @param disprange Disparity range for scaling.
-    */
+  void setDisprange(int disprange);
 
-    void setDisprange(int disprange);
+  bool used() override;
 
-    bool used() override;
+  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
+private:
+  DisparityColorPublisher(const DisparityColorPublisher&);             // forbidden
+  DisparityColorPublisher& operator=(const DisparityColorPublisher&);  // forbidden
 
-  private:
+  uint32_t seq;
+  double scale;
+  int disprange;
 
-    DisparityColorPublisher(const DisparityColorPublisher &); // forbidden
-    DisparityColorPublisher &operator=(const DisparityColorPublisher &); // forbidden
-
-    uint32_t seq;
-    double   scale;
-    int      disprange;
-
-    image_transport::Publisher pub;
+  image_transport::Publisher pub;
 };
-
 }
 
 #endif

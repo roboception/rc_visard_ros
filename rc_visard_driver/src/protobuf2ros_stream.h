@@ -34,16 +34,13 @@
 #ifndef RC_VISARD_ROS_PROTOBUF2ROS_STREAM_H
 #define RC_VISARD_ROS_PROTOBUF2ROS_STREAM_H
 
-
 #include <ros/ros.h>
 #include <rc_dynamics_api/remote_interface.h>
 
 #include "ThreadedStream.h"
 
-
 namespace rc
 {
-
 /**
  * Implementation of a ThreadedStream that receives rc_visard's dynamics
  * protobuf messages and re-publishes them as ros messages
@@ -53,19 +50,18 @@ namespace rc
  */
 class Protobuf2RosStream : public ThreadedStream
 {
-  public:
-    Protobuf2RosStream(rc::dynamics::RemoteInterface::Ptr rcdIface,
-                       const std::string &stream, ros::NodeHandle &nh,
-                       const std::string &frame_id_prefix)
-            : ThreadedStream(rcdIface, stream, nh), _tfPrefix(frame_id_prefix)
-    {}
+public:
+  Protobuf2RosStream(rc::dynamics::RemoteInterface::Ptr rcdIface, const std::string& stream, ros::NodeHandle& nh,
+                     const std::string& frame_id_prefix)
+    : ThreadedStream(rcdIface, stream, nh), _tfPrefix(frame_id_prefix)
+  {
+  }
 
-  protected:
-    virtual bool startReceivingAndPublishingAsRos() override;
+protected:
+  virtual bool startReceivingAndPublishingAsRos() override;
 
-    const std::string _tfPrefix;
+  const std::string _tfPrefix;
 };
-
 
 /**
  * Specific implementation for roboception::msgs::Frame messages. It publishes
@@ -75,18 +71,17 @@ class Protobuf2RosStream : public ThreadedStream
  */
 class PoseStream : public Protobuf2RosStream
 {
-  public:
-    PoseStream(rc::dynamics::RemoteInterface::Ptr rcdIface,
-               const std::string &stream, ros::NodeHandle &nh,
-               const std::string &frame_id_prefix, bool tfEnabled)
-            : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix),
-              _tfEnabled(tfEnabled)
-    {}
+public:
+  PoseStream(rc::dynamics::RemoteInterface::Ptr rcdIface, const std::string& stream, ros::NodeHandle& nh,
+             const std::string& frame_id_prefix, bool tfEnabled)
+    : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix), _tfEnabled(tfEnabled)
+  {
+  }
 
-  protected:
-    virtual bool startReceivingAndPublishingAsRos() override;
+protected:
+  virtual bool startReceivingAndPublishingAsRos() override;
 
-    bool _tfEnabled;
+  bool _tfEnabled;
 };
 
 /**
@@ -98,16 +93,15 @@ class PoseStream : public Protobuf2RosStream
  */
 class DynamicsStream : public Protobuf2RosStream
 {
-  public:
-    DynamicsStream(rc::dynamics::RemoteInterface::Ptr rcdIface,
-               const std::string &stream, ros::NodeHandle &nh,
-               const std::string &frame_id_prefix)
-            : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix)
-    {}
+public:
+  DynamicsStream(rc::dynamics::RemoteInterface::Ptr rcdIface, const std::string& stream, ros::NodeHandle& nh,
+                 const std::string& frame_id_prefix)
+    : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix)
+  {
+  }
 
-  protected:
-    virtual bool startReceivingAndPublishingAsRos() override;
+protected:
+  virtual bool startReceivingAndPublishingAsRos() override;
 };
-
 }
-#endif //RC_VISARD_ROS_PROTOBUF2ROS_STREAM_H
+#endif  // RC_VISARD_ROS_PROTOBUF2ROS_STREAM_H

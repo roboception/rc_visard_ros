@@ -1,31 +1,31 @@
-/* 
-* Roboception GmbH 
-* Munich, Germany 
-* www.roboception.com 
-* 
-* Copyright (c) 2017 Roboception GmbH 
-* All rights reserved 
-* 
-* Author: Christian Emmerich 
+/*
+* Roboception GmbH
+* Munich, Germany
+* www.roboception.com
+*
+* Copyright (c) 2017 Roboception GmbH
+* All rights reserved
+*
+* Author: Christian Emmerich
 */
 
 #include "protobuf2ros_conversions.h"
 
 #include <boost/make_shared.hpp>
 
-namespace rc {
-
-ros::Time toRosTime(const roboception::msgs::Time &time)
+namespace rc
+{
+ros::Time toRosTime(const roboception::msgs::Time& time)
 {
   return ros::Time(time.sec(), time.nsec());
 }
 
-sensor_msgs::ImuPtr toRosImu(const roboception::msgs::Imu  &imu)
+sensor_msgs::ImuPtr toRosImu(const roboception::msgs::Imu& imu)
 {
   auto rosImu = boost::make_shared<sensor_msgs::Imu>();
   rosImu->header.frame_id = "imu";
   rosImu->header.stamp = toRosTime(imu.timestamp());
-  rosImu->orientation_covariance[0] = -1; // we dont support orientation
+  rosImu->orientation_covariance[0] = -1;  // we dont support orientation
   rosImu->angular_velocity.x = imu.angular_velocity().x();
   rosImu->angular_velocity.y = imu.angular_velocity().y();
   rosImu->angular_velocity.z = imu.angular_velocity().z();
@@ -36,7 +36,7 @@ sensor_msgs::ImuPtr toRosImu(const roboception::msgs::Imu  &imu)
   return rosImu;
 }
 
-geometry_msgs::PosePtr toRosPose(const roboception::msgs::Pose &pose)
+geometry_msgs::PosePtr toRosPose(const roboception::msgs::Pose& pose)
 {
   auto rosPose = boost::make_shared<geometry_msgs::Pose>();
   rosPose->position.x = pose.position().x();
@@ -49,7 +49,7 @@ geometry_msgs::PosePtr toRosPose(const roboception::msgs::Pose &pose)
   return rosPose;
 }
 
-geometry_msgs::PoseStampedPtr toRosPoseStamped(const roboception::msgs::Frame &frame)
+geometry_msgs::PoseStampedPtr toRosPoseStamped(const roboception::msgs::Frame& frame)
 {
   auto protoPoseStamped = frame.pose();
   auto protoPosePose = protoPoseStamped.pose();
@@ -67,10 +67,8 @@ geometry_msgs::PoseStampedPtr toRosPoseStamped(const roboception::msgs::Frame &f
   return rosPose;
 }
 
-geometry_msgs::PoseStampedPtr
-toRosPoseStamped(const roboception::msgs::Pose &pose,
-                 const roboception::msgs::Time &time,
-                 const std::string &frame_id)
+geometry_msgs::PoseStampedPtr toRosPoseStamped(const roboception::msgs::Pose& pose, const roboception::msgs::Time& time,
+                                               const std::string& frame_id)
 {
   auto rosPose = boost::make_shared<geometry_msgs::PoseStamped>();
   rosPose->header.frame_id = frame_id;
@@ -85,7 +83,7 @@ toRosPoseStamped(const roboception::msgs::Pose &pose,
   return rosPose;
 }
 
-geometry_msgs::PoseWithCovarianceStampedPtr toRosPoseWithCovarianceStamped(const roboception::msgs::Frame &frame)
+geometry_msgs::PoseWithCovarianceStampedPtr toRosPoseWithCovarianceStamped(const roboception::msgs::Frame& frame)
 {
   auto protoPoseStamped = frame.pose();
   auto protoPosePose = protoPoseStamped.pose();
@@ -108,27 +106,18 @@ geometry_msgs::PoseWithCovarianceStampedPtr toRosPoseWithCovarianceStamped(const
   return rosPose;
 }
 
-tf::Transform toRosTfTransform(const roboception::msgs::Pose &pose)
+tf::Transform toRosTfTransform(const roboception::msgs::Pose& pose)
 {
   tf::Transform transform;
-  transform.setOrigin(tf::Vector3(pose.position().x(),
-                                  pose.position().y(),
-                                  pose.position().z()));
+  transform.setOrigin(tf::Vector3(pose.position().x(), pose.position().y(), pose.position().z()));
   transform.setRotation(
-          tf::Quaternion(pose.orientation().x(),
-                         pose.orientation().y(),
-                         pose.orientation().z(),
-                         pose.orientation().w()));
+      tf::Quaternion(pose.orientation().x(), pose.orientation().y(), pose.orientation().z(), pose.orientation().w()));
   return transform;
 }
 
-tf::StampedTransform
-toRosTfStampedTransform(const roboception::msgs::Frame &frame)
+tf::StampedTransform toRosTfStampedTransform(const roboception::msgs::Frame& frame)
 {
-  return tf::StampedTransform(toRosTfTransform(frame.pose().pose()),
-                              toRosTime(frame.pose().timestamp()),
+  return tf::StampedTransform(toRosTfTransform(frame.pose().pose()), toRosTime(frame.pose().timestamp()),
                               frame.parent(), frame.name());
 }
-
-
 }

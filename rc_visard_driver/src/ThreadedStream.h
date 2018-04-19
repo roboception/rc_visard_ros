@@ -41,10 +41,8 @@
 #include <rc_dynamics_api/remote_interface.h>
 #include <ros/ros.h>
 
-
 namespace rc
 {
-
 /**
  * Convenience classes to implement and manage different types of
  * data streams in separate threads.
@@ -60,65 +58,74 @@ namespace rc
  */
 class ThreadedStream
 {
+public:
+  typedef std::shared_ptr<ThreadedStream> Ptr;
+
+  class Manager : public std::enable_shared_from_this<Manager>
+  {
   public:
-    typedef std::shared_ptr<ThreadedStream> Ptr;
+    typedef std::shared_ptr<Manager> Ptr;
 
-    class Manager: public std::enable_shared_from_this<Manager>
+    static Ptr create();
+
+    void add(ThreadedStream::Ptr stream);
+    const std::list<ThreadedStream::Ptr>& get();
+
+    void start_all();
+    void stop_all();
+    void join_all();
+
+    bool all_succeeded() const;
+    inline const std::atomic_bool& any_failed() const
     {
-      public:
-        typedef std::shared_ptr<Manager> Ptr;
-
-        static Ptr create();
-
-        void add(ThreadedStream::Ptr stream);
-        const std::list<ThreadedStream::Ptr>& get();
-
-        void start_all();
-        void stop_all();
-        void join_all();
-
-        bool all_succeeded() const;
-        inline const std::atomic_bool& any_failed() const { return _any_failed; }
-
-      protected:
-        Manager();
-
-        std::atomic_bool _any_failed;
-        std::list<ThreadedStream::Ptr> _streams;
-
-        friend ThreadedStream;
-    };
-
-    void start();
-    void stop();
-    void join();
-
-    inline const std::string &name() const { return _stream; }
-    inline const std::atomic_bool &requested() const { return _requested; }
-    inline const std::atomic_bool &succeeded() const { return _success; }
+      return _any_failed;
+    }
 
   protected:
-    ThreadedStream(rc::dynamics::RemoteInterface::Ptr rcdIface,
-                   const std::string &stream, ros::NodeHandle &nh);
+    Manager();
 
-    /**
-     * @return true, if stopped without fails
-     */
-    virtual bool startReceivingAndPublishingAsRos() = 0;
+    std::atomic_bool _any_failed;
+    std::list<ThreadedStream::Ptr> _streams;
 
-    virtual void work();
+    friend ThreadedStream;
+  };
 
-    std::atomic_bool _stop, _requested, _success;
+  void start();
+  void stop();
+  void join();
 
-    std::thread _thread;
-    Manager::Ptr _manager;
+  inline const std::string& name() const
+  {
+    return _stream;
+  }
+  inline const std::atomic_bool& requested() const
+  {
+    return _requested;
+  }
+  inline const std::atomic_bool& succeeded() const
+  {
+    return _success;
+  }
 
-    rc::dynamics::RemoteInterface::Ptr _rcdyn;
-    std::string _stream;
-    ros::NodeHandle _nh;
+protected:
+  ThreadedStream(rc::dynamics::RemoteInterface::Ptr rcdIface, const std::string& stream, ros::NodeHandle& nh);
+
+  /**
+   * @return true, if stopped without fails
+   */
+  virtual bool startReceivingAndPublishingAsRos() = 0;
+
+  virtual void work();
+
+  std::atomic_bool _stop, _requested, _success;
+
+  std::thread _thread;
+  Manager::Ptr _manager;
+
+  rc::dynamics::RemoteInterface::Ptr _rcdyn;
+  std::string _stream;
+  ros::NodeHandle _nh;
 };
-
 }
 
-
-#endif //RC_VISARD_DRIVER_THREADEDSTREAMER_H
+#endif  // RC_VISARD_DRIVER_THREADEDSTREAMER_H

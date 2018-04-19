@@ -39,21 +39,19 @@
 
 namespace rc
 {
-
-DisparityColorPublisher::DisparityColorPublisher(image_transport::ImageTransport &it,
-                                                 const std::string &frame_id_prefix,
-                                                 double _scale)
-        : GenICam2RosPublisher(frame_id_prefix)
+DisparityColorPublisher::DisparityColorPublisher(image_transport::ImageTransport& it,
+                                                 const std::string& frame_id_prefix, double _scale)
+  : GenICam2RosPublisher(frame_id_prefix)
 {
-  scale=_scale;
-  disprange=0;
+  scale = _scale;
+  disprange = 0;
 
-  pub=it.advertise("disparity_color", 1);
+  pub = it.advertise("disparity_color", 1);
 }
 
 void DisparityColorPublisher::setDisprange(int _disprange)
 {
-  disprange=_disprange;
+  disprange = _disprange;
 }
 
 bool DisparityColorPublisher::used()
@@ -61,82 +59,82 @@ bool DisparityColorPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void DisparityColorPublisher::publish(const rcg::Buffer *buffer, uint64_t pixelformat)
+void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
 {
   if (pub.getNumSubscribers() > 0 && pixelformat == Coord3D_C16)
   {
     // create image and initialize header
 
-    sensor_msgs::ImagePtr im=boost::make_shared<sensor_msgs::Image>();
+    sensor_msgs::ImagePtr im = boost::make_shared<sensor_msgs::Image>();
 
-    const uint64_t freq=1000000000ul;
-    uint64_t time=buffer->getTimestampNS();
+    const uint64_t freq = 1000000000ul;
+    uint64_t time = buffer->getTimestampNS();
 
-    im->header.seq=seq++;
-    im->header.stamp.sec=time/freq;
-    im->header.stamp.nsec=time-freq*im->header.stamp.sec;
-    im->header.frame_id=frame_id;
+    im->header.seq = seq++;
+    im->header.stamp.sec = time / freq;
+    im->header.stamp.nsec = time - freq * im->header.stamp.sec;
+    im->header.frame_id = frame_id;
 
     // set image size
 
-    im->width=static_cast<uint32_t>(buffer->getWidth());
-    im->height=static_cast<uint32_t>(buffer->getHeight());
-    im->is_bigendian=rcg::isHostBigEndian();
+    im->width = static_cast<uint32_t>(buffer->getWidth());
+    im->height = static_cast<uint32_t>(buffer->getHeight());
+    im->is_bigendian = rcg::isHostBigEndian();
 
     // get pointer to image data in buffer
 
-    size_t px=buffer->getXPadding();
-    const uint8_t *ps=static_cast<const uint8_t *>(buffer->getBase())+buffer->getImageOffset();
+    size_t px = buffer->getXPadding();
+    const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase()) + buffer->getImageOffset();
 
     // convert image data
 
-    im->encoding=sensor_msgs::image_encodings::RGB8;
-    im->step=3*im->width*sizeof(uint8_t);
+    im->encoding = sensor_msgs::image_encodings::RGB8;
+    im->step = 3 * im->width * sizeof(uint8_t);
 
-    im->data.resize(im->step*im->height);
-    uint8_t *pt=reinterpret_cast<uint8_t *>(&im->data[0]);
+    im->data.resize(im->step * im->height);
+    uint8_t* pt = reinterpret_cast<uint8_t*>(&im->data[0]);
 
-    bool bigendian=buffer->isBigEndian();
+    bool bigendian = buffer->isBigEndian();
 
-    for (uint32_t k=0; k<im->height; k++)
+    for (uint32_t k = 0; k < im->height; k++)
     {
-      for (uint32_t i=0; i<im->width; i++)
+      for (uint32_t i = 0; i < im->width; i++)
       {
         uint16_t d;
 
         if (bigendian)
         {
-          d=(ps[0]<<8)|ps[1];
+          d = (ps[0] << 8) | ps[1];
         }
         else
         {
-          d=(ps[1]<<8)|ps[0];
+          d = (ps[1] << 8) | ps[0];
         }
 
-        ps+=2;
+        ps += 2;
 
         if (d != 0)
         {
-          double v=scale*d/disprange;
-          v=v/1.15+0.1;
+          double v = scale * d / disprange;
+          v = v / 1.15 + 0.1;
 
-          double r=std::max(0.0, std::min(1.0, (1.5 - 4*fabs(v-0.75))));
-          double g=std::max(0.0, std::min(1.0, (1.5 - 4*fabs(v-0.5))));
-          double b=std::max(0.0, std::min(1.0, (1.5 - 4*fabs(v-0.25))));
+          double r = std::max(0.0, std::min(1.0, (1.5 - 4 * fabs(v - 0.75))));
+          double g = std::max(0.0, std::min(1.0, (1.5 - 4 * fabs(v - 0.5))));
+          double b = std::max(0.0, std::min(1.0, (1.5 - 4 * fabs(v - 0.25))));
 
-          *pt++=255*r+0.5;
-          *pt++=255*g+0.5;
-          *pt++=255*b+0.5;
+          *pt++ = 255 * r + 0.5;
+          *pt++ = 255 * g + 0.5;
+          *pt++ = 255 * b + 0.5;
         }
         else
         {
-          *pt++=0;
-          *pt++=0;
-          *pt++=0;
+          *pt++ = 0;
+          *pt++ = 0;
+          *pt++ = 0;
         }
       }
 
-      ps+=px;
+      ps += px;
     }
 
     // publish message
@@ -144,5 +142,4 @@ void DisparityColorPublisher::publish(const rcg::Buffer *buffer, uint64_t pixelf
     pub.publish(im);
   }
 }
-
 }

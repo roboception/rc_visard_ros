@@ -42,37 +42,33 @@
 
 namespace rc
 {
-
 class ImagePublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  /**
+    Initialization of publisher.
 
-    /**
-      Initialization of publisher.
+    @param it    Image transport handle.
+    @param left  True for left and false for right camera.
+    @param color True for sending color instead of monochrome images.
+  */
 
-      @param it    Image transport handle.
-      @param left  True for left and false for right camera.
-      @param color True for sending color instead of monochrome images.
-    */
+  ImagePublisher(image_transport::ImageTransport& it, const std::string& frame_id_prefix, bool left, bool color);
 
-    ImagePublisher(image_transport::ImageTransport &it, const std::string &frame_id_prefix, bool left, bool color);
+  bool used() override;
 
-    bool used() override;
+  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
+private:
+  ImagePublisher(const ImagePublisher&);             // forbidden
+  ImagePublisher& operator=(const ImagePublisher&);  // forbidden
 
-  private:
+  bool left;
+  bool color;
+  uint32_t seq;
 
-    ImagePublisher(const ImagePublisher &); // forbidden
-    ImagePublisher &operator=(const ImagePublisher &); // forbidden
-
-    bool left;
-    bool color;
-    uint32_t seq;
-
-    image_transport::Publisher pub;
+  image_transport::Publisher pub;
 };
-
 }
 
 #endif

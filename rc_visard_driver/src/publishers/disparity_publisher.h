@@ -41,48 +41,44 @@
 
 namespace rc
 {
-
 class DisparityPublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  /**
+    Initialization of publisher.
 
-    /**
-      Initialization of publisher.
+    @param nh     Node handle.
+    @param f      Focal length, normalized to image width 1.
+    @param t      Basline in m.
+    @param scale  Factor for raw disparities.
+  */
 
-      @param nh     Node handle.
-      @param f      Focal length, normalized to image width 1.
-      @param t      Basline in m.
-      @param scale  Factor for raw disparities.
-    */
+  DisparityPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double f, double t, double scale);
 
-    DisparityPublisher(ros::NodeHandle &nh, const std::string &frame_id_prefix, double f, double t, double scale);
+  /**
+    Set the disparity range for scaling of images.
 
-    /**
-      Set the disparity range for scaling of images.
+    @param disprange Disparity range for scaling.
+  */
 
-      @param disprange Disparity range for scaling.
-    */
+  void setDisprange(int disprange);
 
-    void setDisprange(int disprange);
+  bool used() override;
 
-    bool used() override;
+  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
+private:
+  DisparityPublisher(const DisparityPublisher&);             // forbidden
+  DisparityPublisher& operator=(const DisparityPublisher&);  // forbidden
 
-  private:
+  uint32_t seq;
+  double f;
+  double t;
+  float scale;
+  int disprange;
 
-    DisparityPublisher(const DisparityPublisher &); // forbidden
-    DisparityPublisher &operator=(const DisparityPublisher &); // forbidden
-
-    uint32_t seq;
-    double f;
-    double t;
-    float  scale;
-    int    disprange;
-
-    ros::Publisher pub;
+  ros::Publisher pub;
 };
-
 }
 
 #endif

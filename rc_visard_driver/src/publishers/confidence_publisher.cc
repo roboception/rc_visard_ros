@@ -39,12 +39,10 @@
 
 namespace rc
 {
-
-ConfidencePublisher::ConfidencePublisher(ros::NodeHandle &nh,
-                                         const std::string &frame_id_prefix)
-        : GenICam2RosPublisher(frame_id_prefix)
+ConfidencePublisher::ConfidencePublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix)
+  : GenICam2RosPublisher(frame_id_prefix)
 {
-  pub=nh.advertise<sensor_msgs::Image>("confidence", 1);
+  pub = nh.advertise<sensor_msgs::Image>("confidence", 1);
 }
 
 bool ConfidencePublisher::used()
@@ -52,51 +50,51 @@ bool ConfidencePublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void ConfidencePublisher::publish(const rcg::Buffer *buffer, uint64_t pixelformat)
+void ConfidencePublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
 {
   if (pub.getNumSubscribers() > 0 && pixelformat == Confidence8)
   {
     // create image and initialize header
 
-    sensor_msgs::ImagePtr im=boost::make_shared<sensor_msgs::Image>();
+    sensor_msgs::ImagePtr im = boost::make_shared<sensor_msgs::Image>();
 
-    const uint64_t freq=1000000000ul;
-    uint64_t time=buffer->getTimestampNS();
+    const uint64_t freq = 1000000000ul;
+    uint64_t time = buffer->getTimestampNS();
 
-    im->header.seq=seq++;
-    im->header.stamp.sec=time/freq;
-    im->header.stamp.nsec=time-freq*im->header.stamp.sec;
-    im->header.frame_id=frame_id;
+    im->header.seq = seq++;
+    im->header.stamp.sec = time / freq;
+    im->header.stamp.nsec = time - freq * im->header.stamp.sec;
+    im->header.frame_id = frame_id;
 
     // set image size
 
-    im->width=static_cast<uint32_t>(buffer->getWidth());
-    im->height=static_cast<uint32_t>(buffer->getHeight());
+    im->width = static_cast<uint32_t>(buffer->getWidth());
+    im->height = static_cast<uint32_t>(buffer->getHeight());
 
     // get pointer to image data in buffer
 
-    size_t px=buffer->getXPadding();
-    const uint8_t *ps=static_cast<const uint8_t *>(buffer->getBase())+buffer->getImageOffset();
+    size_t px = buffer->getXPadding();
+    const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase()) + buffer->getImageOffset();
 
     // convert image data
 
-    im->encoding=sensor_msgs::image_encodings::TYPE_32FC1;
-    im->is_bigendian=rcg::isHostBigEndian();
-    im->step=im->width*sizeof(float);
+    im->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+    im->is_bigendian = rcg::isHostBigEndian();
+    im->step = im->width * sizeof(float);
 
-    im->data.resize(im->step*im->height);
-    float *pt=reinterpret_cast<float *>(&im->data[0]);
+    im->data.resize(im->step * im->height);
+    float* pt = reinterpret_cast<float*>(&im->data[0]);
 
-    float scale=1.0f/255.0f;
+    float scale = 1.0f / 255.0f;
 
-    for (uint32_t k=0; k<im->height; k++)
+    for (uint32_t k = 0; k < im->height; k++)
     {
-      for (uint32_t i=0; i<im->width; i++)
+      for (uint32_t i = 0; i < im->width; i++)
       {
-        *pt++=scale **ps++;
+        *pt++ = scale * *ps++;
       }
 
-      ps+=px;
+      ps += px;
     }
 
     // publish message
@@ -104,5 +102,4 @@ void ConfidencePublisher::publish(const rcg::Buffer *buffer, uint64_t pixelforma
     pub.publish(im);
   }
 }
-
 }

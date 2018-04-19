@@ -39,18 +39,15 @@
 
 namespace rc
 {
-
-ErrorDepthPublisher::ErrorDepthPublisher(ros::NodeHandle &nh,
-                                         const std::string &frame_id_prefix,
-                                         double _f, double _t,
+ErrorDepthPublisher::ErrorDepthPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double _f, double _t,
                                          double _scale)
-        : GenICam2RosPublisher(frame_id_prefix)
+  : GenICam2RosPublisher(frame_id_prefix)
 {
-  f=_f;
-  t=_t;
-  scale=_scale;
+  f = _f;
+  t = _t;
+  scale = _scale;
 
-  pub=nh.advertise<sensor_msgs::Image>("error_depth", 1);
+  pub = nh.advertise<sensor_msgs::Image>("error_depth", 1);
 }
 
 bool ErrorDepthPublisher::used()
@@ -58,7 +55,7 @@ bool ErrorDepthPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void ErrorDepthPublisher::publish(const rcg::Buffer *buffer, uint64_t pixelformat)
+void ErrorDepthPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
 {
   if (pub.getNumSubscribers() > 0)
   {
@@ -75,10 +72,10 @@ void ErrorDepthPublisher::publish(const rcg::Buffer *buffer, uint64_t pixelforma
 
     // get disparity and error image pair with current time stamp
 
-    uint64_t timestamp=buffer->getTimestampNS();
+    uint64_t timestamp = buffer->getTimestampNS();
 
-    std::shared_ptr<const rcg::Image> disp=disp_list.find(timestamp);
-    std::shared_ptr<const rcg::Image> err=err_list.find(timestamp);
+    std::shared_ptr<const rcg::Image> disp = disp_list.find(timestamp);
+    std::shared_ptr<const rcg::Image> err = err_list.find(timestamp);
 
     if (disp && err)
     {
@@ -86,72 +83,72 @@ void ErrorDepthPublisher::publish(const rcg::Buffer *buffer, uint64_t pixelforma
       {
         // create image and initialize header
 
-        sensor_msgs::ImagePtr im=boost::make_shared<sensor_msgs::Image>();
+        sensor_msgs::ImagePtr im = boost::make_shared<sensor_msgs::Image>();
 
-        const uint64_t freq=1000000000ul;
+        const uint64_t freq = 1000000000ul;
 
-        im->header.seq=seq++;
-        im->header.stamp.sec=timestamp/freq;
-        im->header.stamp.nsec=timestamp-freq*im->header.stamp.sec;
-        im->header.frame_id=frame_id;
+        im->header.seq = seq++;
+        im->header.stamp.sec = timestamp / freq;
+        im->header.stamp.nsec = timestamp - freq * im->header.stamp.sec;
+        im->header.frame_id = frame_id;
 
         // set image size
 
-        im->width=static_cast<uint32_t>(disp->getWidth());
-        im->height=static_cast<uint32_t>(disp->getHeight());
+        im->width = static_cast<uint32_t>(disp->getWidth());
+        im->height = static_cast<uint32_t>(disp->getHeight());
 
         // get pointer to image data in buffer
 
-        size_t dpx=disp->getXPadding();
-        const uint8_t *dps=disp->getPixels();
+        size_t dpx = disp->getXPadding();
+        const uint8_t* dps = disp->getPixels();
 
-        size_t epx=err->getXPadding();
-        const uint8_t *eps=err->getPixels();
+        size_t epx = err->getXPadding();
+        const uint8_t* eps = err->getPixels();
 
         // convert image data
 
-        im->encoding=sensor_msgs::image_encodings::TYPE_32FC1;
-        im->is_bigendian=rcg::isHostBigEndian();
-        im->step=im->width*sizeof(float);
+        im->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+        im->is_bigendian = rcg::isHostBigEndian();
+        im->step = im->width * sizeof(float);
 
-        im->data.resize(im->step*im->height);
-        float *pt=reinterpret_cast<float *>(&im->data[0]);
+        im->data.resize(im->step * im->height);
+        float* pt = reinterpret_cast<float*>(&im->data[0]);
 
-        float s=scale*f*im->width*t;
+        float s = scale * f * im->width * t;
 
-        bool bigendian=disp->isBigEndian();
+        bool bigendian = disp->isBigEndian();
 
-        for (uint32_t k=0; k<im->height; k++)
+        for (uint32_t k = 0; k < im->height; k++)
         {
-          for (uint32_t i=0; i<im->width; i++)
+          for (uint32_t i = 0; i < im->width; i++)
           {
             float d;
 
             if (bigendian)
             {
-              d=scale*((dps[0]<<8)|dps[1]);
+              d = scale * ((dps[0] << 8) | dps[1]);
             }
             else
             {
-              d=scale*((dps[1]<<8)|dps[0]);
+              d = scale * ((dps[1] << 8) | dps[0]);
             }
 
-            dps+=2;
+            dps += 2;
 
             if (d > 0)
             {
-              *pt++=*eps*s/(d*d);
+              *pt++ = *eps * s / (d * d);
             }
             else
             {
-              *pt++=std::numeric_limits<float>::infinity();
+              *pt++ = std::numeric_limits<float>::infinity();
             }
 
             eps++;
           }
 
-          dps+=dpx;
-          eps+=epx;
+          dps += dpx;
+          eps += epx;
         }
 
         // publish message
@@ -160,9 +157,9 @@ void ErrorDepthPublisher::publish(const rcg::Buffer *buffer, uint64_t pixelforma
       }
       else
       {
-        ROS_ERROR_STREAM("Size of disparity and error images differ: " <<
-                         disp->getWidth() << "x" << disp->getHeight() << " != " <<
-                         err->getWidth() << "x" << err->getHeight());
+        ROS_ERROR_STREAM("Size of disparity and error images differ: " << disp->getWidth() << "x" << disp->getHeight()
+                                                                       << " != " << err->getWidth() << "x"
+                                                                       << err->getHeight());
       }
 
       // remove all old images, including the current ones
@@ -172,5 +169,4 @@ void ErrorDepthPublisher::publish(const rcg::Buffer *buffer, uint64_t pixelforma
     }
   }
 }
-
 }

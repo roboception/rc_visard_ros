@@ -39,17 +39,15 @@
 
 namespace rc
 {
-
-Points2Publisher::Points2Publisher(ros::NodeHandle &nh,
-                                   const std::string &frame_id_prefix,
-                                   double _f, double _t, double _scale)
-        : GenICam2RosPublisher(frame_id_prefix), left_list(50)
+Points2Publisher::Points2Publisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double _f, double _t,
+                                   double _scale)
+  : GenICam2RosPublisher(frame_id_prefix), left_list(50)
 {
-  f=_f;
-  t=_t;
-  scale=_scale;
+  f = _f;
+  t = _t;
+  scale = _scale;
 
-  pub=nh.advertise<sensor_msgs::PointCloud2>("points2", 1);
+  pub = nh.advertise<sensor_msgs::PointCloud2>("points2", 1);
 }
 
 bool Points2Publisher::used()
@@ -57,7 +55,7 @@ bool Points2Publisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void Points2Publisher::publish(const rcg::Buffer *buffer, uint64_t pixelformat)
+void Points2Publisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
 {
   if (pub.getNumSubscribers() > 0)
   {
@@ -74,100 +72,100 @@ void Points2Publisher::publish(const rcg::Buffer *buffer, uint64_t pixelformat)
 
     // get corresponding left and disparity image
 
-    uint64_t timestamp=buffer->getTimestampNS();
+    uint64_t timestamp = buffer->getTimestampNS();
 
-    std::shared_ptr<const rcg::Image> left=left_list.find(timestamp);
-    std::shared_ptr<const rcg::Image> disp=disp_list.find(timestamp);
+    std::shared_ptr<const rcg::Image> left = left_list.find(timestamp);
+    std::shared_ptr<const rcg::Image> disp = disp_list.find(timestamp);
 
     if (left && disp)
     {
       // determine integer factor between size of left and disparity image
 
-      uint32_t lw=left->getWidth();
-      uint32_t lh=left->getHeight();
+      uint32_t lw = left->getWidth();
+      uint32_t lh = left->getHeight();
 
-      if (lh > lw) // there may be a stacked right image
+      if (lh > lw)  // there may be a stacked right image
       {
-        lh>>=1;
+        lh >>= 1;
       }
 
-      int ds=(lw+disp->getWidth()-1)/disp->getWidth();
+      int ds = (lw + disp->getWidth() - 1) / disp->getWidth();
 
-      if ((lw+ds-1)/ds == disp->getWidth() && (lh+ds-1)/ds == disp->getHeight())
+      if ((lw + ds - 1) / ds == disp->getWidth() && (lh + ds - 1) / ds == disp->getHeight())
       {
         // allocate new image message and set meta information
 
-        sensor_msgs::PointCloud2Ptr p=boost::make_shared<sensor_msgs::PointCloud2>();
+        sensor_msgs::PointCloud2Ptr p = boost::make_shared<sensor_msgs::PointCloud2>();
 
-        const uint64_t freq=1000000000ul;
+        const uint64_t freq = 1000000000ul;
 
-        p->header.seq=seq++;
-        p->header.stamp.sec=timestamp/freq;
-        p->header.stamp.nsec=timestamp-freq*p->header.stamp.sec;
-        p->header.frame_id=frame_id;
+        p->header.seq = seq++;
+        p->header.stamp.sec = timestamp / freq;
+        p->header.stamp.nsec = timestamp - freq * p->header.stamp.sec;
+        p->header.frame_id = frame_id;
 
         // set meta data of point cloud
 
-        p->width=lw/ds; // consider only full pixels if downscaled
-        p->height=lh/ds; // consider only full pixels if downscaled
+        p->width = lw / ds;   // consider only full pixels if downscaled
+        p->height = lh / ds;  // consider only full pixels if downscaled
 
-        p->is_bigendian=rcg::isHostBigEndian();
-        p->is_dense=false;
+        p->is_bigendian = rcg::isHostBigEndian();
+        p->is_dense = false;
 
         p->fields.resize(4);
-        p->fields[0].name="x";
-        p->fields[0].offset=0;
-        p->fields[0].count=1;
-        p->fields[0].datatype=sensor_msgs::PointField::FLOAT32;
-        p->fields[1].name="y";
-        p->fields[1].offset=4;
-        p->fields[1].count=1;
-        p->fields[1].datatype=sensor_msgs::PointField::FLOAT32;
-        p->fields[2].name="z";
-        p->fields[2].offset=8;
-        p->fields[2].count=1;
-        p->fields[2].datatype=sensor_msgs::PointField::FLOAT32;
-        p->fields[3].name="rgb";
-        p->fields[3].offset=12;
-        p->fields[3].count=1;
-        p->fields[3].datatype=sensor_msgs::PointField::FLOAT32;
+        p->fields[0].name = "x";
+        p->fields[0].offset = 0;
+        p->fields[0].count = 1;
+        p->fields[0].datatype = sensor_msgs::PointField::FLOAT32;
+        p->fields[1].name = "y";
+        p->fields[1].offset = 4;
+        p->fields[1].count = 1;
+        p->fields[1].datatype = sensor_msgs::PointField::FLOAT32;
+        p->fields[2].name = "z";
+        p->fields[2].offset = 8;
+        p->fields[2].count = 1;
+        p->fields[2].datatype = sensor_msgs::PointField::FLOAT32;
+        p->fields[3].name = "rgb";
+        p->fields[3].offset = 12;
+        p->fields[3].count = 1;
+        p->fields[3].datatype = sensor_msgs::PointField::FLOAT32;
 
-        p->point_step=16;
-        p->row_step=p->point_step*p->width;
+        p->point_step = 16;
+        p->row_step = p->point_step * p->width;
 
         // allocate memory
 
-        p->data.resize(p->row_step*p->height);
-        float *pd=reinterpret_cast<float *>(&p->data[0]);
+        p->data.resize(p->row_step * p->height);
+        float* pd = reinterpret_cast<float*>(&p->data[0]);
 
         // pointer to disparity data
 
-        const uint8_t *dps=disp->getPixels();
-        size_t dstep=disp->getWidth()*sizeof(uint16_t)+disp->getXPadding();
+        const uint8_t* dps = disp->getPixels();
+        size_t dstep = disp->getWidth() * sizeof(uint16_t) + disp->getXPadding();
 
         // convert disparity to point cloud using left image for texture
 
-        float ff=f*disp->getWidth();
+        float ff = f * disp->getWidth();
 
-        bool bigendian=disp->isBigEndian();
+        bool bigendian = disp->isBigEndian();
 
-        for (uint32_t k=0; k<p->height; k++)
+        for (uint32_t k = 0; k < p->height; k++)
         {
-          for (uint32_t i=0; i<p->width; i++)
+          for (uint32_t i = 0; i < p->width; i++)
           {
             // get disparity
 
-            uint32_t j=i<<1;
+            uint32_t j = i << 1;
 
             float d;
 
             if (bigendian)
             {
-              d=scale*((dps[j]<<8)|dps[j+1]);
+              d = scale * ((dps[j] << 8) | dps[j + 1]);
             }
             else
             {
-              d=scale*((dps[j+1]<<8)|dps[j]);
+              d = scale * ((dps[j + 1] << 8) | dps[j]);
             }
 
             // if disparity is valid and color can be obtained
@@ -176,34 +174,34 @@ void Points2Publisher::publish(const rcg::Buffer *buffer, uint64_t pixelformat)
             {
               // reconstruct 3D point
 
-              pd[0]=(i+0.5-disp->getWidth()/2.0)*t/d;
-              pd[1]=(k+0.5-disp->getHeight()/2.0)*t/d;
-              pd[2]=ff*t/d;
+              pd[0] = (i + 0.5 - disp->getWidth() / 2.0) * t / d;
+              pd[1] = (k + 0.5 - disp->getHeight() / 2.0) * t / d;
+              pd[2] = ff * t / d;
 
               // store color of point
 
               uint8_t rgb[3];
               rcg::getColor(rgb, left, ds, i, k);
 
-              uint8_t *bgra=reinterpret_cast<uint8_t *>(pd+3);
+              uint8_t* bgra = reinterpret_cast<uint8_t*>(pd + 3);
 
-              bgra[0]=rgb[2];
-              bgra[1]=rgb[1];
-              bgra[2]=rgb[0];
-              bgra[3]=0;
+              bgra[0] = rgb[2];
+              bgra[1] = rgb[1];
+              bgra[2] = rgb[0];
+              bgra[3] = 0;
             }
             else
             {
-              for (int i=0; i<4; i++)
+              for (int i = 0; i < 4; i++)
               {
-                pd[i]=std::numeric_limits<float>::quiet_NaN();
+                pd[i] = std::numeric_limits<float>::quiet_NaN();
               }
             }
 
-            pd+=4;
+            pd += 4;
           }
 
-          dps+=dstep;
+          dps += dstep;
         }
 
         // publish message
@@ -212,9 +210,9 @@ void Points2Publisher::publish(const rcg::Buffer *buffer, uint64_t pixelformat)
       }
       else
       {
-        ROS_ERROR_STREAM("Size of left and disparity image must differ only by an integer factor: " <<
-                         left->getWidth() << "x" << left->getHeight() << " != " <<
-                         disp->getWidth() << "x" << disp->getHeight());
+        ROS_ERROR_STREAM("Size of left and disparity image must differ only by an integer factor: "
+                         << left->getWidth() << "x" << left->getHeight() << " != " << disp->getWidth() << "x"
+                         << disp->getHeight());
       }
 
       // remove all old images, including the current ones
@@ -224,5 +222,4 @@ void Points2Publisher::publish(const rcg::Buffer *buffer, uint64_t pixelformat)
     }
   }
 }
-
 }

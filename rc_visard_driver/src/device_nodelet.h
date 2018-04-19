@@ -52,109 +52,97 @@
 
 #include <rc_visard_driver/GetTrajectory.h>
 
-
 namespace rc
 {
-
 class DeviceNodelet : public nodelet::Nodelet
 {
-  public:
+public:
+  DeviceNodelet();
+  virtual ~DeviceNodelet();
 
-    DeviceNodelet();
-    virtual ~DeviceNodelet();
+  virtual void onInit();
 
-    virtual void onInit();
+  /// Start Stereo INS
+  ///@return always true, check resp.success for whether the dynamics service has been called
+  bool dynamicsStart(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  /// Start Stereo INS+SLAM
+  ///@return always true, check resp.success for whether the dynamics service has been called
+  bool dynamicsStartSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  /// Restart Stereo INS
+  ///@return always true, check resp.success for whether the dynamics service has been called
+  bool dynamicsRestart(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  /// Restart Stereo INS+SLAM
+  ///@return always true, check resp.success for whether the dynamics service has been called
+  bool dynamicsRestartSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  /// Stop Stereo INS(+SLAM if running)
+  ///@return always true, check resp.success for whether the dynamics service has been called
+  bool dynamicsStop(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  /// Stop SLAM (keep Stereo INS running)
+  ///@return always true, check resp.success for whether the dynamics service has been called
+  bool dynamicsStopSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  /// Reset SLAM (keep Stereo INS running)
+  ///@return always true, check resp.success for whether the dynamics service has been called
+  bool dynamicsResetSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  /// Get the Slam trajectory
+  ///@return always true
+  bool getSlamTrajectory(rc_visard_driver::GetTrajectory::Request& req,
+                         rc_visard_driver::GetTrajectory::Response& resp);
 
-    ///Start Stereo INS
-    ///@return always true, check resp.success for whether the dynamics service has been called
-    bool dynamicsStart(std_srvs::Trigger::Request &req,
-                       std_srvs::Trigger::Response &resp);
-    ///Start Stereo INS+SLAM
-    ///@return always true, check resp.success for whether the dynamics service has been called
-    bool dynamicsStartSlam(std_srvs::Trigger::Request &req,
-                       std_srvs::Trigger::Response &resp);
-    ///Restart Stereo INS
-    ///@return always true, check resp.success for whether the dynamics service has been called
-    bool dynamicsRestart(std_srvs::Trigger::Request &req,
-                         std_srvs::Trigger::Response &resp);
-    ///Restart Stereo INS+SLAM
-    ///@return always true, check resp.success for whether the dynamics service has been called
-    bool dynamicsRestartSlam(std_srvs::Trigger::Request &req,
-                             std_srvs::Trigger::Response &resp);
-    ///Stop Stereo INS(+SLAM if running)
-    ///@return always true, check resp.success for whether the dynamics service has been called
-    bool dynamicsStop(std_srvs::Trigger::Request &req,
-                      std_srvs::Trigger::Response &resp);
-    ///Stop SLAM (keep Stereo INS running)
-    ///@return always true, check resp.success for whether the dynamics service has been called
-    bool dynamicsStopSlam(std_srvs::Trigger::Request &req,
-                          std_srvs::Trigger::Response &resp);
-    ///Reset SLAM (keep Stereo INS running)
-    ///@return always true, check resp.success for whether the dynamics service has been called
-    bool dynamicsResetSlam(std_srvs::Trigger::Request &req,
-                          std_srvs::Trigger::Response &resp);
-    ///Get the Slam trajectory
-    ///@return always true
-    bool getSlamTrajectory(rc_visard_driver::GetTrajectory::Request &req,
-                           rc_visard_driver::GetTrajectory::Response &resp);
+private:
+  static ThreadedStream::Ptr CreateDynamicsStreamOfType(rc::dynamics::RemoteInterface::Ptr rcdIface,
+                                                        const std::string& stream, ros::NodeHandle& nh,
+                                                        const std::string& frame_id_prefix, bool tfEnabled);
 
-  private:
-    static ThreadedStream::Ptr CreateDynamicsStreamOfType(
-            rc::dynamics::RemoteInterface::Ptr rcdIface,
-            const std::string &stream, ros::NodeHandle &nh,
-            const std::string &frame_id_prefix, bool tfEnabled);
+  void initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
+                         rc_visard_driver::rc_visard_driverConfig& cfg, rcg::Device::ACCESS access);
 
-    void initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef> &nodemap,
-      rc_visard_driver::rc_visard_driverConfig &cfg, rcg::Device::ACCESS access);
+  void reconfigure(rc_visard_driver::rc_visard_driverConfig& config, uint32_t level);
 
-    void reconfigure(rc_visard_driver::rc_visard_driverConfig &config, uint32_t level);
+  void grab(std::string device, rcg::Device::ACCESS access);
 
-    void grab(std::string device, rcg::Device::ACCESS access);
+  void keepAliveAndRecoverFromFails();
 
-    void keepAliveAndRecoverFromFails();
+  dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>* reconfig;
 
-    dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig> *reconfig;
+  bool dev_supports_gain;
+  bool dev_supports_wb;
 
-    bool dev_supports_gain;
-    bool dev_supports_wb;
+  std::shared_ptr<rcg::Device> rcgdev;
+  std::shared_ptr<GenApi::CNodeMapRef> rcgnodemap;
 
-    std::shared_ptr<rcg::Device> rcgdev;
-    std::shared_ptr<GenApi::CNodeMapRef> rcgnodemap;
+  std::mutex mtx;
+  rc_visard_driver::rc_visard_driverConfig config;
+  std::atomic_uint_least32_t level;
 
-    std::mutex mtx;
-    rc_visard_driver::rc_visard_driverConfig config;
-    std::atomic_uint_least32_t level;
+  std::thread imageThread;
+  std::atomic_bool stopImageThread, imageRequested, imageSuccess;
 
-    std::thread imageThread;
-    std::atomic_bool stopImageThread, imageRequested, imageSuccess;
+  std::thread recoverThread;
+  std::atomic_bool stopRecoverThread;
+  bool recoveryRequested;
+  int cntConsecutiveRecoveryFails;
 
-    std::thread recoverThread;
-    std::atomic_bool stopRecoverThread;
-    bool recoveryRequested;
-    int cntConsecutiveRecoveryFails;
+  ThreadedStream::Manager::Ptr dynamicsStreams;
 
-    ThreadedStream::Manager::Ptr dynamicsStreams;
+  /// wrapper for REST-API calls relating to rc_visard's dynamics interface
+  rc::dynamics::RemoteInterface::Ptr dynamicsInterface;
+  ros::ServiceServer dynamicsStartService;
+  ros::ServiceServer dynamicsStartSlamService;
+  ros::ServiceServer dynamicsRestartService;
+  ros::ServiceServer dynamicsRestartSlamService;
+  ros::ServiceServer dynamicsStopService;
+  ros::ServiceServer dynamicsStopSlamService;
+  ros::ServiceServer dynamicsResetSlamService;
+  ros::ServiceServer getSlamTrajectoryService;
+  ros::Publisher trajPublisher;
+  bool autostartDynamics, autostopDynamics, autostartSlam, autopublishTrajectory;
 
-    /// wrapper for REST-API calls relating to rc_visard's dynamics interface
-    rc::dynamics::RemoteInterface::Ptr dynamicsInterface;
-    ros::ServiceServer dynamicsStartService;
-    ros::ServiceServer dynamicsStartSlamService;
-    ros::ServiceServer dynamicsRestartService;
-    ros::ServiceServer dynamicsRestartSlamService;
-    ros::ServiceServer dynamicsStopService;
-    ros::ServiceServer dynamicsStopSlamService;
-    ros::ServiceServer dynamicsResetSlamService;
-    ros::ServiceServer getSlamTrajectoryService;
-    ros::Publisher trajPublisher;
-    bool autostartDynamics, autostopDynamics, autostartSlam, autopublishTrajectory;
+  /// all frame names must be prefixed when using more than one rc_visard
+  std::string tfPrefix;
 
-    /// all frame names must be prefixed when using more than one rc_visard
-    std::string tfPrefix;
-
-    /// should poses published also via tf?
-    bool tfEnabled;
+  /// should poses published also via tf?
+  bool tfEnabled;
 };
-
 }
 
 #endif

@@ -41,37 +41,33 @@
 
 namespace rc
 {
-
 class DepthPublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  /**
+    Initialization of publisher.
 
-    /**
-      Initialization of publisher.
+    @param nh     Node handle.
+    @param f      Focal length, normalized to image width of 1.
+    @param t      Basline in m.
+    @param scale  Factor for raw disparities.
+  */
 
-      @param nh     Node handle.
-      @param f      Focal length, normalized to image width of 1.
-      @param t      Basline in m.
-      @param scale  Factor for raw disparities.
-    */
+  DepthPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double f, double t, double scale);
 
-    DepthPublisher(ros::NodeHandle &nh, const std::string &frame_id_prefix, double f, double t, double scale);
+  bool used() override;
 
-    bool used() override;
+  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
+private:
+  DepthPublisher(const DepthPublisher&);             // forbidden
+  DepthPublisher& operator=(const DepthPublisher&);  // forbidden
 
-  private:
+  uint32_t seq;
+  float scale;
 
-    DepthPublisher(const DepthPublisher &); // forbidden
-    DepthPublisher &operator=(const DepthPublisher &); // forbidden
-
-    uint32_t seq;
-    float  scale;
-
-    ros::Publisher pub;
+  ros::Publisher pub;
 };
-
 }
 
 #endif

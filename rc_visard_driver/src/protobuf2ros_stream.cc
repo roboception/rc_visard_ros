@@ -43,14 +43,11 @@
 
 #include <rc_dynamics_api/unexpected_receive_timeout.h>
 
-
 using namespace std;
 
 namespace rc
 {
-
 namespace rcd = dynamics;
-
 
 bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
 {
@@ -64,7 +61,6 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
 
   while (!_stop && !failed)
   {
-
     // start streaming only if someone is listening
 
     if (!rosPublisher.used())
@@ -89,16 +85,16 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
     {
       receiver = _rcdyn->createReceiverForStream(_stream);
     }
-    catch (rcd::UnexpectedReceiveTimeout& e) {
+    catch (rcd::UnexpectedReceiveTimeout& e)
+    {
       stringstream msg;
       msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
       ROS_WARN_STREAM_THROTTLE(5, msg.str());
       continue;
     }
-    catch (exception &e)
+    catch (exception& e)
     {
-      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ")
-                       + _stream + ": " + e.what());
+      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ") + _stream + ": " + e.what());
       failed = true;
       break;
     }
@@ -110,34 +106,29 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
     shared_ptr<::google::protobuf::Message> pbMsg;
     while (!_stop && rosPublisher.used())
     {
-
       // try receive msg; blocking call (timeout)
       try
       {
         pbMsg = receiver->receive(pbMsgType);
         _success = true;
       }
-      catch (std::exception &e)
+      catch (std::exception& e)
       {
-        ROS_ERROR_STREAM("Caught exception during receiving "
-                                 << _stream << ": " << e.what());
+        ROS_ERROR_STREAM("Caught exception during receiving " << _stream << ": " << e.what());
         failed = true;
-        break; // stop receiving loop
+        break;  // stop receiving loop
       }
 
       // timeout happened
       if (!pbMsg)
       {
-        ROS_WARN_STREAM("Did not receive any "
-                                 << _stream << " message within the last "
-                                 << timeoutMillis << " ms. "
-                                 << "Either rc_visard stopped streaming or is turned off, "
-                                 << "or you seem to have serious network/connection problems!");
-        continue; // wait for next packet
+        ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
+                                               << "Either rc_visard stopped streaming or is turned off, "
+                                               << "or you seem to have serious network/connection problems!");
+        continue;  // wait for next packet
       }
 
-      ROS_DEBUG_STREAM_THROTTLE(1, "Received protobuf message: "
-              << pbMsg->DebugString());
+      ROS_DEBUG_STREAM_THROTTLE(1, "Received protobuf message: " << pbMsg->DebugString());
 
       // convert to ROS message and publish
       rosPublisher.publish(pbMsg);
@@ -149,7 +140,6 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
   // return info about stream being stopped externally or failed internally
   return !failed;
 }
-
 
 bool PoseStream::startReceivingAndPublishingAsRos()
 {
@@ -189,16 +179,16 @@ bool PoseStream::startReceivingAndPublishingAsRos()
     {
       receiver = _rcdyn->createReceiverForStream(_stream);
     }
-    catch (rcd::UnexpectedReceiveTimeout& e) {
+    catch (rcd::UnexpectedReceiveTimeout& e)
+    {
       stringstream msg;
       msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
       ROS_WARN_STREAM_THROTTLE(5, msg.str());
       continue;
     }
-    catch (exception &e)
+    catch (exception& e)
     {
-      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ")
-                       + _stream + ": " + e.what());
+      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ") + _stream + ": " + e.what());
       failed = true;
       break;
     }
@@ -207,42 +197,36 @@ bool PoseStream::startReceivingAndPublishingAsRos()
 
     // main loop for listening, receiving and republishing data to ROS
 
-    shared_ptr <roboception::msgs::Frame> protoFrame;
+    shared_ptr<roboception::msgs::Frame> protoFrame;
     while (!_stop && someoneListens)
     {
-
       // try receive msg; blocking call (timeout)
       try
       {
         protoFrame = receiver->receive<roboception::msgs::Frame>();
         _success = true;
       }
-      catch (std::exception &e)
+      catch (std::exception& e)
       {
-        ROS_ERROR_STREAM("Caught exception during receiving "
-                                 << _stream << ": " << e.what());
+        ROS_ERROR_STREAM("Caught exception during receiving " << _stream << ": " << e.what());
         failed = true;
-        break; // stop receiving loop
+        break;  // stop receiving loop
       }
 
       // timeout happened
       if (!protoFrame)
       {
-        ROS_WARN_STREAM("Did not receive any "
-                                 << _stream << " message within the last "
-                                 << timeoutMillis << " ms. "
-                                 << "Either rc_visard stopped streaming or is turned off, "
-                                 << "or you seem to have serious network/connection problems!");
-        continue; // wait for next packet
+        ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
+                                               << "Either rc_visard stopped streaming or is turned off, "
+                                               << "or you seem to have serious network/connection problems!");
+        continue;  // wait for next packet
       }
 
-      ROS_DEBUG_STREAM_THROTTLE(1, "Received protoFrame: "
-              << protoFrame->DebugString());
-
+      ROS_DEBUG_STREAM_THROTTLE(1, "Received protoFrame: " << protoFrame->DebugString());
 
       // overwrite frame name/ids
-      protoFrame->set_parent(_tfPrefix+protoFrame->parent());
-      protoFrame->set_name(_tfPrefix+protoFrame->name());
+      protoFrame->set_parent(_tfPrefix + protoFrame->parent());
+      protoFrame->set_name(_tfPrefix + protoFrame->name());
 
       auto rosPose = toRosPoseStamped(*protoFrame);
       pub.publish(rosPose);
@@ -264,8 +248,6 @@ bool PoseStream::startReceivingAndPublishingAsRos()
   // return info about stream being stopped externally or failed internally
   return !failed;
 }
-
-
 
 bool DynamicsStream::startReceivingAndPublishingAsRos()
 {
@@ -292,8 +274,8 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
 
   while (!_stop && !failed)
   {
-    bool someoneListens = pub_odom.getNumSubscribers() > 0 ||
-            (publishVisualizationMarkers && pub_markers.getNumSubscribers() > 0);
+    bool someoneListens =
+        pub_odom.getNumSubscribers() > 0 || (publishVisualizationMarkers && pub_markers.getNumSubscribers() > 0);
 
     // start streaming only if someone is listening
 
@@ -319,16 +301,16 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
     {
       receiver = _rcdyn->createReceiverForStream(_stream);
     }
-    catch (rcd::UnexpectedReceiveTimeout& e) {
+    catch (rcd::UnexpectedReceiveTimeout& e)
+    {
       stringstream msg;
       msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
       ROS_WARN_STREAM_THROTTLE(5, msg.str());
       continue;
     }
-    catch (exception &e)
+    catch (exception& e)
     {
-      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ")
-                       + _stream + ": " + e.what());
+      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ") + _stream + ": " + e.what());
       failed = true;
       break;
     }
@@ -337,46 +319,40 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
 
     // main loop for listening, receiving and republishing data to ROS
 
-    shared_ptr <roboception::msgs::Dynamics> protoMsg;
+    shared_ptr<roboception::msgs::Dynamics> protoMsg;
     while (!_stop && someoneListens)
     {
-
       // try receive msg; blocking call (timeout)
       try
       {
         protoMsg = receiver->receive<roboception::msgs::Dynamics>();
         _success = true;
       }
-      catch (std::exception &e)
+      catch (std::exception& e)
       {
-        ROS_ERROR_STREAM("Caught exception during receiving "
-                                 << _stream << ": " << e.what());
+        ROS_ERROR_STREAM("Caught exception during receiving " << _stream << ": " << e.what());
         failed = true;
-        break; // stop receiving loop
+        break;  // stop receiving loop
       }
 
       // timeout happened
       if (!protoMsg)
       {
-        ROS_WARN_STREAM("Did not receive any "
-                                 << _stream << " message within the last "
-                                 << timeoutMillis << " ms. "
-                                 << "Either rc_visard stopped streaming or is turned off, "
-                                 << "or you seem to have serious network/connection problems!");
-        continue; // wait for next packet
+        ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
+                                               << "Either rc_visard stopped streaming or is turned off, "
+                                               << "or you seem to have serious network/connection problems!");
+        continue;  // wait for next packet
       }
 
-      ROS_DEBUG_STREAM_THROTTLE(1, "Received protoMsg: "
-              << protoMsg->DebugString());
-
+      ROS_DEBUG_STREAM_THROTTLE(1, "Received protoMsg: " << protoMsg->DebugString());
 
       // prefix all frame ids before
-      protoMsg->set_pose_frame(_tfPrefix+protoMsg->pose_frame());
-      protoMsg->set_linear_velocity_frame(_tfPrefix+protoMsg->linear_velocity_frame());
-      protoMsg->set_angular_velocity_frame(_tfPrefix+protoMsg->angular_velocity_frame());
-      protoMsg->set_linear_acceleration_frame(_tfPrefix+protoMsg->linear_acceleration_frame());
-      protoMsg->mutable_cam2imu_transform()->set_name(_tfPrefix+protoMsg->cam2imu_transform().name());
-      protoMsg->mutable_cam2imu_transform()->set_parent(_tfPrefix+protoMsg->cam2imu_transform().parent());
+      protoMsg->set_pose_frame(_tfPrefix + protoMsg->pose_frame());
+      protoMsg->set_linear_velocity_frame(_tfPrefix + protoMsg->linear_velocity_frame());
+      protoMsg->set_angular_velocity_frame(_tfPrefix + protoMsg->angular_velocity_frame());
+      protoMsg->set_linear_acceleration_frame(_tfPrefix + protoMsg->linear_acceleration_frame());
+      protoMsg->mutable_cam2imu_transform()->set_name(_tfPrefix + protoMsg->cam2imu_transform().name());
+      protoMsg->mutable_cam2imu_transform()->set_parent(_tfPrefix + protoMsg->cam2imu_transform().parent());
 
       // time stamp of this message
       ros::Time msgStamp = toRosTime(protoMsg->timestamp());
@@ -395,18 +371,17 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
 
       // publish rc dynamics message as ros odometry
       auto odom = boost::make_shared<nav_msgs::Odometry>();
-      odom->header.frame_id = protoMsg->pose_frame(); // "world"
+      odom->header.frame_id = protoMsg->pose_frame();  // "world"
       odom->header.stamp = msgStamp;
-      odom->child_frame_id = protoMsg->linear_acceleration_frame(); //"imu"
+      odom->child_frame_id = protoMsg->linear_acceleration_frame();  //"imu"
       odom->pose.pose = *toRosPose(protoMsg->pose());
       // for odom twist, we need to transform lin_velocity from world to imu
       auto lin_vel = protoMsg->linear_velocity();
-      auto lin_vel_transformed = imu2world_rot_only.inverse()*tf::Vector3(
-              lin_vel.x(), lin_vel.y(), lin_vel.z());
+      auto lin_vel_transformed = imu2world_rot_only.inverse() * tf::Vector3(lin_vel.x(), lin_vel.y(), lin_vel.z());
       odom->twist.twist.linear.x = lin_vel_transformed.x();
       odom->twist.twist.linear.y = lin_vel_transformed.y();
       odom->twist.twist.linear.z = lin_vel_transformed.z();
-      auto ang_vel = protoMsg->angular_velocity(); // ang_velocity already is in imu
+      auto ang_vel = protoMsg->angular_velocity();  // ang_velocity already is in imu
       odom->twist.twist.angular.x = ang_vel.x();
       odom->twist.twist.angular.y = ang_vel.y();
       odom->twist.twist.angular.z = ang_vel.z();
@@ -421,7 +396,7 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
         start.y = protoPosePosition.y();
         start.z = protoPosePosition.z();
 
-        visualization_msgs::Marker lin_vel_marker; // single marker for linear velocity
+        visualization_msgs::Marker lin_vel_marker;  // single marker for linear velocity
         lin_vel_marker.header.stamp = msgStamp;
         lin_vel_marker.header.frame_id = protoMsg->linear_velocity_frame();
         lin_vel_marker.ns = _tfPrefix;
@@ -437,20 +412,18 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
         lin_vel_marker.scale.x = 0.005;
         lin_vel_marker.scale.y = 0.01;
         lin_vel_marker.color.a = 1;
-        lin_vel_marker.color.g = lin_vel_marker.color.b = 1.0; // cyan
+        lin_vel_marker.color.g = lin_vel_marker.color.b = 1.0;  // cyan
         pub_markers.publish(lin_vel_marker);
 
-        visualization_msgs::Marker ang_vel_marker; // single marker for angular velocity
+        visualization_msgs::Marker ang_vel_marker;  // single marker for angular velocity
         ang_vel_marker.header.stamp = msgStamp;
-        ang_vel_marker.header.frame_id = protoMsg->pose_frame(); // "world"
+        ang_vel_marker.header.frame_id = protoMsg->pose_frame();  // "world"
         ang_vel_marker.ns = _tfPrefix;
         ang_vel_marker.id = 1;
         ang_vel_marker.type = visualization_msgs::Marker::ARROW;
         ang_vel_marker.action = visualization_msgs::Marker::MODIFY;
         ang_vel_marker.frame_locked = true;
-        auto ang_vel_transformed = imu2world_rot_only *
-                                   tf::Vector3(ang_vel.x(), ang_vel.y(),
-                                               ang_vel.z());
+        auto ang_vel_transformed = imu2world_rot_only * tf::Vector3(ang_vel.x(), ang_vel.y(), ang_vel.z());
         end.x = start.x + ang_vel_transformed.x();
         end.y = start.y + ang_vel_transformed.y();
         end.z = start.z + ang_vel_transformed.z();
@@ -459,21 +432,19 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
         ang_vel_marker.scale.x = 0.005;
         ang_vel_marker.scale.y = 0.01;
         ang_vel_marker.color.a = 1;
-        ang_vel_marker.color.r = ang_vel_marker.color.b = 1.0; // mangenta
+        ang_vel_marker.color.r = ang_vel_marker.color.b = 1.0;  // mangenta
         pub_markers.publish(ang_vel_marker);
 
-        visualization_msgs::Marker lin_accel_marker; // single marker for linear acceleration
+        visualization_msgs::Marker lin_accel_marker;  // single marker for linear acceleration
         lin_accel_marker.header.stamp = msgStamp;
-        lin_accel_marker.header.frame_id = protoMsg->pose_frame(); // "world"
+        lin_accel_marker.header.frame_id = protoMsg->pose_frame();  // "world"
         lin_accel_marker.ns = _tfPrefix;
         lin_accel_marker.id = 2;
         lin_accel_marker.type = visualization_msgs::Marker::ARROW;
         lin_accel_marker.action = visualization_msgs::Marker::MODIFY;
         lin_accel_marker.frame_locked = true;
         auto lin_accel = protoMsg->linear_acceleration();
-        auto lin_accel_transformed = imu2world_rot_only *
-                                     tf::Vector3(lin_accel.x(), lin_accel.y(),
-                                                 lin_accel.z());
+        auto lin_accel_transformed = imu2world_rot_only * tf::Vector3(lin_accel.x(), lin_accel.y(), lin_accel.z());
         end.x = start.x + lin_accel_transformed.x();
         end.y = start.y + lin_accel_transformed.y();
         end.z = start.z + lin_accel_transformed.z();
@@ -482,14 +453,13 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
         lin_accel_marker.scale.x = 0.005;
         lin_accel_marker.scale.y = 0.01;
         lin_accel_marker.color.a = 1;
-        lin_accel_marker.color.r = lin_accel_marker.color.g = 1.0; // yellow
+        lin_accel_marker.color.r = lin_accel_marker.color.g = 1.0;  // yellow
         pub_markers.publish(lin_accel_marker);
       }
 
       // check if still someone is listening
-      someoneListens = pub_odom.getNumSubscribers() > 0 ||
-                       (publishVisualizationMarkers &&
-                        pub_markers.getNumSubscribers() > 0);
+      someoneListens =
+          pub_odom.getNumSubscribers() > 0 || (publishVisualizationMarkers && pub_markers.getNumSubscribers() > 0);
     }
 
     ROS_INFO_STREAM("rc_visard_driver: Disabled rc-dynamics stream: " << _stream);
@@ -498,7 +468,4 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
   // return info about stream being stopped externally or failed internally
   return !failed;
 }
-
-
-
 }

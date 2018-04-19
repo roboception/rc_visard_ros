@@ -41,37 +41,33 @@
 
 namespace rc
 {
-
 class CameraInfoPublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  /**
+    Initialization of publisher.
 
-    /**
-      Initialization of publisher.
+    @param nh   Node handle.
+    @param f    Focal length, normalized to image width 1.
+    @param t    Baseline in m.
+    @param left True for left and false for right camera.
+  */
 
-      @param nh   Node handle.
-      @param f    Focal length, normalized to image width 1.
-      @param t    Baseline in m.
-      @param left True for left and false for right camera.
-    */
+  CameraInfoPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double f, double t, bool left);
 
-    CameraInfoPublisher(ros::NodeHandle &nh, const std::string &frame_id_prefix, double f, double t, bool left);
+  bool used() override;
 
-    bool used() override;
+  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
+private:
+  CameraInfoPublisher(const CameraInfoPublisher&);             // forbidden
+  CameraInfoPublisher& operator=(const CameraInfoPublisher&);  // forbidden
 
-  private:
+  float f;
 
-    CameraInfoPublisher(const CameraInfoPublisher &); // forbidden
-    CameraInfoPublisher &operator=(const CameraInfoPublisher &); // forbidden
-
-    float f;
-
-    sensor_msgs::CameraInfo info;
-    ros::Publisher pub;
+  sensor_msgs::CameraInfo info;
+  ros::Publisher pub;
 };
-
 }
 
 #endif

@@ -43,42 +43,38 @@
 
 namespace rc
 {
-
 class ErrorDepthPublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  /**
+    Initialization of publisher for depth errors.
 
-    /**
-      Initialization of publisher for depth errors.
+    @param nh     Node handle.
+    @param f      Focal length, normalized to image width of 1.
+    @param t      Basline in m.
+    @param scale  Factor for raw disparities.
+  */
 
-      @param nh     Node handle.
-      @param f      Focal length, normalized to image width of 1.
-      @param t      Basline in m.
-      @param scale  Factor for raw disparities.
-    */
+  ErrorDepthPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double f, double t, double scale);
 
-    ErrorDepthPublisher(ros::NodeHandle &nh, const std::string &frame_id_prefix, double f, double t, double scale);
+  bool used() override;
 
-    bool used() override;
+  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
+private:
+  ErrorDepthPublisher(const ErrorDepthPublisher&);             // forbidden
+  ErrorDepthPublisher& operator=(const ErrorDepthPublisher&);  // forbidden
 
-  private:
+  rcg::ImageList disp_list;
+  rcg::ImageList err_list;
 
-    ErrorDepthPublisher(const ErrorDepthPublisher &); // forbidden
-    ErrorDepthPublisher &operator=(const ErrorDepthPublisher &); // forbidden
+  uint32_t seq;
+  float f;
+  float t;
+  float scale;
 
-    rcg::ImageList disp_list;
-    rcg::ImageList err_list;
-
-    uint32_t seq;
-    float f;
-    float t;
-    float scale;
-
-    ros::Publisher pub;
+  ros::Publisher pub;
 };
-
 }
 
 #endif

@@ -43,35 +43,31 @@
 
 namespace rc
 {
-
 class ErrorDisparityPublisher : public GenICam2RosPublisher
 {
-  public:
+public:
+  /**
+    Initialization of publisher for disparity errors.
 
-    /**
-      Initialization of publisher for disparity errors.
+    @param nh    Node handle.
+    @param scale Factor for raw disparities.
+  */
 
-      @param nh    Node handle.
-      @param scale Factor for raw disparities.
-    */
+  ErrorDisparityPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double scale);
 
-    ErrorDisparityPublisher(ros::NodeHandle &nh, const std::string &frame_id_prefix, double scale);
+  bool used() override;
 
-    bool used() override;
+  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
 
-    void publish(const rcg::Buffer *buffer, uint64_t pixelformat) override;
+private:
+  ErrorDisparityPublisher(const ErrorDisparityPublisher&);             // forbidden
+  ErrorDisparityPublisher& operator=(const ErrorDisparityPublisher&);  // forbidden
 
-  private:
+  uint32_t seq;
+  float scale;
 
-    ErrorDisparityPublisher(const ErrorDisparityPublisher &); // forbidden
-    ErrorDisparityPublisher &operator=(const ErrorDisparityPublisher &); // forbidden
-
-    uint32_t seq;
-    float scale;
-
-    ros::Publisher pub;
+  ros::Publisher pub;
 };
-
 }
 
 #endif

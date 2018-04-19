@@ -37,14 +37,13 @@ using namespace std;
 
 namespace rc
 {
-
 namespace rcd = dynamics;
 
-ThreadedStream::ThreadedStream(rc::dynamics::RemoteInterface::Ptr rcdIface,
-                               const std::string &stream, ros::NodeHandle &nh)
-        : _stop(false), _requested(false), _success(false), _rcdyn(rcdIface),
-          _stream(stream), _nh(nh)
-{}
+ThreadedStream::ThreadedStream(rc::dynamics::RemoteInterface::Ptr rcdIface, const std::string& stream,
+                               ros::NodeHandle& nh)
+  : _stop(false), _requested(false), _success(false), _rcdyn(rcdIface), _stream(stream), _nh(nh)
+{
+}
 
 void ThreadedStream::start()
 {
@@ -76,16 +75,14 @@ void ThreadedStream::work()
   }
 }
 
-
-
-
 ThreadedStream::Manager::Ptr ThreadedStream::Manager::create()
 {
   return Ptr(new Manager());
 }
 
 ThreadedStream::Manager::Manager() : _any_failed(false)
-{}
+{
+}
 
 void ThreadedStream::Manager::add(ThreadedStream::Ptr stream)
 {
@@ -100,17 +97,19 @@ const std::list<ThreadedStream::Ptr>& ThreadedStream::Manager::get()
 
 void ThreadedStream::Manager::start_all()
 {
-  for (auto &s : _streams)  s->start();
+  for (auto& s : _streams)
+    s->start();
 }
 
 void ThreadedStream::Manager::stop_all()
 {
-  for (auto &s : _streams)  s->stop();
+  for (auto& s : _streams)
+    s->stop();
 }
 
 void ThreadedStream::Manager::join_all()
 {
-  for (auto &s : _streams)
+  for (auto& s : _streams)
     s->join();
 }
 
@@ -119,12 +118,10 @@ bool ThreadedStream::Manager::all_succeeded() const
   if (_streams.empty())
     return true;
 
-  for (const auto &s : _streams)
+  for (const auto& s : _streams)
     if (s->requested() && !s->succeeded())
       return false;
 
   return true;
 }
-
-
 }

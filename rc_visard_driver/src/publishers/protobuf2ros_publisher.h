@@ -31,54 +31,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef RC_VISARD_ROS_PROTOBUF2ROS_PUBLISHER_H
 #define RC_VISARD_ROS_PROTOBUF2ROS_PUBLISHER_H
-
 
 #include <ros/ros.h>
 #include <google/protobuf/message.h>
 
-
 namespace rc
 {
-
-
 /**
  * Generic implementation for publishing protobuf messages to ros
  */
 class Protobuf2RosPublisher
 {
-  public:
+public:
+  /**
+   * Internally creates a corresponding ros publisher
+   */
+  Protobuf2RosPublisher(ros::NodeHandle& nh, const std::string& topic, const std::string& pbMsgType,
+                        const std::string& frame_id_prefix);
 
-    /**
-     * Internally creates a corresponding ros publisher
-     */
-    Protobuf2RosPublisher(ros::NodeHandle &nh, const std::string &topic,
-                          const std::string &pbMsgType,
-                          const std::string &frame_id_prefix);
+  /**
+    Returns true if there are subscribers to the topic.
 
-    /**
-      Returns true if there are subscribers to the topic.
+    @return True if there are subscribers.
+  */
+  virtual bool used();
 
-      @return True if there are subscribers.
-    */
-    virtual bool used();
+  /**
+   * Publish the generic protobuf message as a corresponding Ros Message
+   */
+  virtual void publish(std::shared_ptr<::google::protobuf::Message> pbMsg);
 
-    /**
-     * Publish the generic protobuf message as a corresponding Ros Message
-     */
-    virtual void publish(std::shared_ptr<::google::protobuf::Message> pbMsg);
+protected:
+  ros::Publisher pub;  // needs to be constructed properly by child classes
+  const std::string _tfPrefix;
 
-  protected:
-    ros::Publisher pub; // needs to be constructed properly by child classes
-    const std::string _tfPrefix;
-
-  private:
-    Protobuf2RosPublisher &
-    operator=(const Protobuf2RosPublisher &); // forbidden
+private:
+  Protobuf2RosPublisher& operator=(const Protobuf2RosPublisher&);  // forbidden
 };
-
 }
 
-#endif //RC_VISARD_ROS_PROTOBUF2ROS_PUBLISHER_H
+#endif  // RC_VISARD_ROS_PROTOBUF2ROS_PUBLISHER_H
