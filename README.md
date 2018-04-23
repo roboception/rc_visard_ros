@@ -33,21 +33,20 @@ Alternatively, instead of the final `make install`, you can also use
 
 ### GenICam GenTL Transport Layer
 
-The rc_visard_driver uses rc_genicam_api for interfacing with the rc_visard
-sensor via GenICam/GigE Vision and requires a transport layer called a GenTL producer (shared library with the suffix `.cti`).
-The path to this producer has to be set with the
-`GENICAM_GENTL64_PATH` environment variable (or `GENICAM_GENTL32_PATH` for
-32 bit systems).
-
+The rc_visard_driver uses [rc_genicam_api](https://github.com/roboception/rc_genicam_api)
+for interfacing with the rc_visard sensor via GenICam/GigE Vision and requires a
+transport layer called a GenTL producer (shared library with the suffix `.cti`).
 For convenience rc_genicam_api comes with producers from Baumer for common
 architectures.
-If the `GENICAM_GENTL64_PATH` environment variable is not set, rc_visard_driver
-will fall back to searching for the Baumer producer where rc_genicam_api is
-installed.
+
+The path to the producer can be set with the `GENICAM_GENTL64_PATH`
+environment variable (or `GENICAM_GENTL32_PATH` for 32 bit systems).
+If not set, rc_visard_driver will fall back to searching for the Baumer
+producer where rc_genicam_api is installed.
 
 If the producer .cti can't be found and you will get an error message like
 
-    [ERROR] [1512568083.512790905]: rc_visard_driver: No transport layers found in path GENICAM_GENTL64_PATH
+    [ERROR] [1512568083.512790905]: rc_visard_driver: No transport layers found in path /opt/ros/indigo/lib/rc_genicam_api
 
 In this case you need either need to actually install rc_genicam_api properly or
 set the environment variable when running it. E.g. export:

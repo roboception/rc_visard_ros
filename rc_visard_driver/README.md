@@ -212,6 +212,7 @@ dynamic module (which needs to be started for working dynamic-state estimates).
 - `dynamics_start_slam`
 - `dynamics_restart_slam`
 - `dynamics_stop_slam`
+- `dynamics_reset_slam`
 
 The trajectory constructed and stored by the `rc_slam` node
 can be retrieved by

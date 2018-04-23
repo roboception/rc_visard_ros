@@ -2,6 +2,14 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2018-04-23)
+------------------
+
+* add ptp_enabled dynamic_reconfigure parameter (to enable PrecisionTimeProtocol Slave on rc_visard)
+* add reset service for SLAM
+* README updates
+* use 'rc_visard' as default device name (works with one rc_visard with factory settings connected)
+
 2.0.0 (2018-02-27)
 ------------------
 * rc_genicam_api and rc_dynamics_api as dependency instead of submodule
