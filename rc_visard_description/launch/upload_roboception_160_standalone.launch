@@ -1,3 +1,3 @@
 <launch>
-    <param name="robot_description" command="$(find xacro)/xacro.py '$(find rc_visard_160_description)/urdf/rc_visard_160_standalone.urdf'"/>
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find rc_visard_description)/urdf/rc_visard_160_standalone.urdf'"/>
 </launch>
