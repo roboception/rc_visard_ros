@@ -89,6 +89,7 @@ DeviceNodelet::DeviceNodelet()
   reconfig = 0;
   dev_supports_gain = false;
   dev_supports_wb = false;
+  iocontrol_avail = false;
   level = 0;
 
   stopImageThread = imageRequested = imageSuccess = false;
@@ -406,6 +407,35 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
   cfg.ptp_enabled = rcg::getBoolean(nodemap, "GevIEEE1588", false);
 
+  // check if io-control is available and get values
+
+  try
+  {
+    // only deliver images with output (i.e. projector) turned off in exposure
+    // alternate mode
+
+    rcg::setEnum(nodemap, "AcquisitionAlternateFilter", "OnlyLow", true);
+
+    // get current values
+
+    rcg::setEnum(nodemap, "LineSelector", "Out1", true);
+    cfg.out1_mode = rcg::getString(nodemap, "LineSource", true);
+
+    rcg::setEnum(nodemap, "LineSelector", "Out2", true);
+    cfg.out2_mode = rcg::getString(nodemap, "LineSource", true);
+
+    iocontrol_avail = true;
+  }
+  catch (const std::exception &)
+  {
+    ROS_WARN("rc_visard_driver: IO control functions are not available.");
+
+    cfg.out1_mode = "ExposureActive";
+    cfg.out2_mode = "Low";
+
+    iocontrol_avail = false;
+  }
+
   // setup reconfigure server
 
   if (reconfig == 0)
@@ -430,6 +460,8 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     pnh.setParam("depth_maxdepth", cfg.depth_maxdepth);
     pnh.setParam("depth_maxdeptherr", cfg.depth_maxdeptherr);
     pnh.setParam("ptp_enabled", cfg.ptp_enabled);
+    pnh.setParam("out1_mode", cfg.out1_mode);
+    pnh.setParam("out2_mode", cfg.out2_mode);
 
     // TODO: we need to dismangle initialization of dynreconfserver from not-READONLY-access-condition
     reconfig = new dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>(pnh);
@@ -468,6 +500,26 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
     c.depth_quality = "H";
   }
 
+  if (iocontrol_avail)
+  {
+    if (c.out1_mode != "Low" && c.out1_mode != "High" && c.out1_mode != "ExposureActive" &&
+        c.out1_mode != "ExposureAlternateActive")
+    {
+      c.out1_mode = "ExposureActive";
+    }
+
+    if (c.out2_mode != "Low" && c.out2_mode != "High" && c.out2_mode != "ExposureActive" &&
+        c.out2_mode != "ExposureAlternateActive")
+    {
+      c.out2_mode = "Low";
+    }
+  }
+  else
+  {
+    c.out1_mode = "ExposureActive";
+    c.out2_mode = "Low";
+  }
+
   // copy config for using it in the grabbing thread
 
   config = c;
@@ -483,7 +535,8 @@ namespace
 */
 
 void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
-                      const rc_visard_driver::rc_visard_driverConfig& cfg, uint32_t lvl)
+                      const rc_visard_driver::rc_visard_driverConfig& cfg, uint32_t lvl,
+                      bool iocontrol_avail)
 {
   uint32_t prev_lvl = 0;
 
@@ -637,6 +690,28 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
       {
         lvl &= ~131072;
         rcg::setBoolean(nodemap, "GevIEEE1588", cfg.ptp_enabled, true);
+      }
+
+      if (lvl & 262144)
+      {
+        lvl &= ~262144;
+
+        if (iocontrol_avail)
+        {
+          rcg::setEnum(nodemap, "LineSelector", "Out1", true);
+          rcg::setEnum(nodemap, "LineSource", cfg.out1_mode.c_str(), true);
+        }
+      }
+
+      if (lvl & 524288)
+      {
+        lvl &= ~524288;
+
+        if (iocontrol_avail)
+        {
+          rcg::setEnum(nodemap, "LineSelector", "Out2", true);
+          rcg::setEnum(nodemap, "LineSource", cfg.out2_mode.c_str(), true);
+        }
       }
     }
     catch (const std::exception& ex)
@@ -961,9 +1036,22 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             level = 0;
             mtx.unlock();
 
-            setConfiguration(rcgnodemap, cfg, lvl);
+            setConfiguration(rcgnodemap, cfg, lvl, iocontrol_avail);
 
             disprange = cfg.depth_disprange;
+
+            if (lvl & (262144|524288))
+            {
+              if (cfg.out1_mode == "ExposureAlternateActive" ||
+                  cfg.out2_mode == "ExposureAlternateActive")
+              {
+                points2.setTimestampTolerance(0.05);
+              }
+              else
+              {
+                points2.setTimestampTolerance(0);
+              }
+            }
           }
         }
 

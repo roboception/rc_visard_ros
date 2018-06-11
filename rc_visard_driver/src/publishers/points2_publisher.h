@@ -58,6 +58,8 @@ public:
 
   Points2Publisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double f, double t, double scale);
 
+  void setTimestampTolerance(double tolerance);
+
   bool used() override;
 
   void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
@@ -73,6 +75,8 @@ private:
   float f;
   float t;
   float scale;
+
+  uint64_t tolerance_ns;
 
   ros::Publisher pub;
 };

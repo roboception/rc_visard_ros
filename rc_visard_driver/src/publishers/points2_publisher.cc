@@ -47,7 +47,14 @@ Points2Publisher::Points2Publisher(ros::NodeHandle& nh, const std::string& frame
   t = _t;
   scale = _scale;
 
+  tolerance_ns=0;
+
   pub = nh.advertise<sensor_msgs::PointCloud2>("points2", 1);
+}
+
+void Points2Publisher::setTimestampTolerance(double tolerance)
+{
+  tolerance_ns=static_cast<uint64_t>(tolerance*1000000000ull);
 }
 
 bool Points2Publisher::used()
@@ -74,8 +81,8 @@ void Points2Publisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
 
     uint64_t timestamp = buffer->getTimestampNS();
 
-    std::shared_ptr<const rcg::Image> left = left_list.find(timestamp);
-    std::shared_ptr<const rcg::Image> disp = disp_list.find(timestamp);
+    std::shared_ptr<const rcg::Image> left = left_list.find(timestamp, tolerance_ns);
+    std::shared_ptr<const rcg::Image> disp = disp_list.find(timestamp, tolerance_ns);
 
     if (left && disp)
     {
