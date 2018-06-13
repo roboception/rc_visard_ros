@@ -84,6 +84,20 @@ void Points2Publisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
     std::shared_ptr<const rcg::Image> left = left_list.find(timestamp, tolerance_ns);
     std::shared_ptr<const rcg::Image> disp = disp_list.find(timestamp, tolerance_ns);
 
+    // print warning with reason if no left image can be found for disparity image
+
+    if (pixelformat == Coord3D_C16 && !left)
+    {
+      if (timestamp < left_list.getOldestTime())
+      {
+        ROS_WARN_STREAM("Cannot find left image for disparity image. Internal queue size to small.");
+      }
+      else
+      {
+        ROS_WARN_STREAM("Cannot find left image for disparity image. Left image possibly dropped.");
+      }
+    }
+
     if (left && disp)
     {
       // determine integer factor between size of left and disparity image
