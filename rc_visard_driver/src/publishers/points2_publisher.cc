@@ -90,11 +90,11 @@ void Points2Publisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
     {
       if (timestamp < left_list.getOldestTime())
       {
-        ROS_WARN_STREAM("Cannot find left image for disparity image. Internal queue size to small.");
+        ROS_DEBUG_STREAM("Cannot find left image for disparity image. Internal queue size to small.");
       }
       else
       {
-        ROS_WARN_STREAM("Cannot find left image for disparity image. Left image possibly dropped.");
+        ROS_DEBUG_STREAM("Cannot find left image for disparity image. Left image possibly dropped.");
       }
     }
 
