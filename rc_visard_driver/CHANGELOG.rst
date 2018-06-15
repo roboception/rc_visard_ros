@@ -2,6 +2,13 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2018-06-15)
+------------------
+
+* Adjusting disparity range to content of disparity image for colored disparity visualization
+* Added debug message if left and disparity images cannot be synchronized for creating point clouds
+* Implemented parameters for IO control and relaxed time synchronization in case of exposure alternate mode
+
 2.1.0 (2018-04-23)
 ------------------
 
