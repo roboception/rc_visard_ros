@@ -86,6 +86,42 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelf
     size_t px = buffer->getXPadding();
     const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase()) + buffer->getImageOffset();
 
+    // ensure that current disprange setting is sufficient
+
+    bool bigendian = buffer->isBigEndian();
+
+    int drange=disprange;
+
+    {
+      int dmax=0;
+      const uint8_t* p=ps;
+
+      if (bigendian)
+      {
+        for (uint32_t k = 0; k < im->height; k++)
+        {
+          for (uint32_t i = 0; i < im->width; i++)
+          {
+            dmax=std::max(dmax, static_cast<int>(p[0] << 8) | p[1]);
+            p++;
+          }
+        }
+      }
+      else
+      {
+        for (uint32_t k = 0; k < im->height; k++)
+        {
+          for (uint32_t i = 0; i < im->width; i++)
+          {
+            dmax=std::max(dmax, static_cast<int>(p[1] << 8) | p[0]);
+            p++;
+          }
+        }
+      }
+
+      drange=std::max(disprange, static_cast<int>(std::ceil(dmax*scale)));
+    }
+
     // convert image data
 
     im->encoding = sensor_msgs::image_encodings::RGB8;
@@ -93,8 +129,6 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelf
 
     im->data.resize(im->step * im->height);
     uint8_t* pt = reinterpret_cast<uint8_t*>(&im->data[0]);
-
-    bool bigendian = buffer->isBigEndian();
 
     for (uint32_t k = 0; k < im->height; k++)
     {
@@ -115,7 +149,7 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelf
 
         if (d != 0)
         {
-          double v = scale * d / disprange;
+          double v = scale * d / drange;
           v = v / 1.15 + 0.1;
 
           double r = std::max(0.0, std::min(1.0, (1.5 - 4 * fabs(v - 0.75))));
