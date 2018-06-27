@@ -185,7 +185,12 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   dynamicsStopService = pnh.advertiseService("dynamics_stop", &DeviceNodelet::dynamicsStop, this);
   dynamicsStopSlamService = pnh.advertiseService("dynamics_stop_slam", &DeviceNodelet::dynamicsStopSlam, this);
   dynamicsResetSlamService = pnh.advertiseService("dynamics_reset_slam", &DeviceNodelet::dynamicsResetSlam, this);
+
   getSlamTrajectoryService = pnh.advertiseService("get_trajectory", &DeviceNodelet::getSlamTrajectory, this);
+  slamSaveMapService = pnh.advertiseService("save_map", &DeviceNodelet::saveSlamMap, this);
+  slamLoadMapService = pnh.advertiseService("load_map", &DeviceNodelet::loadSlamMap, this);
+  slamRemoveMapService = pnh.advertiseService("remove_map", &DeviceNodelet::removeSlamMap, this);
+
   if (autopublishTrajectory)
   {
     trajPublisher = getNodeHandle().advertise<nav_msgs::Path>("trajectory", 10);
@@ -1238,6 +1243,91 @@ bool DeviceNodelet::getSlamTrajectory(rc_visard_driver::GetTrajectory::Request& 
 
   return true;
 }
+
+bool DeviceNodelet::saveSlamMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+{
+  resp.success = false;
+
+  if (dynamicsInterface)
+  {
+    try
+    {
+      rcd::RemoteInterface::ReturnCode rc = dynamicsInterface->saveSlamMap();
+      resp.success = (rc.value >= 0);
+      resp.message = rc.message;
+    }
+    catch (std::exception& e)
+    {
+      resp.message = std::string("Failed to save SLAM map: ") + e.what();
+    }
+  }
+  else
+  {
+    resp.message = "rcdynamics remote interface not yet initialized!";
+  }
+
+  if (!resp.success)
+    ROS_ERROR_STREAM(resp.message);
+
+  return true;
+}
+
+bool DeviceNodelet::loadSlamMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+{
+  resp.success = false;
+
+  if (dynamicsInterface)
+  {
+    try
+    {
+      rcd::RemoteInterface::ReturnCode rc = dynamicsInterface->loadSlamMap();
+      resp.success = (rc.value >= 0);
+      resp.message = rc.message;
+    }
+    catch (std::exception& e)
+    {
+      resp.message = std::string("Failed to load SLAM map: ") + e.what();
+    }
+  }
+  else
+  {
+    resp.message = "rcdynamics remote interface not yet initialized!";
+  }
+
+  if (!resp.success)
+    ROS_ERROR_STREAM(resp.message);
+
+  return true;
+}
+
+bool DeviceNodelet::removeSlamMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+{
+  resp.success = false;
+
+  if (dynamicsInterface)
+  {
+    try
+    {
+      rcd::RemoteInterface::ReturnCode rc = dynamicsInterface->removeSlamMap();
+      resp.success = (rc.value >= 0);
+      resp.message = rc.message;
+    }
+    catch (std::exception& e)
+    {
+      resp.message = std::string("Failed to remove SLAM map: ") + e.what();
+    }
+  }
+  else
+  {
+    resp.message = "rcdynamics remote interface not yet initialized!";
+  }
+
+  if (!resp.success)
+    ROS_ERROR_STREAM(resp.message);
+
+  return true;
+}
+
 }
 
 PLUGINLIB_EXPORT_CLASS(rc::DeviceNodelet, nodelet::Nodelet)
