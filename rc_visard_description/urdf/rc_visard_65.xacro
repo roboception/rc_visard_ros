@@ -2,6 +2,7 @@
 
 <robot name="rc_visard_65" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="rc_65" params="prefix parent *origin">
+
     <joint name="${prefix}camera" type="fixed">
       <parent link="${parent}"/>
       <child link="${prefix}camera"/>
@@ -11,17 +12,22 @@
     <link name="${prefix}camera">
       <visual>
         <geometry>
-            <mesh filename="package://rc_visard_description/meshes/visual/rc_visard_65.dae"/>
+          <mesh filename="package://rc_visard_description/meshes/visual/rc_visard_65.dae"/>
         </geometry>
       </visual>
       <collision>
         <geometry>
-            <mesh filename="package://rc_visard_description/meshes/collision/rc_visard_65.stl"/>
+          <mesh filename="package://rc_visard_description/meshes/collision/rc_visard_65.stl"/>
         </geometry>
       </collision>
+      <inertial>
+        <mass value="0.675"/>
+        <inertia ixx="1.3" ixy="0.0" ixz="0.85" iyy="2.9" iyz="0.0" izz="2.3"/>
+      </inertial>
     </link>
 
   <link name="${prefix}mounting"/>
+
   <joint name="${prefix}mounting_to_camera" type="fixed">
     <parent link="${prefix}camera"/>
     <child link="${prefix}mounting"/>

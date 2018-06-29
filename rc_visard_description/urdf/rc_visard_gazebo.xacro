@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+
+<robot name="rc_visard_gazebo" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:include filename="$(find rc_visard_description)/urdf/rc_visard_65.xacro" />
+    <xacro:include filename="$(find rc_visard_description)/urdf/rc_visard_160.xacro" />
+
+
+  <xacro:macro name="rc_65_gazebo" params="prefix parent *origin">
+
+    <link name="${prefix}imu"/>
+    <joint name="${prefix}mounting_to_imu" type="fixed">
+      <parent link="${prefix}camera"/>
+      <child link="${prefix}imu"/>
+      <origin xyz="0.1163 -0.0269 -0.029" />
+    </joint>
+
+    <xacro:rc_65 parent="${parent}" prefix="${prefix}">
+      <insert_block name="origin"/>
+    </xacro:rc_65>
+
+    <xacro:rc_visard_gazebo_imu prefix=""/>
+    <xacro:rc_visard_gazebo_camera prefix="" baseline="0.065" pointCloudCutoff="0.2"/>
+
+  </xacro:macro>
+
+
+  <xacro:macro name="rc_160_gazebo" params="prefix parent *origin">
+
+    <link name="${prefix}imu"/>
+    <joint name="${prefix}mounting_to_imu" type="fixed">
+      <parent link="${prefix}camera"/>
+      <child link="${prefix}imu"/>
+      <origin xyz="0.1163 -0.0269 -0.029" />
+    </joint>
+
+    <xacro:rc_160 parent="${parent}" prefix="${prefix}">
+      <insert_block name="origin"/>
+    </xacro:rc_160>
+
+    <xacro:rc_visard_gazebo_imu prefix=""/>
+    <xacro:rc_visard_gazebo_camera prefix="" baseline="0.16" pointCloudCutoff="0.5"/>
+
+  </xacro:macro>
+
+
+  <xacro:macro name="rc_visard_gazebo_imu" params="prefix">
+
+    <gazebo reference="${prefix}imu">
+      <sensor type="imu" name="imu">
+        <always_on>true</always_on>
+        <visualize>false</visualize>
+      </sensor>
+      <material>Gazebo/Grey</material>
+    </gazebo>
+
+    <gazebo>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+        <alwaysOn>true</alwaysOn>
+        <bodyName>${prefix}imu</bodyName>
+        <frameName>${prefix}imu</frameName>
+        <topicName>imu</topicName>
+        <serviceName>imu_service</serviceName>
+        <gaussianNoise>0.0</gaussianNoise>
+        <updateRate>200</updateRate>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0.0</mean>
+              <stddev>2e-4</stddev>
+              <bias_mean>0.0000075</bias_mean>
+              <bias_stddev>0.0000008</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0.0</mean>
+              <stddev>1.7e-2</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+      </plugin>
+    </gazebo>
+
+  </xacro:macro>
+
+
+  <xacro:macro name="rc_visard_gazebo_camera" params="prefix baseline pointCloudCutoff">
+
+    <gazebo reference="${prefix}camera">
+      <sensor name="${prefix}depth" type="depth">
+        <update_rate>3</update_rate>
+        <camera>
+          <horizontal_fov>1.047198</horizontal_fov>
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>${pointCloudCutoff}</near>
+            <far>10</far>
+          </clip>
+        </camera>
+        <plugin name="camera_plugin" filename="libgazebo_ros_openni_kinect.so">
+          <baseline>${baseline}</baseline>
+          <alwaysOn>true</alwaysOn>
+          <!-- Keep this zero, update_rate in the parent <sensor> tag
+          will control the frame rate. -->
+          <updateRate>0.0</updateRate>
+          <depthImageTopicName>/stereo/depth</depthImageTopicName>
+          <pointCloudTopicName>/stereo/points2</pointCloudTopicName>
+          <frameName>camera_link</frameName>
+          <pointCloudCutoff>${pointCloudCutoff}</pointCloudCutoff>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionK3>0</distortionK3>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>0</CxPrime>
+          <Cx>0</Cx>
+          <Cy>0</Cy>
+          <focalLength>0</focalLength>
+          <hackBaseline>0</hackBaseline>
+        </plugin>
+      </sensor>
+    </gazebo>
+
+    <gazebo reference="${prefix}camera">
+
+      <sensor type="multicamera" name="camera">
+        <update_rate>25.0</update_rate>
+        <camera name="left">
+          <horizontal_fov>1.047198</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>960</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <!-- Noise is sampled independently per pixel on each frame.
+                 That pixel's noise value is added to each of its color
+                 channels, which at that point lie in the range [0,1]. -->
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <camera name="right">
+          <pose>0 -${baseline} 0 0 0 0</pose>
+          <horizontal_fov>1.047198</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>960</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <!-- Noise is sampled independently per pixel on each frame.
+                 That pixel's noise value is added to each of its color
+                 channels, which at that point lie in the range [0,1]. -->
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <plugin name="camera_controller" filename="libgazebo_ros_multicamera.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>/stereo/</cameraName>
+          <imageTopicName>image_rect</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <rightFrameName>/stereo/right/</rightFrameName>
+          <frameName>{$prefix}camera</frameName>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+    </gazebo>
+
+  </xacro:macro>
+
+
+
+</robot>
