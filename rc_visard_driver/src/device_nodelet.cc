@@ -184,12 +184,12 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   dynamicsRestartSlamService = pnh.advertiseService("dynamics_restart_slam", &DeviceNodelet::dynamicsRestartSlam, this);
   dynamicsStopService = pnh.advertiseService("dynamics_stop", &DeviceNodelet::dynamicsStop, this);
   dynamicsStopSlamService = pnh.advertiseService("dynamics_stop_slam", &DeviceNodelet::dynamicsStopSlam, this);
-  dynamicsResetSlamService = pnh.advertiseService("dynamics_reset_slam", &DeviceNodelet::dynamicsResetSlam, this);
 
-  getSlamTrajectoryService = pnh.advertiseService("get_trajectory", &DeviceNodelet::getSlamTrajectory, this);
-  slamSaveMapService = pnh.advertiseService("save_map", &DeviceNodelet::saveSlamMap, this);
-  slamLoadMapService = pnh.advertiseService("load_map", &DeviceNodelet::loadSlamMap, this);
-  slamRemoveMapService = pnh.advertiseService("remove_map", &DeviceNodelet::removeSlamMap, this);
+  dynamicsResetSlamService = pnh.advertiseService("slam_reset", &DeviceNodelet::dynamicsResetSlam, this);
+  getSlamTrajectoryService = pnh.advertiseService("slam_get_trajectory", &DeviceNodelet::getSlamTrajectory, this);
+  slamSaveMapService = pnh.advertiseService("slam_save_map", &DeviceNodelet::saveSlamMap, this);
+  slamLoadMapService = pnh.advertiseService("slam_load_map", &DeviceNodelet::loadSlamMap, this);
+  slamRemoveMapService = pnh.advertiseService("slam_remove_map", &DeviceNodelet::removeSlamMap, this);
 
   if (autopublishTrajectory)
   {

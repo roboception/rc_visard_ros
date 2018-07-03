@@ -212,11 +212,20 @@ dynamic module (which needs to be started for working dynamic-state estimates).
 - `dynamics_start_slam`
 - `dynamics_restart_slam`
 - `dynamics_stop_slam`
-- `dynamics_reset_slam`
 
 The trajectory constructed and stored by the `rc_slam` node
 can be retrieved by
-- `get_trajectory`
+- `slam_get_trajectory`
+
+The onboard map of the `rc_slam` node can be saved on the rc_visard for loading it
+after a SLAM restart or power cycle:
+- `slam_save_map`
+- `slam_load_map`
+- `slam_remove_map`
+
+The onboard `rc_slam` node can be "reset" (clears the internal state of the SLAM component,
+including the trajectory) to free the memory with
+- `slam_reset`
 
 
 Launching
