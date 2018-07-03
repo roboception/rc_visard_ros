@@ -2,6 +2,16 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2018-07-03)
+------------------
+
+* fix out1_mode/out2_mode description and default
+* change/add service calls for onboard SLAM module:
+  - rename `dynamics_reset_slam` to `slam_reset`
+  - rename `get_trajectory` to `slam_get_trajectory`
+  - add `slam_save_map`, `slam_load_map` and `slam_remove_map`
+* install Rviz example config file
+
 2.1.1 (2018-06-15)
 ------------------
 
