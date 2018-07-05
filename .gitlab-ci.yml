@@ -108,7 +108,7 @@ gen_dox:
     - mkdir build
     - cd build
     - cmake ../rc_visard_driver
-    - make doc
+    - make rc_visard_driver_doc
     - upload_dox.sh doc/html
   only:
     - master
