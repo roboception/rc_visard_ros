@@ -744,6 +744,7 @@ void disableAll(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap)
     rcg::setBoolean(nodemap, "ComponentEnable", false, true);
   }
 
+  rcg::setEnum(nodemap, "ComponentSelector", "Intensity");
   rcg::setEnum(nodemap, "PixelFormat", "Mono8");
 }
 
@@ -881,6 +882,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       {
         std::vector<std::string> format;
+        rcg::setEnum(rcgnodemap, "ComponentSelector", "Intensity", true);
         rcg::getEnum(rcgnodemap, "PixelFormat", format, true);
 
         for (size_t i = 0; i < format.size(); i++)
@@ -988,6 +990,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           {
             if (!ccolor)
             {
+              rcg::setEnum(rcgnodemap, "ComponentSelector", "Intensity", true);
               rcg::setEnum(rcgnodemap, "PixelFormat", "YCbCr411_8", true);
               ccolor = true;
             }
@@ -996,6 +999,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           {
             if (ccolor)
             {
+              rcg::setEnum(rcgnodemap, "ComponentSelector", "Intensity", true);
               rcg::setEnum(rcgnodemap, "PixelFormat", "Mono8", true);
               ccolor = false;
             }
