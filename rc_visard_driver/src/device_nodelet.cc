@@ -445,7 +445,30 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
   if (reconfig == 0)
   {
-    // set ROS parameters according to current configuration
+    // try to get ROS parameters: if parameter is not set in parameter server, default to current sensor configuration
+
+    pnh.param("camera_fps", cfg.camera_fps, cfg.camera_fps);
+    pnh.param("camera_exp_auto", cfg.camera_exp_auto, cfg.camera_exp_auto);
+    pnh.param("camera_exp_value", cfg.camera_exp_value, cfg.camera_exp_value);
+    pnh.param("camera_gain_value", cfg.camera_gain_value, cfg.camera_gain_value);
+    pnh.param("camera_exp_max", cfg.camera_exp_max, cfg.camera_exp_max);
+    pnh.param("camera_wb_auto", cfg.camera_wb_auto, cfg.camera_wb_auto);
+    pnh.param("camera_wb_ratio_red", cfg.camera_wb_ratio_red, cfg.camera_wb_ratio_red);
+    pnh.param("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue, cfg.camera_wb_ratio_blue);
+    pnh.param("depth_quality", cfg.depth_quality, cfg.depth_quality);
+    pnh.param("depth_disprange", cfg.depth_disprange, cfg.depth_disprange);
+    pnh.param("depth_seg", cfg.depth_seg, cfg.depth_seg);
+    pnh.param("depth_median", cfg.depth_median, cfg.depth_median);
+    pnh.param("depth_fill", cfg.depth_fill, cfg.depth_fill);
+    pnh.param("depth_minconf", cfg.depth_minconf, cfg.depth_minconf);
+    pnh.param("depth_mindepth", cfg.depth_mindepth, cfg.depth_mindepth);
+    pnh.param("depth_maxdepth", cfg.depth_maxdepth, cfg.depth_maxdepth);
+    pnh.param("depth_maxdeptherr", cfg.depth_maxdeptherr, cfg.depth_maxdeptherr);
+    pnh.param("ptp_enabled", cfg.ptp_enabled, cfg.ptp_enabled);
+    pnh.param("out1_mode", cfg.out1_mode, cfg.out1_mode);
+    pnh.param("out2_mode", cfg.out2_mode, cfg.out2_mode);
+
+    // set parameters on parameter server so that dynamic reconfigure picks them up
 
     pnh.setParam("camera_fps", cfg.camera_fps);
     pnh.setParam("camera_exp_auto", cfg.camera_exp_auto);
