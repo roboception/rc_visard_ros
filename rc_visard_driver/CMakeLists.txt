@@ -114,6 +114,6 @@ install(DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 ## Define information for packaging ##
 ######################################
 # optionally specify dependencies of the debian package here (comma separated!)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "rc-genicam-api | ros-$ENV{ROS_DISTRO}-rc-genicam-api, rc-dynamics-api | ros-$ENV{ROS_DISTRO}-rc-dynamics-api")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "rc-genicam-api | ros-$ENV{ROS_DISTRO}-rc-genicam-api, rc-dynamics-api | ros-$ENV{ROS_DISTRO}-rc-dynamics-api, ros-$ENV{ROS_DISTRO}-image-pipeline")
 
 include(cmake/package_debian.cmake)
