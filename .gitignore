@@ -9,3 +9,4 @@ cmake-build*
 !.gitlab-ci.yml
 !.gitmodules
 !.clang-format
+!.dockerignore
