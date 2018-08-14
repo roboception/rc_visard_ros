@@ -9,7 +9,7 @@
   <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>
   <license>BSD</license>
 
-  <url type="website">http://roboception.com/rc_visard</url>
+  <url type="website">http://wiki.ros.org/rc_visard_driver</url>
   <url type="repository">https://github.com/roboception/rc_visard_ros</url>
   <url type="bugtracker">https://github.com/roboception/rc_visard_ros/issues</url>
 
