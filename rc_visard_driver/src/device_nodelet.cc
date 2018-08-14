@@ -441,7 +441,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
     rcg::setBoolean(nodemap, "ChunkModeActive", iocontrol_avail, false);
   }
-  catch (const std::exception &)
+  catch (const std::exception&)
   {
     ROS_WARN("rc_visard_driver: rc_visard has an older firmware, IO control functions are not available.");
 
@@ -573,8 +573,7 @@ namespace
 */
 
 void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
-                      const rc_visard_driver::rc_visard_driverConfig& cfg, uint32_t lvl,
-                      bool iocontrol_avail)
+                      const rc_visard_driver::rc_visard_driverConfig& cfg, uint32_t lvl, bool iocontrol_avail)
 {
   uint32_t prev_lvl = 0;
 
@@ -893,7 +892,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       if (iocontrol_avail)
       {
-        chunkadapter=rcg::getChunkAdapter(rcgnodemap, rcgdev->getTLType());
+        chunkadapter = rcg::getChunkAdapter(rcgnodemap, rcgdev->getTLType());
       }
 
       // initialize all publishers
@@ -970,13 +969,12 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
             // get out1 line status from chunk data if possible
 
-            bool out1=false;
+            bool out1 = false;
             if (iocontrol_avail && chunkadapter && buffer->getContainsChunkdata())
             {
-              chunkadapter->AttachBuffer(reinterpret_cast<std::uint8_t *>(buffer->getBase()),
-                                         buffer->getSizeFilled());
+              chunkadapter->AttachBuffer(reinterpret_cast<std::uint8_t*>(buffer->getBase()), buffer->getSizeFilled());
 
-              out1=(rcg::getInteger(rcgnodemap, "ChunkLineStatusAll", 0, 0, false) & 0x1);
+              out1 = (rcg::getInteger(rcgnodemap, "ChunkLineStatusAll", 0, 0, false) & 0x1);
             }
 
             // the buffer is offered to all publishers
@@ -1104,7 +1102,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
             if (lvl & 262144)
             {
-              bool alternate=(cfg.out1_mode == "ExposureAlternateActive");
+              bool alternate = (cfg.out1_mode == "ExposureAlternateActive");
 
               limage.setOut1Alternate(alternate);
               rimage.setOut1Alternate(alternate);
@@ -1386,7 +1384,6 @@ bool DeviceNodelet::removeSlamMap(std_srvs::Trigger::Request& req, std_srvs::Tri
 
   return true;
 }
-
 }
 
 PLUGINLIB_EXPORT_CLASS(rc::DeviceNodelet, nodelet::Nodelet)

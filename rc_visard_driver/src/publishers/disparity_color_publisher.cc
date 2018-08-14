@@ -90,11 +90,11 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelf
 
     bool bigendian = buffer->isBigEndian();
 
-    int drange=disprange;
+    int drange = disprange;
 
     {
-      int dmax=0;
-      const uint8_t* p=ps;
+      int dmax = 0;
+      const uint8_t* p = ps;
 
       if (bigendian)
       {
@@ -102,7 +102,7 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelf
         {
           for (uint32_t i = 0; i < im->width; i++)
           {
-            dmax=std::max(dmax, static_cast<int>(p[0] << 8) | p[1]);
+            dmax = std::max(dmax, static_cast<int>(p[0] << 8) | p[1]);
             p++;
           }
         }
@@ -113,13 +113,13 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelf
         {
           for (uint32_t i = 0; i < im->width; i++)
           {
-            dmax=std::max(dmax, static_cast<int>(p[1] << 8) | p[0]);
+            dmax = std::max(dmax, static_cast<int>(p[1] << 8) | p[0]);
             p++;
           }
         }
       }
 
-      drange=std::max(disprange, static_cast<int>(std::ceil(dmax*scale)));
+      drange = std::max(disprange, static_cast<int>(std::ceil(dmax * scale)));
     }
 
     // convert image data

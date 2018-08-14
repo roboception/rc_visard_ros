@@ -42,7 +42,6 @@
 
 namespace rc
 {
-
 class ImagePublisher : public GenICam2RosPublisher
 {
 public:
@@ -57,12 +56,15 @@ public:
                            topics.
   */
 
-  ImagePublisher(image_transport::ImageTransport& it, const std::string& frame_id_prefix,
-                 bool left, bool color, bool out1_filter);
+  ImagePublisher(image_transport::ImageTransport& it, const std::string& frame_id_prefix, bool left, bool color,
+                 bool out1_filter);
 
   bool used() override;
 
-  void setOut1Alternate(bool alternate) { out1_alternate=alternate; }
+  void setOut1Alternate(bool alternate)
+  {
+    out1_alternate = alternate;
+  }
 
   void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
   void publish(const rcg::Buffer* buffer, uint64_t pixelformat, bool out1);
@@ -80,7 +82,6 @@ private:
   image_transport::Publisher pub_out1_low;
   image_transport::Publisher pub_out1_high;
 };
-
 }
 
 #endif

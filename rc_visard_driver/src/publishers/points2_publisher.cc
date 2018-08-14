@@ -47,7 +47,7 @@ Points2Publisher::Points2Publisher(ros::NodeHandle& nh, const std::string& frame
   t = _t;
   scale = _scale;
 
-  tolerance_ns=0;
+  tolerance_ns = 0;
 
   pub = nh.advertise<sensor_msgs::PointCloud2>("points2", 1);
 }
@@ -56,11 +56,11 @@ void Points2Publisher::setOut1Alternate(bool alternate)
 {
   if (alternate)
   {
-    tolerance_ns=static_cast<uint64_t>(0.050*1000000000ull);
+    tolerance_ns = static_cast<uint64_t>(0.050 * 1000000000ull);
   }
   else
   {
-    tolerance_ns=0;
+    tolerance_ns = 0;
   }
 }
 

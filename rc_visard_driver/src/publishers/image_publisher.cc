@@ -40,9 +40,8 @@
 
 namespace rc
 {
-
-ImagePublisher::ImagePublisher(image_transport::ImageTransport& it,
-  const std::string& frame_id_prefix, bool _left, bool _color, bool out1_filter)
+ImagePublisher::ImagePublisher(image_transport::ImageTransport& it, const std::string& frame_id_prefix, bool _left,
+                               bool _color, bool out1_filter)
   : GenICam2RosPublisher(frame_id_prefix)
 {
   left = _left;
@@ -53,31 +52,30 @@ ImagePublisher::ImagePublisher(image_transport::ImageTransport& it,
 
   if (left)
   {
-    name="left/image_rect";
+    name = "left/image_rect";
   }
   else
   {
-    name="right/image_rect";
+    name = "right/image_rect";
   }
 
   if (color)
   {
-    name=name+"_color";
+    name = name + "_color";
   }
 
   pub = it.advertise(name, 1);
 
   if (out1_filter)
   {
-    pub_out1_low = it.advertise(name+"_out1_low", 1);
-    pub_out1_high = it.advertise(name+"_out1_high", 1);
+    pub_out1_low = it.advertise(name + "_out1_low", 1);
+    pub_out1_high = it.advertise(name + "_out1_high", 1);
   }
 }
 
 bool ImagePublisher::used()
 {
-  return pub.getNumSubscribers() > 0 || pub_out1_low.getNumSubscribers() > 0 ||
-         pub_out1_high.getNumSubscribers() > 0;
+  return pub.getNumSubscribers() > 0 || pub_out1_low.getNumSubscribers() > 0 || pub_out1_high.getNumSubscribers() > 0;
 }
 
 void ImagePublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
@@ -87,10 +85,12 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
 
 void ImagePublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat, bool out1)
 {
-  bool sub=(pub.getNumSubscribers() > 0 && (!out1_alternate || !out1));
+  bool sub = (pub.getNumSubscribers() > 0 && (!out1_alternate || !out1));
 
-  if (!out1 && pub_out1_low.getNumSubscribers() > 0) sub=true;
-  if (out1 && pub_out1_high.getNumSubscribers() > 0) sub=true;
+  if (!out1 && pub_out1_low.getNumSubscribers() > 0)
+    sub = true;
+  if (out1 && pub_out1_high.getNumSubscribers() > 0)
+    sub = true;
 
   if (sub && (pixelformat == Mono8 || pixelformat == YCbCr411_8))
   {
@@ -212,10 +212,12 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat, bo
 
     // publish message
 
-    if (!out1_alternate || !out1) pub.publish(im);
-    if (!out1) pub_out1_low.publish(im);
-    if (out1) pub_out1_high.publish(im);
+    if (!out1_alternate || !out1)
+      pub.publish(im);
+    if (!out1)
+      pub_out1_low.publish(im);
+    if (out1)
+      pub_out1_high.publish(im);
   }
 }
-
 }
