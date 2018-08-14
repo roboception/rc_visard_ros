@@ -443,7 +443,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   }
   catch (const std::exception &)
   {
-    ROS_WARN("rc_visard_driver: rc_visard uses old software, IO control functions are not available.");
+    ROS_WARN("rc_visard_driver: rc_visard has an older firmware, IO control functions are not available.");
 
     cfg.out1_mode = "ExposureActive";
     cfg.out2_mode = "Low";
