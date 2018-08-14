@@ -58,11 +58,12 @@ public:
 
   Points2Publisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double f, double t, double scale);
 
-  void setTimestampTolerance(double tolerance);
+  void setOut1Alternate(bool alternate);
 
   bool used() override;
 
   void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
+  void publish(const rcg::Buffer* buffer, uint64_t pixelformat, bool out1);
 
 private:
   Points2Publisher(const Points2Publisher&);             // forbidden

@@ -52,9 +52,16 @@ Points2Publisher::Points2Publisher(ros::NodeHandle& nh, const std::string& frame
   pub = nh.advertise<sensor_msgs::PointCloud2>("points2", 1);
 }
 
-void Points2Publisher::setTimestampTolerance(double tolerance)
+void Points2Publisher::setOut1Alternate(bool alternate)
 {
-  tolerance_ns=static_cast<uint64_t>(tolerance*1000000000ull);
+  if (alternate)
+  {
+    tolerance_ns=static_cast<uint64_t>(0.050*1000000000ull);
+  }
+  else
+  {
+    tolerance_ns=0;
+  }
 }
 
 bool Points2Publisher::used()
@@ -64,12 +71,25 @@ bool Points2Publisher::used()
 
 void Points2Publisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
 {
+  publish(buffer, pixelformat, false);
+}
+
+void Points2Publisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat, bool out1)
+{
   if (pub.getNumSubscribers() > 0)
   {
     // buffer left and disparity images
 
     if (pixelformat == Mono8 || pixelformat == YCbCr411_8)
     {
+      // in alternate exposure mode, skip images for texture with out1 == true,
+      // i.e. with projected pattern
+
+      if (tolerance_ns > 0 && out1)
+      {
+        return;
+      }
+
       left_list.add(buffer);
     }
     else if (pixelformat == Coord3D_C16)
