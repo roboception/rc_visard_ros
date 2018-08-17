@@ -2,6 +2,8 @@
 
 ROS interface for the [Roboception rc_visard][] 3D sensor.
 
+Please also consult the manual for more details: https://doc.rc-visard.com
+
 ## rc_visard_driver
 
 Nodelet/node providing a ROS interface to configure the rc_visard and receive

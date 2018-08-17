@@ -2,8 +2,10 @@
 rc_visard_driver
 ----------------
 
-This nodelet provides data from a Roboception rc_visard sensor on several ROS
+This nodelet provides data from a [Roboception rc_visard](https://roboception.com/rc_visard) sensor on several ROS
 topics.
+
+Please also consult the manual for more details: https://doc.rc-visard.com
 
 Build/Installation
 ------------------
