@@ -62,6 +62,9 @@ public:
 
   virtual void onInit();
 
+  /// Trigger stereo matching in mode 'SingleFrame'
+  ///@return always true, check resp.success
+  bool depthAcquisitionTrigger(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
   /// Start Stereo INS
   ///@return always true, check resp.success for whether the dynamics service has been called
   bool dynamicsStart(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
@@ -115,6 +118,9 @@ private:
 
   bool dev_supports_gain;
   bool dev_supports_wb;
+  bool dev_supports_depth_acquisition_trigger;
+
+  bool perform_depth_acquisition_trigger;
 
   std::shared_ptr<rcg::Device> rcgdev;
   std::shared_ptr<GenApi::CNodeMapRef> rcgnodemap;
@@ -135,6 +141,7 @@ private:
   ThreadedStream::Manager::Ptr dynamicsStreams;
 
   /// wrapper for REST-API calls relating to rc_visard's dynamics interface
+  ros::ServiceServer depthAcquisitionTriggerService;
   rc::dynamics::RemoteInterface::Ptr dynamicsInterface;
   ros::ServiceServer dynamicsStartService;
   ros::ServiceServer dynamicsStartSlamService;

@@ -89,6 +89,8 @@ DeviceNodelet::DeviceNodelet()
   reconfig = 0;
   dev_supports_gain = false;
   dev_supports_wb = false;
+  dev_supports_depth_acquisition_trigger = false;
+  perform_depth_acquisition_trigger = false;
   iocontrol_avail = false;
   level = 0;
 
@@ -175,6 +177,10 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
     ROS_FATAL_STREAM("rc_visard_driver: Access must be 'control', 'exclusive' or 'off': " << access);
     return;
   }
+
+  // setup service for depth acquisition trigger
+
+  depthAcquisitionTriggerService = pnh.advertiseService("depth_acquisition_trigger", &DeviceNodelet::depthAcquisitionTrigger, this);
 
   // setup services for starting and stopping rcdynamics module
 
@@ -398,8 +404,22 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
   // get current depth image configuration
 
+  v = rcg::getEnum(nodemap, "DepthAcquisitionMode", false);
+  if (v.size() > 0)
+  {
+    dev_supports_depth_acquisition_trigger = true;
+    cfg.depth_acquisition_mode = v;
+  }
+  else
+  {
+    ROS_WARN("rc_visard_driver: Device does not support triggering depth images. depth_acquisition_mode is without function.");
+
+    dev_supports_depth_acquisition_trigger = false;
+    cfg.depth_acquisition_mode = "Continuous";
+  }
+
   v = rcg::getEnum(nodemap, "DepthQuality", true);
-  cfg.depth_quality = v.substr(0, 1);
+  cfg.depth_quality = v;
 
   cfg.depth_disprange = rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
   cfg.depth_seg = rcg::getInteger(nodemap, "DepthSeg", 0, 0, true);
@@ -465,6 +485,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     pnh.param("camera_wb_auto", cfg.camera_wb_auto, cfg.camera_wb_auto);
     pnh.param("camera_wb_ratio_red", cfg.camera_wb_ratio_red, cfg.camera_wb_ratio_red);
     pnh.param("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue, cfg.camera_wb_ratio_blue);
+    pnh.param("depth_acquisition_mode", cfg.depth_acquisition_mode, cfg.depth_acquisition_mode);
     pnh.param("depth_quality", cfg.depth_quality, cfg.depth_quality);
     pnh.param("depth_disprange", cfg.depth_disprange, cfg.depth_disprange);
     pnh.param("depth_seg", cfg.depth_seg, cfg.depth_seg);
@@ -488,6 +509,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     pnh.setParam("camera_wb_auto", cfg.camera_wb_auto);
     pnh.setParam("camera_wb_ratio_red", cfg.camera_wb_ratio_red);
     pnh.setParam("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue);
+    pnh.setParam("depth_acquisition_mode", cfg.depth_acquisition_mode);
     pnh.setParam("depth_quality", cfg.depth_quality);
     pnh.setParam("depth_disprange", cfg.depth_disprange);
     pnh.setParam("depth_seg", cfg.depth_seg);
@@ -531,11 +553,40 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
     l &= ~(16384 | 32768 | 65536);
   }
 
-  c.depth_quality = c.depth_quality.substr(0, 1);
-
-  if (c.depth_quality[0] != 'L' && c.depth_quality[0] != 'M' && c.depth_quality[0] != 'H' && c.depth_quality[0] != 'S')
+  if (dev_supports_depth_acquisition_trigger)
   {
-    c.depth_quality = "H";
+    c.depth_acquisition_mode = c.depth_acquisition_mode.substr(0, 1);
+
+    if (c.depth_acquisition_mode[0] == 'S')
+    {
+      c.depth_acquisition_mode = "SingleFrame";
+    }
+    else
+    {
+      c.depth_acquisition_mode = "Continuous";
+    }
+  }
+  else
+  {
+    c.depth_acquisition_mode = "Continuous";
+    l &= ~1048576;
+  }
+
+  if (c.depth_quality[0] == 'L')
+  {
+    c.depth_quality = "Low";
+  }
+  else if (c.depth_quality[0] == 'M')
+  {
+    c.depth_quality = "Medium";
+  }
+  else if (c.depth_quality[0] == 'S')
+  {
+    c.depth_quality = "StaticHigh";
+  }
+  else
+  {
+    c.depth_quality = "High";
   }
 
   if (iocontrol_avail)
@@ -651,6 +702,28 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         lvl &= ~65536;
         rcg::setEnum(nodemap, "BalanceRatioSelector", "Blue", true);
         rcg::setFloat(nodemap, "BalanceRatio", cfg.camera_wb_ratio_blue, true);
+      }
+
+      if (lvl & 1048576)
+      {
+        lvl &= ~1048576;
+
+        std::vector<std::string> list;
+        rcg::getEnum(nodemap, "DepthAcquisitionMode", list, true);
+
+        std::string val;
+        for (size_t i = 0; i < list.size(); i++)
+        {
+          if (list[i].compare(0, 1, cfg.depth_acquisition_mode, 0, 1) == 0)
+          {
+            val = list[i];
+          }
+        }
+
+        if (val.size() > 0)
+        {
+          rcg::setEnum(nodemap, "DepthAcquisitionMode", val.c_str(), true);
+        }
       }
 
       if (lvl & 16)
@@ -1013,10 +1086,19 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           }
           else if (buffer == 0)
           {
-            // throw an expection if components are enabled and there is no
-            // data for 6*0.5 seconds
+            // throw an expection if data from enabled components is expected,
+            // but not comming for more than 3 seconds
 
-            if (cintensity || cintensitycombined || cdisparity || cconfidence || cerror)
+            bool depth_continuous = false;
+            if (dev_supports_depth_acquisition_trigger)
+            {
+              mtx.lock();
+              depth_continuous = (config.depth_acquisition_mode[0] == 'C');
+              mtx.unlock();
+            }
+
+            if (cintensity || cintensitycombined ||
+                (depth_continuous && (cdisparity || cconfidence || cerror)))
             {
               missing++;
               if (missing >= 6)  // report error
@@ -1030,6 +1112,14 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
                 throw std::underflow_error(out.str());
               }
             }
+          }
+
+          // trigger depth
+
+          if (dev_supports_depth_acquisition_trigger && perform_depth_acquisition_trigger)
+          {
+            perform_depth_acquisition_trigger = false;
+            rcg::callCommand(rcgnodemap, "DepthAcquisitionTrigger", true);
           }
 
           // determine what should be streamed, according to subscriptions to
@@ -1144,6 +1234,17 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
     ROS_ERROR_STREAM("rc_visard_driver: Image grabbing failed.");
     recoveryRequested = true;
   }
+}
+
+bool DeviceNodelet::depthAcquisitionTrigger(std_srvs::Trigger::Request& req,
+                                            std_srvs::Trigger::Response& resp)
+{
+  perform_depth_acquisition_trigger = true;
+
+  resp.success = true;
+  resp.message = "";
+
+  return true;
 }
 
 // Anonymous namespace for local linkage

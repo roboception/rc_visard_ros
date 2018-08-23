@@ -89,6 +89,9 @@ Parameters to be set to the ROS param server before run-time.
 
   * `camera_gain_value`: Gain factor in decibel if exp_auto is false.
 
+  * `depth_acquisition_mode`: Can be either `SingleFrame` or `Continuous`. Only
+    the first letter will be checked, thus giving `S` or `C` is sufficient.
+
   * `depth_quality`: Quality can be `Low`, `Medium`, `High` and `StaticHigh`.
     Only the first letter will be checked, thus specification of `L`, `M`,
     `H` or `S` is sufficient.
@@ -247,6 +250,11 @@ frame_ids in all ros messages will be prefixed, e.g., to `my_visard_world` or
 
 Services
 --------
+
+The following service is offered to trigger stereo matching in `SingleFrame`
+mode. It returns and error if the depth acquisition mode if `Continuous`.
+
+* `depth_acquisition_trigger`
 
 The following services are offered to start, stop, and restart the rc_visard's
 dynamic module (which needs to be started for working dynamic-state estimates).
