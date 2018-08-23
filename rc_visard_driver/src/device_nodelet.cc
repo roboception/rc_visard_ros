@@ -958,6 +958,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
       initConfiguration(rcgnodemap, config, access);
 
       int disprange = config.depth_disprange;
+      bool is_depth_acquisition_continuous = (config.depth_acquisition_mode[0] == 'C');
 
       // prepare chunk adapter for getting chunk data, if iocontrol is available
 
@@ -1024,18 +1025,16 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
         // enter grabbing loop
 
-        int missing = 0;
         ros::Time tlastimage = ros::Time::now();
 
         while (!stopImageThread)
         {
-          const rcg::Buffer* buffer = stream[0]->grab(500);
+          const rcg::Buffer* buffer = stream[0]->grab(40);
 
           if (buffer != 0 && !buffer->getIsIncomplete() && buffer->getImagePresent())
           {
             // reset counter of consecutive missing images and failures
 
-            missing = 0;
             tlastimage = ros::Time::now();
             cntConsecutiveFails = 0;
             imageSuccess = true;
@@ -1081,7 +1080,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           }
           else if (buffer != 0 && buffer->getIsIncomplete())
           {
-            missing = 0;
+            tlastimage = ros::Time::now();
             ROS_WARN("rc_visard_driver: Received incomplete image buffer");
           }
           else if (buffer == 0)
@@ -1089,25 +1088,16 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             // throw an expection if data from enabled components is expected,
             // but not comming for more than 3 seconds
 
-            bool depth_continuous = false;
-            if (dev_supports_depth_acquisition_trigger)
-            {
-              mtx.lock();
-              depth_continuous = (config.depth_acquisition_mode[0] == 'C');
-              mtx.unlock();
-            }
-
             if (cintensity || cintensitycombined ||
-                (depth_continuous && (cdisparity || cconfidence || cerror)))
+                (is_depth_acquisition_continuous && (cdisparity || cconfidence || cerror)))
             {
-              missing++;
-              if (missing >= 6)  // report error
+              double t=(ros::Time::now() - tlastimage).toSec();
+
+              if (t > 3)  // report error
               {
                 std::ostringstream out;
 
-                out << "No images received for ";
-                out << (ros::Time::now() - tlastimage).toSec();
-                out << " seconds!";
+                out << "No images received for " << t << " seconds!";
 
                 throw std::underflow_error(out.str());
               }
@@ -1190,6 +1180,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
             disprange = cfg.depth_disprange;
 
+            // if in alternate mode, then make publishers aware of it
+
             if (lvl & 262144)
             {
               bool alternate = (cfg.out1_mode == "ExposureAlternateActive");
@@ -1202,6 +1194,20 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
               {
                 limage_color->setOut1Alternate(alternate);
                 rimage_color->setOut1Alternate(alternate);
+              }
+            }
+
+            // if depth acquisition changed to continuous mode, reset last
+            // grabbing time to avoid triggering timout if only disparity,
+            // confidence and/or error components are enabled
+
+            is_depth_acquisition_continuous = (cfg.depth_acquisition_mode[0] == 'C');
+
+            if (lvl & 1048576)
+            {
+              if (is_depth_acquisition_continuous)
+              {
+                tlastimage = ros::Time::now();
               }
             }
           }
