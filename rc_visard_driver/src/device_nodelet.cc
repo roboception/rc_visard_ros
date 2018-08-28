@@ -1025,7 +1025,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
         // enter grabbing loop
 
-        ros::Time tlastimage = ros::Time::now();
+        ros::WallTime tlastimage = ros::WallTime::now();
 
         while (!stopImageThread)
         {
@@ -1035,7 +1035,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           {
             // reset counter of consecutive missing images and failures
 
-            tlastimage = ros::Time::now();
+            tlastimage = ros::WallTime::now();
             cntConsecutiveFails = 0;
             imageSuccess = true;
 
@@ -1080,7 +1080,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           }
           else if (buffer != 0 && buffer->getIsIncomplete())
           {
-            tlastimage = ros::Time::now();
+            tlastimage = ros::WallTime::now();
             ROS_WARN("rc_visard_driver: Received incomplete image buffer");
           }
           else if (buffer == 0)
@@ -1091,7 +1091,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             if (cintensity || cintensitycombined ||
                 (is_depth_acquisition_continuous && (cdisparity || cconfidence || cerror)))
             {
-              double t=(ros::Time::now() - tlastimage).toSec();
+              double t = (ros::WallTime::now() - tlastimage).toSec();
 
               if (t > 3)  // report error
               {
@@ -1207,7 +1207,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             {
               if (is_depth_acquisition_continuous)
               {
-                tlastimage = ros::Time::now();
+                tlastimage = ros::WallTime::now();
               }
             }
           }
