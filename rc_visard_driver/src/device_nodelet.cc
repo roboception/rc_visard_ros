@@ -533,7 +533,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
 void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uint32_t l)
 {
-  mtx.lock();
+  std::lock_guard<std::mutex> lock(mtx);
 
   // check and correct parameters
 
@@ -613,8 +613,6 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
 
   config = c;
   level |= l;
-
-  mtx.unlock();
 }
 
 namespace
