@@ -71,90 +71,90 @@ Parameters to be set to the ROS param server before run-time.
 
 #### Dynamic-reconfigure Parameters
 
-  These parameters can be changed during runtime via dynamic reconfigure:
+These parameters can be changed during runtime via dynamic reconfigure:
 
-  * `ptp_enabled`: Enable PTP slave (PrecisionTimeProtocol, IEEE1588)
+* `ptp_enabled`: Enable PTP slave (PrecisionTimeProtocol, IEEE1588)
 
-  * `camera_fps`: Frames per second that are published by this nodelet.
-    Publishing frames will be slowed down depending on this setting. Setting
-    it higher than the real framerate of the specific device has no effect.
+* `camera_fps`: Frames per second that are published by this nodelet.
+  Publishing frames will be slowed down depending on this setting. Setting
+  it higher than the real framerate of the specific device has no effect.
 
-  * `camera_exp_auto`: If true, then the exposure time is chosen automatically,
-    up to exp_max as maximum. If false, then exp_value is used as exposure
-    time in seconds.
+* `camera_exp_auto`: If true, then the exposure time is chosen automatically,
+  up to exp_max as maximum. If false, then exp_value is used as exposure
+  time in seconds.
 
-  * `camera_exp_max`: Maximum exposure time in seconds if exp_auto is true.
+* `camera_exp_max`: Maximum exposure time in seconds if exp_auto is true.
 
-  * `camera_exp_value`: Exposure time in seconds if exp_auto is false.
+* `camera_exp_value`: Exposure time in seconds if exp_auto is false.
 
-  * `camera_gain_value`: Gain factor in decibel if exp_auto is false.
+* `camera_gain_value`: Gain factor in decibel if exp_auto is false.
 
-  * `depth_acquisition_mode`: Can be either `SingleFrame` or `Continuous`. Only
-    the first letter will be checked, thus giving `S` or `C` is sufficient.
+* `depth_acquisition_mode`: Can be either `SingleFrame` or `Continuous`. Only
+  the first letter will be checked, thus giving `S` or `C` is sufficient.
 
-  * `depth_quality`: Quality can be `Low`, `Medium`, `High` and `StaticHigh`.
-    Only the first letter will be checked, thus specification of `L`, `M`,
-    `H` or `S` is sufficient.
+* `depth_quality`: Quality can be `Low`, `Medium`, `High` and `StaticHigh`.
+  Only the first letter will be checked, thus specification of `L`, `M`,
+  `H` or `S` is sufficient.
 
-    * `StaticHigh` quality means computation with 640x480 pixel, limited to 3 Hz
-      and accumulation input images. The scene must be static during image
-      accumulation! The timestamp of the disparity image is taken from the first
-      image that was used for accumulation.
-    * `High` quality means computation with 640x480 pixel.
-    * `Medium` quality means computation with 320x240 pixel.
-    * `Low` quality means computation with 214x160 pixel.
+  * `StaticHigh` quality means computation with 640x480 pixel, limited to 3 Hz
+    and accumulation input images. The scene must be static during image
+    accumulation! The timestamp of the disparity image is taken from the first
+    image that was used for accumulation.
+  * `High` quality means computation with 640x480 pixel.
+  * `Medium` quality means computation with 320x240 pixel.
+  * `Low` quality means computation with 214x160 pixel.
 
-    Default: `High`.
+  Default: `High`.
 
-  * `depth_disprange`: Disparity range in pixel, related to the downscaled
-    image at quality=H. The range is adapted to the quality.
+* `depth_disprange`: Disparity range in pixel, related to the downscaled
+  image at quality=H. The range is adapted to the quality.
 
-  * `depth_fill`: Higher numbers fill gaps with measurments with potentielly
-    higher errors.
+* `depth_fill`: Higher numbers fill gaps with measurments with potentielly
+  higher errors.
 
-  * `depth_seg`: Maximum size of isolated disparity regions that will be
-    invalidated, related to full resolution.
+* `depth_seg`: Maximum size of isolated disparity regions that will be
+  invalidated, related to full resolution.
 
-  * `depth_median`: Performs median filtering with the given window size.
+* `depth_median`: Performs median filtering with the given window size.
 
-  * `depth_minconf`: Minimal confidence. All disparities with lower confidence
-    will be set to invalid.
+* `depth_minconf`: Minimal confidence. All disparities with lower confidence
+  will be set to invalid.
 
-  * `depth_mindepth`: Minimum depth in meter. All disparities with lower depth
-    will be set to invalid.
+* `depth_mindepth`: Minimum depth in meter. All disparities with lower depth
+  will be set to invalid.
 
-  * `depth_maxdepth`: Maximum depth in meter. All disparities with higher depth
-    will be set to invalid.
+* `depth_maxdepth`: Maximum depth in meter. All disparities with higher depth
+  will be set to invalid.
 
-  * `depth_maxdeptherr`: Maximum depth error in meter. All disparities with a
-    higher depth error will be set to invalid.
+* `depth_maxdeptherr`: Maximum depth error in meter. All disparities with a
+  higher depth error will be set to invalid.
 
-  * `out1_mode`: Mode for the digital GPIO out1. Possible values are:
+* `out1_mode`: Mode for the digital GPIO out1. Possible values are:
 
-    * `Low` for switching out1 permanently off.
-    * `High` for switching out1 permanently on.
-    * `ExposureActive` for switching out1 on for the exposure time of every
-      image.
-    * `ExposureAlternateActive` for switching out1 on for the exposure time of
-      every second image.
+  * `Low` for switching out1 permanently off.
+  * `High` for switching out1 permanently on.
+  * `ExposureActive` for switching out1 on for the exposure time of every
+    image.
+  * `ExposureAlternateActive` for switching out1 on for the exposure time of
+    every second image.
 
-    The value can only be changed if the rc_visard has an `IO Control` license.
-    The default is `ExposureActive`.
+  The value can only be changed if the rc_visard has an `IO Control` license.
+  The default is `ExposureActive`.
 
-  * `out2_mode`: Mode for the digital GPIO out2. The functionality is the same
-    as for `out1_mode`. The default is `Low`.
+* `out2_mode`: Mode for the digital GPIO out2. The functionality is the same
+  as for `out1_mode`. The default is `Low`.
 
 For color sensors, the following dynamic-reconfigure parameters are additionally
 available:
 
-  * `camera_wb_auto`: If true, then white balancing is done automatically. If
-    false, then the red and blue to green ratios can be chosen manually.
+* `camera_wb_auto`: If true, then white balancing is done automatically. If
+  false, then the red and blue to green ratios can be chosen manually.
 
-  * `camera_wb_ratio_red`: Red to green ratio for color balancing if
-    `camera_wb_auto` is false.
+* `camera_wb_ratio_red`: Red to green ratio for color balancing if
+  `camera_wb_auto` is false.
 
-  * `camera_wb_ratio_blue`: Blue to green ratio for color balancing if
-    `camera_wb_auto` is false.
+* `camera_wb_ratio_blue`: Blue to green ratio for color balancing if
+  `camera_wb_auto` is false.
 
 Provided Topics
 ---------------
@@ -247,12 +247,11 @@ be started in separate namespaces, e.g., `my_visard`. As a result, all
 frame_ids in all ros messages will be prefixed, e.g., to `my_visard_world` or
 `my_visard_camera`.
 
-
 Services
 --------
 
 The following service is offered to trigger stereo matching in `SingleFrame`
-mode. It returns and error if the depth acquisition mode if `Continuous`.
+mode. It returns an error if the `depth_acquisition_mode` is `Continuous`.
 
 * `depth_acquisition_trigger`
 
@@ -268,16 +267,19 @@ dynamic module (which needs to be started for working dynamic-state estimates).
 
 The trajectory constructed and stored by the `rc_slam` node
 can be retrieved by
+
 * `slam_get_trajectory`
 
 The onboard map of the `rc_slam` node can be saved on the rc_visard for loading it
 after a SLAM restart or power cycle:
+
 * `slam_save_map`
 * `slam_load_map`
 * `slam_remove_map`
 
 The onboard `rc_slam` node can be "reset" (clears the internal state of the SLAM component,
 including the trajectory) to free the memory with
+
 * `slam_reset`
 
 
