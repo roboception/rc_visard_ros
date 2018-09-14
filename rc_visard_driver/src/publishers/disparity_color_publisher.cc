@@ -102,8 +102,8 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelf
         {
           for (uint32_t i = 0; i < im->width; i++)
           {
-            dmax = std::max(dmax, static_cast<int>(p[0] << 8) | p[1]);
-            p++;
+            dmax = std::max(dmax, (static_cast<int>(p[0]) << 8) | p[1]);
+            p+=2;
           }
         }
       }
@@ -113,8 +113,8 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelf
         {
           for (uint32_t i = 0; i < im->width; i++)
           {
-            dmax = std::max(dmax, static_cast<int>(p[1] << 8) | p[0]);
-            p++;
+            dmax = std::max(dmax, (static_cast<int>(p[1]) << 8) | p[0]);
+            p+=2;
           }
         }
       }
