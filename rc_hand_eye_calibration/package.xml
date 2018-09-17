@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rc_hand_eye_calibration_client</name>
+  <version>1.2.3</version>
+  <description>The rc_hand_eye_calibration_client package</description>
+
+  <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://roboception.com/rc_visard</url>
+
+  <author email="heiko.hirschmueller@roboception.de">Heiko Hirschmueller</author>
+  <author email="christian.emmerich@roboception.de">Christian Emmerich</author>
+  <author email="felix.ruess@roboception.de">Felix Ruess</author>
+
+  <!-- system dependencies -->
+  <build_depend>protobuf-dev</build_depend>
+  <exec_depend>protobuf</exec_depend>
+  <depend>curl</depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <!-- depend is a shorthand for build_depend, build_export_depend and exec_depend -->
+  
+  <depend>roscpp</depend>
+  <depend>std_srvs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf</depend>
+
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
+  <doc_depend>doxygen</doc_depend>
+</package>

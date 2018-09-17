@@ -1,0 +1,19 @@
+# Description: Request hand-eye calibration
+
+#No request data
+---
+# True if calibration result is valid
+bool success
+# Internal status:
+# 0: Valid calibration returned
+# 1: Not enough poses
+# 2: Calibration result is not available
+int32 status
+# Human readable message, for development
+string message
+# Relative pose of grid with respect to the frame for which the pose was given in the request of SetCalibrationPose
+geometry_msgs/Pose pose
+# Calibration residual error
+float64 error
+# True if calibration was done with sensor mounted on robot
+bool robot_mounted
