@@ -25,6 +25,9 @@ add_definitions(-std=c++11)
 # add a target to generate API documentation with Doxygen
 add_subdirectory(doc)
 
+# add a target for the submodule CPR doing the REST api calls
+add_subdirectory(opt)
+
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -120,6 +123,8 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${CPR_INCLUDE_DIRS}
+  ${JSON_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -138,6 +143,7 @@ add_dependencies(rc_hand_eye_calibration_client_node rc_hand_eye_calibration_cli
 ## Specify libraries to link a library or executable target against
 target_link_libraries(rc_hand_eye_calibration_client_node
   ${catkin_LIBRARIES}
+  ${CPR_LIBRARIES}
 )
 
 #############
