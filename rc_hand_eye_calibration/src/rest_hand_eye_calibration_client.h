@@ -59,5 +59,9 @@ class CalibrationWrapper
     ros::ServiceServer srv_publish_transform_;
     ros::ServiceServer srv_get_result_;
 
+    // REST stuff
+    std::string ip_addr_, baseUrl_;
+    int timeoutCurl_; // ms
+
 };
 #endif

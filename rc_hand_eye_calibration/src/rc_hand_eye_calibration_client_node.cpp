@@ -10,11 +10,11 @@ int main(int argc, char **argv)
 
   ros::NodeHandle pnh("~");
   std::string ip_addr = "192.168.0.1"; // TODO: better default behaviour?
-  pnh.param("ip", ip_addr);
+  pnh.param("ip", ip_addr, ip_addr);
 
   // instantiate wrapper and advertise services
   CalibrationWrapper calib_wrapper(name, ip_addr);
-  ROS_INFO("Hand eye calibration node started");
+  ROS_INFO_STREAM("Hand eye calibration node started for device with ip address: " << ip_addr);
 
   // Use 2 threads, so the service call can wait for the image subscriber
   ros::MultiThreadedSpinner spinner(2); // TODO: is this necessary?
