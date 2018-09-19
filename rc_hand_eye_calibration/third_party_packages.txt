@@ -8,4 +8,6 @@
 # the subdirectory 'package' of the repository 'doc/third_party_licenses'.
 
 ros
+cpr
+nlohmann-json
 
