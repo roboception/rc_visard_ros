@@ -71,6 +71,13 @@ Building and installing the package follows the typical ROS catkin workflow.
 
 See the [rc_visard_description README](rc_visard_description/README.md) for more details.
 
+## rc_hand_eye_calibration
+
+Package for calibrating the rc_visard to a robot. 
+See the [rc_hand_eye_calibration README](rc_hand_eye_calibration/README.md) for more details.
+
+
+
 ## Acknowledgements
 
 This FTP (Focused Technical Project) has received funding from the European Union’s Horizon 2020 research and innovation programme under the project ROSIN with the grant agreement No 732287.
