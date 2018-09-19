@@ -3,9 +3,14 @@
 
 #include <rc_hand_eye_calibration_client/SetCalibrationPose.h>
 #include <rc_hand_eye_calibration_client/Calibration.h>
+#include <rc_hand_eye_calibration_client/hand_eye_calibrationConfig.h>
+
 #include <std_srvs/Trigger.h>
 
 #include <ros/ros.h>
+#include <dynamic_reconfigure/server.h>
+
+#include <memory>
 
 
 /**
@@ -15,7 +20,7 @@ class CalibrationWrapper
 {
   public:
 
-    CalibrationWrapper(std::string name, std::string ip_addr);
+    CalibrationWrapper(std::string name, std::string ip_addr, ros::NodeHandle nh);
 
   private:
 
@@ -49,6 +54,10 @@ class CalibrationWrapper
     ///Advertises the services in the namespace of nh_
     void advertiseServices();
 
+    void initConfiguration();
+
+    void dynamicReconfigureCb(rc_hand_eye_calibration_client::hand_eye_calibrationConfig &config, uint32_t);
+
     //ROS Stuff
     ros::NodeHandle nh_; 
     ros::ServiceServer srv_set_slot_;
@@ -58,9 +67,10 @@ class CalibrationWrapper
     ros::ServiceServer srv_remove_;
     ros::ServiceServer srv_publish_transform_;
     ros::ServiceServer srv_get_result_;
+    std::unique_ptr<dynamic_reconfigure::Server<rc_hand_eye_calibration_client::hand_eye_calibrationConfig> > server_;
 
     // REST stuff
-    std::string ip_addr_, baseUrl_;
+    std::string ip_addr_, servicesUrl_, paramsUrl_;
     int timeoutCurl_; // ms
 
 };

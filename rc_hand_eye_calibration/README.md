@@ -6,15 +6,17 @@ This package provides ROS service calls and topics to calibrate the rc_visard to
 Installation
 ------------
 
-This repository relies on git submodules for the cpr library which need to be initialized before building from source.
+This package relies on git submodules for the cpr library which need to be initialized before building from source.
 ~~~
 git submodule update --init --recursive
 ~~~
 
-Parameters
-----------
+Configuration
+-------------
 
-* `ip`: IP address of the rc_visard that should be calibrated
+### Parameters
+
+* `ip`: The IP address of the rc_visard that should be calibrated
 
 Documentation
 -------------

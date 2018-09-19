@@ -58,8 +58,10 @@ bool isValidIPAddress(const std::string& ip)
 }//anonymous ns
 
 
-CalibrationWrapper::CalibrationWrapper(std::string name, std::string ip_addr)
-  : nh_ {name}, ip_addr_(ip_addr), baseUrl_("http://" + ip_addr + "/api/v1/nodes/rc_hand_eye_calibration/services/")
+CalibrationWrapper::CalibrationWrapper(std::string name, std::string ip_addr, ros::NodeHandle nh)
+  : nh_(nh), ip_addr_(ip_addr), 
+    servicesUrl_("http://" + ip_addr + "/api/v1/nodes/rc_hand_eye_calibration/services/"),
+    paramsUrl_("http://" + ip_addr + "/api/v1/nodes/rc_hand_eye_calibration/parameters")
 {
 
   // check if given string is a valid IP address
@@ -69,6 +71,7 @@ CalibrationWrapper::CalibrationWrapper(std::string name, std::string ip_addr)
   }
 
   timeoutCurl_ = 2000;
+  initConfiguration();
   advertiseServices();
 }
 
@@ -76,7 +79,7 @@ CalibrationWrapper::CalibrationWrapper(std::string name, std::string ip_addr)
 bool CalibrationWrapper::saveSrv(std_srvs::TriggerRequest &,
                                  std_srvs::TriggerResponse &response)
 {
-  cpr::Url url = cpr::Url{ baseUrl_ + "save_calibration"};
+  cpr::Url url = cpr::Url{ servicesUrl_ + "save_calibration"};
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
   handleCPRResponse(rest_resp);
 
@@ -92,7 +95,7 @@ bool CalibrationWrapper::saveSrv(std_srvs::TriggerRequest &,
 bool CalibrationWrapper::resetSrv(std_srvs::TriggerRequest &,
                                   std_srvs::TriggerResponse &response)
 {
-  cpr::Url url = cpr::Url{ baseUrl_ + "reset_calibration"};
+  cpr::Url url = cpr::Url{ servicesUrl_ + "reset_calibration"};
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
   handleCPRResponse(rest_resp);
 
@@ -106,7 +109,7 @@ bool CalibrationWrapper::resetSrv(std_srvs::TriggerRequest &,
 bool CalibrationWrapper::removeSrv(std_srvs::TriggerRequest &,
                                    std_srvs::TriggerResponse &response)
 {
-  cpr::Url url = cpr::Url{ baseUrl_ + "remove_calibration"};
+  cpr::Url url = cpr::Url{ servicesUrl_ + "remove_calibration"};
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
   handleCPRResponse(rest_resp);
 
@@ -120,7 +123,6 @@ bool CalibrationWrapper::removeSrv(std_srvs::TriggerRequest &,
 bool CalibrationWrapper::setSlotSrv(rc_hand_eye_calibration_client::SetCalibrationPoseRequest &request,
                                     rc_hand_eye_calibration_client::SetCalibrationPoseResponse &response)
 { 
-
   // convert ros pose to json obj
   json js_pos, js_ori, js_pose;
   js_pos["x"] = request.pose.position.x;
@@ -139,7 +141,7 @@ bool CalibrationWrapper::setSlotSrv(rc_hand_eye_calibration_client::SetCalibrati
   js_args["args"]["slot"] = request.slot;
 
   // do service request
-  cpr::Url url = cpr::Url{ baseUrl_ + "set_pose" };
+  cpr::Url url = cpr::Url{ servicesUrl_ + "set_pose" };
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ }, cpr::Body{ js_args.dump() },
                       cpr::Header{ { "Content-Type", "application/json" } });
   handleCPRResponse(rest_resp);
@@ -157,7 +159,7 @@ bool CalibrationWrapper::calibSrv(rc_hand_eye_calibration_client::CalibrationReq
                                   rc_hand_eye_calibration_client::CalibrationResponse &response)
 {
   // do service request
-  cpr::Url url = cpr::Url{ baseUrl_ + "calibrate" };
+  cpr::Url url = cpr::Url{ servicesUrl_ + "calibrate" };
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
   handleCPRResponse(rest_resp);
 
@@ -186,7 +188,7 @@ bool CalibrationWrapper::getCalibResultSrv(rc_hand_eye_calibration_client::Calib
                                            rc_hand_eye_calibration_client::CalibrationResponse &response)
 {
   // do service request
-  cpr::Url url = cpr::Url{ baseUrl_ + "get_calibration" };
+  cpr::Url url = cpr::Url{ servicesUrl_ + "get_calibration" };
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
   handleCPRResponse(rest_resp);
 
@@ -211,7 +213,6 @@ bool CalibrationWrapper::getCalibResultSrv(rc_hand_eye_calibration_client::Calib
 }
 
 
-
 void CalibrationWrapper::advertiseServices()
 {
   using CW = CalibrationWrapper;
@@ -227,4 +228,72 @@ void CalibrationWrapper::advertiseServices()
   srv_reset_ = nh_.advertiseService("reset_calibration", &CW::resetSrv, this);
   // remove calibration
   srv_remove_ = nh_.advertiseService("remove_calibration", &CW::removeSrv, this);
+}
+
+void CalibrationWrapper::initConfiguration()
+{
+  rc_hand_eye_calibration_client::hand_eye_calibrationConfig cfg;
+
+  // first get the current values from sensor
+  auto rest_resp = cpr::Get(paramsUrl_, cpr::Timeout{ timeoutCurl_ });
+  handleCPRResponse(rest_resp);
+  auto json_resp = json::parse(rest_resp.text);
+  for (auto& param : json_resp) {
+    string name = param["name"];
+    if (param["name"] == "grid_width") 
+    {
+      cfg.grid_width = param["value"];
+    } else if (param["name"] == "grid_height") 
+    {
+      cfg.grid_height = param["value"];
+    } else if (param["name"] == "robot_mounted") 
+    {
+      cfg.robot_mounted = param["value"];
+    }
+  }
+
+  // second, try to get ROS parameters: 
+  // if parameter is not set in parameter server, we default to current sensor configuration
+  nh_.param("grid_width", cfg.grid_width, cfg.grid_width);
+  nh_.param("grid_height", cfg.grid_height, cfg.grid_height);
+  nh_.param("robot_mounted", cfg.robot_mounted, cfg.robot_mounted);
+
+  // set parameters on parameter server so that dynamic reconfigure picks them up
+  nh_.setParam("grid_width", cfg.grid_width);
+  nh_.setParam("grid_height", cfg.grid_height);
+  nh_.setParam("robot_mounted", cfg.robot_mounted);
+
+  // instantiate dynamic reconfigure server that will initially read those values
+  using RCFSRV = dynamic_reconfigure::Server<rc_hand_eye_calibration_client::hand_eye_calibrationConfig>;
+  server_ = unique_ptr<RCFSRV>(new dynamic_reconfigure::Server<rc_hand_eye_calibration_client::hand_eye_calibrationConfig>(nh_));
+  server_->setCallback(boost::bind(&CalibrationWrapper::dynamicReconfigureCb, this, _1, _2));
+}
+
+
+void CalibrationWrapper::dynamicReconfigureCb(rc_hand_eye_calibration_client::hand_eye_calibrationConfig
+    &config,
+    uint32_t)
+{
+  ROS_DEBUG("Reconfigure Request: (%f x %f) %s",
+           config.grid_width, config.grid_height,
+           config.robot_mounted ? "True" : "False");
+
+  // fill json request from dynamic reconfigure request
+  json js_params, js_param;
+  js_param["name"] ="grid_width";
+  js_param["value"] = config.grid_width;
+  js_params.push_back(js_param);
+  js_param["name"] ="grid_height";
+  js_param["value"] = config.grid_height;
+  js_params.push_back(js_param);
+  js_param["name"] ="robot_mounted";
+  js_param["value"] = config.robot_mounted;
+  js_params.push_back(js_param);
+
+  // do service request
+  auto rest_resp = cpr::Put(paramsUrl_, cpr::Timeout{ timeoutCurl_ },
+                      cpr::Body{ js_params.dump() },
+                      cpr::Header{ { "Content-Type", "application/json" } });
+
+  handleCPRResponse(rest_resp);  
 }

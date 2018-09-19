@@ -26,6 +26,7 @@
   <depend>geometry_msgs</depend>
   <depend>tf</depend>
 
+  <depend>dynamic_reconfigure</depend>
   <depend>message_generation</depend>
   <depend>message_runtime</depend>
 
