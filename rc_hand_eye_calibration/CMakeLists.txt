@@ -15,8 +15,6 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RELEASE CACHE STRING "Build type: DEBUG or RELEASE" FORCE)
 endif ()
 
-include(cmake/optimization_flags.cmake)
-
 # - Standard definitions -
 
 add_definitions(-Wall)
