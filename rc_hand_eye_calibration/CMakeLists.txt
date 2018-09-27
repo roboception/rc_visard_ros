@@ -22,9 +22,6 @@ include(cmake/optimization_flags.cmake)
 add_definitions(-Wall)
 add_definitions(-std=c++11)
 
-# add a target to generate API documentation with Doxygen
-add_subdirectory(doc)
-
 # add a target for the submodule CPR doing the REST api calls
 add_subdirectory(opt)
 
