@@ -1,0 +1,13 @@
+# This file lists all third party software used by this package, i.e.:
+#
+# <third party package 1>
+# <third party package 2>
+# ...
+#
+# For each package, there must be a file with the name <package X>.txt in
+# the subdirectory 'package' of the repository 'doc/third_party_licenses'.
+
+ros
+cpr
+nlohmann-json
+
