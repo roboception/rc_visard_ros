@@ -71,10 +71,10 @@ Building and installing the package follows the typical ROS catkin workflow.
 
 See the [rc_visard_description README](rc_visard_description/README.md) for more details.
 
-## rc_hand_eye_calibration
+## rc_hand_eye_calibration_client
 
-Package for calibrating the rc_visard to a robot. 
-See the [rc_hand_eye_calibration README](rc_hand_eye_calibration/README.md) for more details.
+Package for calibrating the rc_visard to a robot.
+See the [rc_hand_eye_calibration_client README](rc_hand_eye_calibration_client/README.md) for more details.
 
 
 
