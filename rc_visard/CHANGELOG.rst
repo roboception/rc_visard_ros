@@ -2,6 +2,10 @@
 Changelog for package rc_visard
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2018-10-16)
+------------------
+* rc_hand_eye_calibration_client package added
+
 2.3.0 (2018-08-21)
 ------------------
 

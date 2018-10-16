@@ -2,6 +2,14 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2018-10-16)
+------------------
+* added `depth_acquisition_mode` parameter
+* added `depth_acquisition_trigger` service call
+* Reduced latency for passing changes of dynamic parameters and topic discriptions to GenICam
+* Fixed using wrong disparity range in disparity color publisher
+* now depends on rc_genicam_api >= 2.0.0
+
 2.3.0 (2018-08-21)
 ------------------
 

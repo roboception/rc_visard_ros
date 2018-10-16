@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rc_visard_driver</name>
-  <version>2.3.0</version>
+  <version>2.4.0</version>
   <description>
     The rc_visard_driver provides data from a Roboception rc_visard 3D sensor on several ROS topics.
   </description>
