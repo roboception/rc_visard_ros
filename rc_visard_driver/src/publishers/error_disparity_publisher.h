@@ -57,7 +57,7 @@ public:
 
   bool used() override;
 
-  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
+  void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
 
 private:
   ErrorDisparityPublisher(const ErrorDisparityPublisher&);             // forbidden

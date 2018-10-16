@@ -69,12 +69,12 @@ bool Points2Publisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void Points2Publisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
+void Points2Publisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
-  publish(buffer, pixelformat, false);
+  publish(buffer, part, pixelformat, false);
 }
 
-void Points2Publisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat, bool out1)
+void Points2Publisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat, bool out1)
 {
   if (pub.getNumSubscribers() > 0)
   {
@@ -90,11 +90,11 @@ void Points2Publisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat, 
         return;
       }
 
-      left_list.add(buffer);
+      left_list.add(buffer, part);
     }
     else if (pixelformat == Coord3D_C16)
     {
-      disp_list.add(buffer);
+      disp_list.add(buffer, part);
     }
 
     // get corresponding left and disparity image

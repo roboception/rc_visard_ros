@@ -66,8 +66,8 @@ public:
     out1_alternate = alternate;
   }
 
-  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
-  void publish(const rcg::Buffer* buffer, uint64_t pixelformat, bool out1);
+  void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
+  void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat, bool out1);
 
 private:
   ImagePublisher(const ImagePublisher&);             // forbidden

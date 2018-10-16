@@ -106,7 +106,7 @@ bool CameraInfoPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void CameraInfoPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
+void CameraInfoPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
   if (pub.getNumSubscribers() > 0 && (pixelformat == Mono8 || pixelformat == YCbCr411_8))
   {
@@ -117,8 +117,8 @@ void CameraInfoPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelforma
     info.header.stamp.sec = time / freq;
     info.header.stamp.nsec = time - freq * info.header.stamp.sec;
 
-    info.width = static_cast<uint32_t>(buffer->getWidth());
-    info.height = static_cast<uint32_t>(buffer->getHeight());
+    info.width = static_cast<uint32_t>(buffer->getWidth(part));
+    info.height = static_cast<uint32_t>(buffer->getHeight(part));
 
     if (info.height > info.width)
     {

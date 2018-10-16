@@ -78,12 +78,12 @@ bool ImagePublisher::used()
   return pub.getNumSubscribers() > 0 || pub_out1_low.getNumSubscribers() > 0 || pub_out1_high.getNumSubscribers() > 0;
 }
 
-void ImagePublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
+void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
-  publish(buffer, pixelformat, false);
+  publish(buffer, part, pixelformat, false);
 }
 
-void ImagePublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat, bool out1)
+void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat, bool out1)
 {
   bool sub = (pub.getNumSubscribers() > 0 && (!out1_alternate || !out1));
 
@@ -108,8 +108,8 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat, bo
 
     // set image size
 
-    im->width = static_cast<uint32_t>(buffer->getWidth());
-    im->height = static_cast<uint32_t>(buffer->getHeight());
+    im->width = static_cast<uint32_t>(buffer->getWidth(part));
+    im->height = static_cast<uint32_t>(buffer->getHeight(part));
     im->is_bigendian = false;
 
     bool stacked = false;
@@ -122,12 +122,12 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat, bo
 
     // get pointer to image data in buffer
 
-    const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase()) + buffer->getImageOffset();
-    size_t pstep = im->width + buffer->getXPadding();
+    const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase(part));
+    size_t pstep = im->width + buffer->getXPadding(part);
 
     if (pixelformat == YCbCr411_8)
     {
-      pstep = (im->width >> 2) * 6 + buffer->getXPadding();
+      pstep = (im->width >> 2) * 6 + buffer->getXPadding(part);
     }
 
     if (!left)

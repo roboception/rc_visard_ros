@@ -62,8 +62,8 @@ public:
 
   bool used() override;
 
-  void publish(const rcg::Buffer* buffer, uint64_t pixelformat) override;
-  void publish(const rcg::Buffer* buffer, uint64_t pixelformat, bool out1);
+  void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
+  void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat, bool out1);
 
 private:
   Points2Publisher(const Points2Publisher&);             // forbidden

@@ -55,7 +55,7 @@ bool ErrorDepthPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void ErrorDepthPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
+void ErrorDepthPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
   if (pub.getNumSubscribers() > 0)
   {
@@ -63,11 +63,11 @@ void ErrorDepthPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelforma
 
     if (pixelformat == Coord3D_C16)
     {
-      disp_list.add(buffer);
+      disp_list.add(buffer, part);
     }
     else if (pixelformat == Error8)
     {
-      err_list.add(buffer);
+      err_list.add(buffer, part);
     }
 
     // get disparity and error image pair with current time stamp

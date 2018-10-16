@@ -55,7 +55,7 @@ generate_messages(
 
 
 ## System dependencies are found with CMake's conventions
-find_package(RC_GENICAM_API REQUIRED)
+find_package(RC_GENICAM_API 2.0.0 REQUIRED)
 find_package(RC_DYNAMICS_API REQUIRED)
 
 #########################################
@@ -114,6 +114,6 @@ install(DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 ## Define information for packaging ##
 ######################################
 # optionally specify dependencies of the debian package here (comma separated!)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "rc-genicam-api | ros-$ENV{ROS_DISTRO}-rc-genicam-api, rc-dynamics-api | ros-$ENV{ROS_DISTRO}-rc-dynamics-api, ros-$ENV{ROS_DISTRO}-image-pipeline, ros-$ENV{ROS_DISTRO}-tf")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "rc-genicam-api (>= 2.0.0) | ros-$ENV{ROS_DISTRO}-rc-genicam-api (>= 2.0.0), rc-dynamics-api | ros-$ENV{ROS_DISTRO}-rc-dynamics-api, ros-$ENV{ROS_DISTRO}-image-pipeline, ros-$ENV{ROS_DISTRO}-tf")
 
 include(cmake/package_debian.cmake)

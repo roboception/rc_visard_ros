@@ -62,7 +62,7 @@ bool DisparityPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void DisparityPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
+void DisparityPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
   if (pub.getNumSubscribers() > 0 && pixelformat == Coord3D_C16)
   {
@@ -81,14 +81,14 @@ void DisparityPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat
     // prepare size and format of outgoing image
 
     p->image.header = p->header;
-    p->image.width = static_cast<uint32_t>(buffer->getWidth());
-    p->image.height = static_cast<uint32_t>(buffer->getHeight());
+    p->image.width = static_cast<uint32_t>(buffer->getWidth(part));
+    p->image.height = static_cast<uint32_t>(buffer->getHeight(part));
     p->image.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
     p->image.is_bigendian = rcg::isHostBigEndian();
     p->image.step = p->image.width * sizeof(float);
 
-    size_t px = buffer->getXPadding();
-    const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase()) + buffer->getImageOffset();
+    size_t px = buffer->getXPadding(part);
+    const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase(part));
 
     // convert image information
 

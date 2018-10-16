@@ -64,10 +64,11 @@ public:
     data is published.
 
     @param buffer      Buffer with data to be published.
+    @param part        Part index of image.
     @param pixelformat The pixelformat as given by buffer.getPixelFormat().
   */
 
-  virtual void publish(const rcg::Buffer* buffer, uint64_t pixelformat) = 0;
+  virtual void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) = 0;
 
   /**
     Returns true if there are subscribers to the topic.

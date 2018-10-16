@@ -1034,55 +1034,66 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         {
           const rcg::Buffer* buffer = stream[0]->grab(40);
 
-          if (buffer != 0 && !buffer->getIsIncomplete() && buffer->getImagePresent())
+          if (buffer != 0 && !buffer->getIsIncomplete())
           {
-            // reset counter of consecutive missing images and failures
-#if ROS_HAS_STEADYTIME
-            tlastimage = ros::SteadyTime::now();
-#else
-            tlastimage = ros::WallTime::now();
-#endif
-            cntConsecutiveFails = 0;
-            imageSuccess = true;
-
             // get out1 line status from chunk data if possible
 
             bool out1 = false;
             if (iocontrol_avail && chunkadapter && buffer->getContainsChunkdata())
             {
-              chunkadapter->AttachBuffer(reinterpret_cast<std::uint8_t*>(buffer->getBase()), buffer->getSizeFilled());
-
+              chunkadapter->AttachBuffer(reinterpret_cast<std::uint8_t*>(buffer->getGlobalBase()),
+                                                                         buffer->getSizeFilled());
               out1 = (rcg::getInteger(rcgnodemap, "ChunkLineStatusAll", 0, 0, false) & 0x1);
             }
 
-            // the buffer is offered to all publishers
-
-            disp.setDisprange(disprange);
-            cdisp.setDisprange(disprange);
-
-            uint64_t pixelformat = buffer->getPixelFormat();
-
-            lcaminfo.publish(buffer, pixelformat);
-            rcaminfo.publish(buffer, pixelformat);
-
-            limage.publish(buffer, pixelformat, out1);
-            rimage.publish(buffer, pixelformat, out1);
-
-            if (limage_color && rimage_color)
+            uint32_t npart=buffer->getNumberOfParts();
+            for (uint32_t part=0; part<npart; part++)
             {
-              limage_color->publish(buffer, pixelformat, out1);
-              rimage_color->publish(buffer, pixelformat, out1);
+              if (buffer->getImagePresent(part))
+              {
+                // reset counter of consecutive missing images and failures
+#if ROS_HAS_STEADYTIME
+                tlastimage = ros::SteadyTime::now();
+#else
+                tlastimage = ros::WallTime::now();
+#endif
+                cntConsecutiveFails = 0;
+                imageSuccess = true;
+
+                // the buffer is offered to all publishers
+
+                disp.setDisprange(disprange);
+                cdisp.setDisprange(disprange);
+
+                uint64_t pixelformat = buffer->getPixelFormat(part);
+
+                lcaminfo.publish(buffer, part, pixelformat);
+                rcaminfo.publish(buffer, part, pixelformat);
+
+                limage.publish(buffer, part, pixelformat, out1);
+                rimage.publish(buffer, part, pixelformat, out1);
+
+                if (limage_color && rimage_color)
+                {
+                  limage_color->publish(buffer, part, pixelformat, out1);
+                  rimage_color->publish(buffer, part, pixelformat, out1);
+                }
+
+                disp.publish(buffer, part, pixelformat);
+                cdisp.publish(buffer, part, pixelformat);
+                depth.publish(buffer, part, pixelformat);
+
+                confidence.publish(buffer, part, pixelformat);
+                error_disp.publish(buffer, part, pixelformat);
+                error_depth.publish(buffer, part, pixelformat);
+
+                points2.publish(buffer, part, pixelformat, out1);
+              }
             }
 
-            disp.publish(buffer, pixelformat);
-            cdisp.publish(buffer, pixelformat);
-            depth.publish(buffer, pixelformat);
+            // detach buffer from nodemap
 
-            confidence.publish(buffer, pixelformat);
-            error_disp.publish(buffer, pixelformat);
-            error_depth.publish(buffer, pixelformat);
-
-            points2.publish(buffer, pixelformat, out1);
+            if (chunkadapter) chunkadapter->DetachBuffer();
           }
           else if (buffer != 0 && buffer->getIsIncomplete())
           {

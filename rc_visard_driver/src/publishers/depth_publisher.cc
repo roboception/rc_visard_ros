@@ -53,7 +53,7 @@ bool DepthPublisher::used()
   return pub.getNumSubscribers() > 0;
 }
 
-void DepthPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
+void DepthPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat)
 {
   if (pub.getNumSubscribers() > 0 && pixelformat == Coord3D_C16)
   {
@@ -71,13 +71,13 @@ void DepthPublisher::publish(const rcg::Buffer* buffer, uint64_t pixelformat)
 
     // set image size
 
-    im->width = static_cast<uint32_t>(buffer->getWidth());
-    im->height = static_cast<uint32_t>(buffer->getHeight());
+    im->width = static_cast<uint32_t>(buffer->getWidth(part));
+    im->height = static_cast<uint32_t>(buffer->getHeight(part));
 
     // get pointer to image data in buffer
 
-    size_t px = buffer->getXPadding();
-    const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase()) + buffer->getImageOffset();
+    size_t px = buffer->getXPadding(part);
+    const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase(part));
 
     // convert image data
 
