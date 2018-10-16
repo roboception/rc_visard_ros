@@ -7,17 +7,15 @@
   <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>
   <license>BSD</license>
 
-  <url type="website">http://wiki.ros.org/rc_visard_driver</url>
+  <url type="website">http://wiki.ros.org/rc_hand_eye_calibration_client</url>
   <url type="repository">https://github.com/roboception/rc_visard_ros</url>
   <url type="bugtracker">https://github.com/roboception/rc_visard_ros/issues</url>
 
-  <author email="heiko.hirschmueller@roboception.de">Heiko Hirschmueller</author>
   <author email="christian.emmerich@roboception.de">Christian Emmerich</author>
-  <author email="felix.ruess@roboception.de">Felix Ruess</author>
 
   <!-- system dependencies -->
   <buildtool_depend>catkin</buildtool_depend>
-  
+
   <depend>roscpp</depend>
   <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
