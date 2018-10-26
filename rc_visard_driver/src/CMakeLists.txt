@@ -18,6 +18,8 @@ set(SRC
 
 # build and install the nodelet
 
+link_directories(${RC_GENICAM_API_LIBRARY_DIRS})
+
 add_library(rc_visard_driver_nodelet ${SRC})
 
 target_link_libraries(rc_visard_driver_nodelet ${catkin_LIBRARIES})
