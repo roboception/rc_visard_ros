@@ -2,6 +2,9 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.2 (2018-10-29)
+------------------
+
 2.4.1 (2018-10-29)
 ------------------
 * Fixed link error if rc_genicam_api is not installed in a standard directory
