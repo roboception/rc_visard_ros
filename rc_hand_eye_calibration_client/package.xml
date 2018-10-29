@@ -16,6 +16,8 @@
   <!-- system dependencies -->
   <buildtool_depend>catkin</buildtool_depend>
 
+  <depend>curl</depend>
+
   <depend>roscpp</depend>
   <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
