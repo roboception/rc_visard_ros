@@ -2,6 +2,11 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.1 (2018-10-29)
+------------------
+* Fixed link error if rc_genicam_api is not installed in a standard directory
+* docker images: upgrade packages first
+
 2.4.0 (2018-10-16)
 ------------------
 * added `depth_acquisition_mode` parameter
