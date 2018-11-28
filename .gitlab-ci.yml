@@ -8,7 +8,7 @@ before_script:
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
-  GIT_SUMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_STRATEGY: recursive
 
 stages:
   - test
