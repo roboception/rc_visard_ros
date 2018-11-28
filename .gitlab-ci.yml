@@ -5,203 +5,282 @@ before_script:
   - curl http://apt.roboception.de/archive.key | apt-key add -
   - apt-get update -yq && apt-get install -y lintian rc-genicam-api rc-dynamics-api
   - rosdep install --from-paths . --ignore-src -r -y --skip-keys="rc_genicam_api rc_dynamics_api"
-  - git submodule sync --recursive
-  - git submodule update --init --recursive
 
-#############
-# Templates
-#############
-.amd64_template: &amd64_job   # Hidden job that defines an anchor named 'amd64_job'
+variables:
+  GET_SOURCES_ATTEMPTS: 3
+  GIT_SUMODULE_STRATEGY: recursive
+
+stages:
+  - test
+  - package
+  - image
+
+##################
+# Anchor templates
+##################
+.amd64_trusty_t: &amd64_trusty_job
   image: registry.roboception.de/tools/docker_images:indigo-perception-pcl
   tags:
     - amd64
     - docker
 
-.armhf_template: &armhf_job   # Hidden job that defines an anchor named 'armhf_job'
+.armhf_trusty_t: &armhf_trusty_job
   image: registry.roboception.de/tools/docker_images:armhf-indigo-perception
   tags:
     - armhf
     - docker
 
-.amd64_xenial_template: &amd64_xenial_job
+.amd64_xenial_t: &amd64_xenial_job
   image: ros:kinetic-perception
   tags:
     - amd64
     - docker
 
-.armhf_xenial_template: &armhf_xenial_job
+.armhf_xenial_t: &armhf_xenial_job
   image: registry.roboception.de/tools/docker_images:armhf-kinetic-perception
   tags:
     - armhf
     - docker
 
-.test_t: &test
+.amd64_bionic_t: &amd64_bionic_job
+  image: ros:melodic-perception
+  tags:
+    - amd64
+    - docker
+
+#############
+# Templates
+#############
+.test:
   stage: test
+  variables:
+    PACKAGE: "rc_visard_driver"
   script:
-    - mkdir build
-    - cd build
-    - cmake ../rc_visard_driver
+    - mkdir build && cd build
+    - cmake ../${PACKAGE}
     - make -j 4
     - CTEST_OUTPUT_ON_FAILURE=1 make test
 
 # run test script with latest debs from testing installed
-.test_latest_t: &test_latest
-  <<: *test
+.test_latest:
+  extends: .test
   variables:
     TESTING_DEBS: "true"
 
 # run test script with released debs from stable installed (allowed to fail)
-.test_stable_t: &test_stable
-  <<: *test
+.test_stable:
+  extends: .test
   allow_failure: true
   except:
-    - /^v[0-9.]+$/
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
 
 # run test script with released debs from stable (only for releases, mustn't fail)
-.test_release_t: &test_release
-  <<: *test
-  only:
-    - /^v[0-9.]+$/
-  except:
-    - branches
-
-.package_testing_t: &package_testing
-  stage: deploy
-  environment:
-    name: testing/$DISTRO_CODENAME
-  variables:
-    TESTING_DEBS: "true"
-  script:
-    - mkdir build
-    - cd build
-    - cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ../rc_visard_driver
-    - make -j 4
-    - make package
-    - upload_deb.sh $DISTRO_CODENAME-testing *.deb
-  only:
-    - master
-
-.package_stable_t: &package_stable
-  stage: deploy
-  environment:
-    name: stable/$DISTRO_CODENAME
-  script:
-    - mkdir build
-    - cd build
-    - cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ../rc_visard_driver
-    - make -j 4
-    - make package
-    - upload_deb.sh $DISTRO_CODENAME-stable *.deb
+.test_release:
+  extends: .test
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+/
   except:
     - branches
 
+# Debian packaging
+.package:
+  stage: package
+  variables:
+    PACKAGE: "rc_visard_driver"
+  script:
+    - mkdir build && cd build
+    - cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ../${PACKAGE}
+    - make -j 4
+    - make package
+    - if [ -z "$APT_REPO" ]; then export APT_REPO=testing; fi
+    - upload_deb.sh $DISTRO_CODENAME-$APT_REPO *.deb
+
+.package_testing:
+  extends: .package
+  only:
+    - master
+  variables:
+    TESTING_DEBS: "true"
+    APT_REPO: "testing"
+
+.package_stable:
+  extends: .package
+  only:
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
+  except:
+    - branches
+  variables:
+    APT_REPO: "stable"
+
+# Docker image
+.docker_build:
+  image: docker:latest
+  stage: image
+  variables:
+    PACKAGE: "rc_visard_driver"
+    ROS_DISTRO: "kinetic"
+    RC_REPO: testing
+  before_script:
+    - docker info
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - if [ -z "$IMAGE" ]; then export IMAGE=$CI_REGISTRY_IMAGE/$PACKAGE/$ROS_DISTRO ; fi
+    - if [ -n "$CI_COMMIT_TAG" ]; then export IMAGE_TAG=$CI_COMMIT_TAG ; else export IMAGE_TAG=$CI_COMMIT_REF_SLUG ; fi
+    - if [ "$CI_COMMIT_REF_NAME" = "master" ]; then export IMAGE_TAG=testing ; fi
+    - if [ -z "$DOCKER_BUILD_FLAGS" ]; then export DOCKER_BUILD_FLAGS="--pull --no-cache --build-arg RC_REPO=$RC_REPO"; fi
+    - if [ -z "$DOCKERFILE_DIR" ]; then export DOCKERFILE_DIR=$PACKAGE/docker/$ROS_DISTRO; fi
+  script:
+    - echo "building docker image $IMAGE:$IMAGE_TAG with flags $DOCKER_BUILD_FLAGS"
+    - docker build $DOCKER_BUILD_FLAGS -t $IMAGE:$IMAGE_TAG $DOCKERFILE_DIR
+    - docker push $IMAGE:$IMAGE_TAG
+    - if [ -n "$CI_COMMIT_TAG" ]; then docker tag $IMAGE:$IMAGE_TAG $IMAGE:latest ; docker push $IMAGE:latest ; fi
+  tags:
+    - docker-build
+
+.docker_build_stable:
+  extends: .docker_build
+  variables:
+    RC_REPO: stable
+  only:
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
+  except:
+    - branches
+    - schedules
+
 ##############
 #### Jobs ####
 ##############
-gen_dox:
-  <<: *amd64_job
-  stage: deploy
-  script:
-    - apt-get install -y doxygen ncftp
-    - mkdir build
-    - cd build
-    - cmake ../rc_visard_driver
-    - make rc_visard_driver_doc
-    - upload_dox.sh doc/html
-  only:
-    - master
-    - tags
-  tags:
-    - docs
+
+################
+# Testing builds
+################
 
 # Test against latest (on every commit)
 #######################################
-test_amd64:
-  <<: *amd64_job
-  <<: *test_latest
+test:trusty:amd64:
+  <<: *amd64_trusty_job
+  extends: .test_latest
 
-test_armhf:
-  <<: *armhf_job
-  <<: *test_latest
+test:trusty:armhf:
+  <<: *armhf_trusty_job
+  extends: .test_latest
 
-test_xenial_amd64:
+test:xenial:amd64:
   <<: *amd64_xenial_job
-  <<: *test_latest
+  extends: .test_latest
 
-test_xenial_armhf:
+test:xenial:armhf:
   <<: *armhf_xenial_job
-  <<: *test_latest
+  extends: .test_latest
+
+test:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .test_latest
 
 # Test against stable (is allowed to fail)
 ##########################################
-test_stable_amd64:
-  <<: *amd64_job
-  <<: *test_stable
+test_stable:trusty:amd64:
+  <<: *amd64_trusty_job
+  extends: .test_stable
 
-test_stable_armhf:
-  <<: *armhf_job
-  <<: *test_stable
+test_stable:trusty:armhf:
+  <<: *armhf_trusty_job
+  extends: .test_stable
 
-test_stable_xenial_amd64:
+test_stable:xenial:amd64:
   <<: *amd64_xenial_job
-  <<: *test_stable
+  extends: .test_stable
 
-test_stable_xenial_armhf:
+test_stable:xenial:armhf:
   <<: *armhf_xenial_job
-  <<: *test_stable
+  extends: .test_stable
 
-# Test against stable if it is a release
-########################################
-test_release_amd64:
-  <<: *amd64_job
-  <<: *test_release
-
-test_release_armhf:
-  <<: *armhf_job
-  <<: *test_release
-
-test_release_xenial_amd64:
-  <<: *amd64_xenial_job
-  <<: *test_release
-
-test_release_xenial_armhf:
-  <<: *armhf_xenial_job
-  <<: *test_release
+test_stable:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .test_stable
 
 # Deploy testing (only on master)
 #################################
-package_testing_amd64:
-  <<: *amd64_job
-  <<: *package_testing
+package_testing:trusty:amd64:
+  <<: *amd64_trusty_job
+  extends: .package_testing
 
-package_testing_armhf:
-  <<: *armhf_job
-  <<: *package_testing
+package_testing:trusty:armhf:
+  <<: *armhf_trusty_job
+  extends: .package_testing
 
-package_testing_xenial_amd64:
+package_testing:xenial:amd64:
   <<: *amd64_xenial_job
-  <<: *package_testing
+  extends: .package_testing
 
-package_testing_xenial_armhf:
+package_testing:xenial:armhf:
   <<: *armhf_xenial_job
-  <<: *package_testing
+  extends: .package_testing
+
+package_testing:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .package_testing
+
+################
+# Stable builds
+################
+
+# Test against stable if it is a release
+########################################
+test_release:trusty:amd64:
+  <<: *amd64_trusty_job
+  extends: .test_release
+
+test_release:trusty:armhf:
+  <<: *armhf_trusty_job
+  extends: .test_release
+
+test_release:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .test_release
+
+test_release:xenial:armhf:
+  <<: *armhf_xenial_job
+  extends: .test_release
+
+test_release:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .test_release
 
 # Deploy stable (only for releases, version tags)
 #################################################
-package_stable_amd64:
-  <<: *amd64_job
-  <<: *package_stable
+package_stable:trusty:amd64:
+  <<: *amd64_trusty_job
+  extends: .package_stable
 
-package_stable_armhf:
-  <<: *armhf_job
-  <<: *package_stable
+package_stable:trusty:armhf:
+  <<: *armhf_trusty_job
+  extends: .package_stable
 
-package_stable_xenial_amd64:
+package_stable:xenial:amd64:
   <<: *amd64_xenial_job
-  <<: *package_stable
+  extends: .package_stable
 
-package_stable_xenial_armhf:
+package_stable:xenial:armhf:
   <<: *armhf_xenial_job
-  <<: *package_stable
+  extends: .package_stable
+
+package_stable:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .package_stable
+
+###############
+# Docker images
+###############
+image:rc_visard_driver:kinetic:testing:
+  extends: .docker_build
+  variables:
+    PACKAGE: "rc_visard_driver"
+    ROS_DISTRO: "kinetic"
+    DOCKERFILE_DIR: "rc_visard_driver"
+
+image:rc_hand_eye_calibration_client:kinetic:testing:
+  extends: .docker_build
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
+    ROS_DISTRO: "kinetic"
+    DOCKERFILE_DIR: "rc_hand_eye_calibration_client"
