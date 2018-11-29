@@ -20,7 +20,7 @@ class CalibrationWrapper
 {
   public:
 
-    CalibrationWrapper(std::string name, std::string ip_addr, ros::NodeHandle nh);
+    CalibrationWrapper(std::string host, ros::NodeHandle nh);
 
   private:
 
@@ -70,7 +70,7 @@ class CalibrationWrapper
     std::unique_ptr<dynamic_reconfigure::Server<rc_hand_eye_calibration_client::hand_eye_calibrationConfig> > server_;
 
     // REST stuff
-    std::string ip_addr_, servicesUrl_, paramsUrl_;
+    std::string host_, servicesUrl_, paramsUrl_;
     int timeoutCurl_; // ms
 
 };
