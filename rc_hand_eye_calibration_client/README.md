@@ -29,7 +29,7 @@ Configuration
 
 ### Parameters
 
-* `ip`: The IP address of the rc_visard that should be calibrated
+* `host`: The IP address or hostname of the rc_visard that should be calibrated
 
 ### Dynamic reconfigure parameters
 
@@ -56,5 +56,5 @@ Launching
 Using command line parameters:
 
 ~~~
-rosrun rc_hand_eye_calibration_client rc_hand_eye_calibration_client_node _ip:="10.0.2.44"
+rosrun rc_hand_eye_calibration_client rc_hand_eye_calibration_client_node _host:="10.0.2.44"
 ~~~

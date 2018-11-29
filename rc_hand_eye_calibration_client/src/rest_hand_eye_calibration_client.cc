@@ -47,29 +47,15 @@ void handleCPRResponse(cpr::Response r)
     throw runtime_error(toString(r));
   }
 }
-
-bool isValidIPAddress(const std::string& ip)
-{
-  // use inet_pton to check if given string is a valid IP address
-  static struct sockaddr_in sa;
-  return TEMP_FAILURE_RETRY(inet_pton(AF_INET, ip.c_str(), &(sa.sin_addr))) == 1;
-}
   
 }//anonymous ns
 
 
-CalibrationWrapper::CalibrationWrapper(std::string name, std::string ip_addr, ros::NodeHandle nh)
-  : nh_(nh), ip_addr_(ip_addr), 
-    servicesUrl_("http://" + ip_addr + "/api/v1/nodes/rc_hand_eye_calibration/services/"),
-    paramsUrl_("http://" + ip_addr + "/api/v1/nodes/rc_hand_eye_calibration/parameters")
+CalibrationWrapper::CalibrationWrapper(std::string host, ros::NodeHandle nh)
+  : nh_(nh), host_(host),
+    servicesUrl_("http://" + host + "/api/v1/nodes/rc_hand_eye_calibration/services/"),
+    paramsUrl_("http://" + host + "/api/v1/nodes/rc_hand_eye_calibration/parameters")
 {
-
-  // check if given string is a valid IP address
-  if (!isValidIPAddress(ip_addr))
-  {
-    throw invalid_argument("Given IP address is not a valid address: " + ip_addr);
-  }
-
   timeoutCurl_ = 2000;
   initConfiguration();
   advertiseServices();
