@@ -142,6 +142,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   // and works as long as only one sensor with that name is connected
   std::string device = "rc_visard";
   std::string access = "control";
+  maxNumRecoveryTrials = 5;
 
   tfEnabled = false;
   autostartDynamics = autostopDynamics = autostartSlam = autopublishTrajectory = false;
@@ -150,6 +151,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
   pnh.param("device", device, device);
   pnh.param("gev_access", access, access);
+  pnh.param("max_reconnects", maxNumRecoveryTrials, maxNumRecoveryTrials);
   pnh.param("enable_tf", tfEnabled, tfEnabled);
   pnh.param("autostart_dynamics", autostartDynamics, autostartDynamics);
   pnh.param("autostart_dynamics_with_slam", autostartSlam, autostartSlam);
@@ -204,11 +206,12 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
     trajPublisher = getNodeHandle().advertise<nav_msgs::Path>("trajectory", 10);
   }
 
-  // run start-keep-alive-a  nd-recover loop
+  // run start-keep-alive-and-recover loop
 
-  static int maxNumRecoveryTrials = 5;
-
-  while (!stopRecoverThread && cntConsecutiveRecoveryFails <= maxNumRecoveryTrials)
+  while (!stopRecoverThread && ( 
+          (maxNumRecoveryTrials < 0) ||
+          (cntConsecutiveRecoveryFails <= maxNumRecoveryTrials) 
+        ))
   {
     // check if everything is running smoothly
 
@@ -238,7 +241,10 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
     // try discover, open and bring up device
 
     bool successfullyOpened = false;
-    while (!stopRecoverThread && !successfullyOpened && cntConsecutiveRecoveryFails <= maxNumRecoveryTrials)
+    while (!stopRecoverThread && !successfullyOpened && ( 
+          (maxNumRecoveryTrials < 0) ||
+          (cntConsecutiveRecoveryFails <= maxNumRecoveryTrials) 
+        ))
     {
       // if we are recovering, put warning and wait before retrying
 
@@ -246,7 +252,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
       {
         ROS_ERROR_STREAM("rc_visard_driver: Failed or lost connection. Trying to recover"
                          " rc_visard_driver from failed state ("
-                         << cntConsecutiveRecoveryFails << "/" << maxNumRecoveryTrials << ")...");
+                         << cntConsecutiveRecoveryFails 
+                         << ((maxNumRecoveryTrials>=0) ? std::string("/") + std::to_string(maxNumRecoveryTrials) : "" )
+                         << ")...");
         usleep(1000 * 500);
       }
 

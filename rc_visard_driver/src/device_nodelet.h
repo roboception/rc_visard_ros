@@ -137,6 +137,7 @@ private:
   std::atomic_bool stopRecoverThread;
   bool recoveryRequested;
   int cntConsecutiveRecoveryFails;
+  int maxNumRecoveryTrials;
 
   ThreadedStream::Manager::Ptr dynamicsStreams;
 
