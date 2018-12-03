@@ -48,6 +48,12 @@ Parameters to be set to the ROS param server before run-time.
   * 'off'       Switches gev access completely off. The node only streams pose
                 information if switched on.
 
+* `max_reconnects`: Maximum number of consecutive recovery trials in case 
+  the driver lost connection to the device or another error happened, 
+  e.g. during streaming data. 
+  If 0, no recovery is tried at all. If negative, the driver keeps trying to 
+  re-connect forever until a connection is re-established. Default: 5.
+
 * `enable_tf`: If true then the node subscribes to the rc_visard's
   dynamics-pose stream and publishes them on tf. Default: false
 
