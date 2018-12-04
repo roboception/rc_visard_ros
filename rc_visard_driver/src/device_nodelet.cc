@@ -320,8 +320,8 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
     }
     if (stopRecoverThread)
       break;
-
-    if (cntConsecutiveRecoveryFails > maxNumRecoveryTrials)
+    
+    if ( (maxNumRecoveryTrials >= 0) && (cntConsecutiveRecoveryFails > maxNumRecoveryTrials) )
     {
       ROS_FATAL_STREAM("rc_visard_driver: could not recover from failed state!");
       break;
