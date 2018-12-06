@@ -103,6 +103,8 @@ DeviceNodelet::DeviceNodelet()
   stopRecoverThread = false;
   recoveryRequested = true;
   cntConsecutiveRecoveryFails = -1;  // first time not giving any warnings
+  cntIncompleteBuffer = 0;
+  cntTotalRecoveries = 0;
 }
 
 DeviceNodelet::~DeviceNodelet()
@@ -130,6 +132,9 @@ void DeviceNodelet::onInit()
 {
   // run initialization and recover routine in separate thread
   recoverThread = std::thread(&DeviceNodelet::keepAliveAndRecoverFromFails, this);
+
+  // add callbacks for diagnostics publishing
+  updater.add("Connection", this, &DeviceNodelet::diag_check_connection);
 }
 
 void DeviceNodelet::keepAliveAndRecoverFromFails()
@@ -213,6 +218,10 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
           (cntConsecutiveRecoveryFails <= maxNumRecoveryTrials) 
         ))
   {
+
+    // update the status for publishing diagnostics  (rate limited by parameter)
+    updater.update();
+
     // check if everything is running smoothly. Recovery is requested only
     // if one of the streaming threads (images or any dynamics) stopped working
     recoveryRequested = recoveryRequested || dynamicsStreams->any_failed();
@@ -223,6 +232,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
       if ((cntConsecutiveRecoveryFails > 0) && allSucceeded)
       {
         cntConsecutiveRecoveryFails = 0;
+        cntTotalRecoveries++;
         ROS_INFO("rc_visard_driver: Device successfully recovered from previous fail(s)!");
       }
 
@@ -268,13 +278,24 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         }
         rcgdev = rcg::getDevice(device.c_str());
         if (!rcgdev)
-        {
+        { 
+          updater.force_update();
           throw std::invalid_argument("Unknown or non-unique device '" + device + "'");
         }
 
         ROS_INFO_STREAM("rc_visard_driver: Opening connection to '" << rcgdev->getID() << "'");
         rcgdev->open(access_id);
         rcgnodemap = rcgdev->getRemoteNodeMap();
+
+        // extract some diagnostics data from device
+        dev_serialno = rcg::getString(rcgnodemap, "DeviceID", true);
+        dev_macaddr = rcg::getString(rcgnodemap, "GevMACAddress", true);
+        dev_ipaddr = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
+        dev_version = rcg::getString(rcgnodemap, "DeviceVersion", true);
+        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true);
+
+        updater.setHardwareID(dev_serialno); 
+        updater.force_update();
 
         // instantiating dynamics interface and autostart dynamics on sensor if desired
 
@@ -1112,6 +1133,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 #else
             tlastimage = ros::WallTime::now();
 #endif
+            cntIncompleteBuffer++;
             ROS_WARN("rc_visard_driver: Received incomplete image buffer");
           }
           else if (buffer == 0)
@@ -1278,6 +1300,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
   {
     ROS_ERROR_STREAM("rc_visard_driver: Image grabbing failed.");
     recoveryRequested = true;
+    updater.force_update();
   }
 }
 
@@ -1530,6 +1553,42 @@ bool DeviceNodelet::removeSlamMap(std_srvs::Trigger::Request& req, std_srvs::Tri
 
   return true;
 }
+
+void DeviceNodelet::diag_check_connection(diagnostic_updater::DiagnosticStatusWrapper &stat) 
+{
+  stat.add("cnt_connection_loss", cntTotalRecoveries);
+  
+  // general connection status is supervised by the recoveryRequested variable
+
+  if (recoveryRequested) {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Disconnected");
+    stat.add("current_reconnect_trial", cntConsecutiveRecoveryFails);
+    return;
+  }
+
+  // at least we are connected to gev server
+
+  stat.add("cnt_incomplete_buffers", cntIncompleteBuffer);
+  stat.add("mac_address", dev_macaddr);
+  stat.add("ip_address", dev_ipaddr);
+  stat.add("firmware_version", dev_version);
+  stat.add("package_size", gev_packet_size);
+
+  if (imageRequested) {
+    if (imageSuccess) {
+      // someone subscribed to images, and we actually receive data via GigE vision
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Info");
+    } else {
+      // someone subscribed to images, but we do not receive any data via GigE vision (yet)
+      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "No data");
+    }
+  } else {
+    // no one requested images -> node is ok but stale
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Stale");
+  }
+  
+}
+
 }
 
 PLUGINLIB_EXPORT_CLASS(rc::DeviceNodelet, nodelet::Nodelet)
