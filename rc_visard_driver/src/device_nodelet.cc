@@ -299,7 +299,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         dev_ipaddr = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
         dev_version = rcg::getString(rcgnodemap, "DeviceVersion", true);
         gev_userid = rcg::getString(rcgnodemap, "DeviceUserID", true);
-        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true, true);
+        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true);
 
         updater.force_update();
 
@@ -1057,8 +1057,9 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         stream[0]->open();
         stream[0]->startStreaming();
 
+        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true);
         ROS_INFO_STREAM("rc_visard_driver: Image streams ready (Package size "
-                        << rcg::getString(rcgnodemap, "GevSCPSPacketSize") << ")");
+                        << gev_packet_size << ")");
 
         // enter grabbing loop
 #if ROS_HAS_STEADYTIME
