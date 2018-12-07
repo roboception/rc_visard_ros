@@ -221,10 +221,6 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
           (cntConsecutiveRecoveryFails <= maxNumRecoveryTrials) 
         ))
   {
-
-    // update the status for publishing diagnostics  (rate limited by parameter)
-    updater.update();
-
     // check if everything is running smoothly. Recovery is requested only
     // if one of the streaming threads (images or any dynamics) stopped working
     recoveryRequested = recoveryRequested || dynamicsStreams->any_failed();
@@ -238,6 +234,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         ROS_INFO("rc_visard_driver: Device successfully recovered from previous fail(s)!");
       }
 
+      updater.update(); // regularly update the status for publishing diagnostics  (rate limited by parameter '~diagnostic_period')
       usleep(1000 * 100);
       continue;
     }
@@ -248,6 +245,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
     if (cntConsecutiveRecoveryFails==1) {
       cntTotalConnectionLosses++;
     }
+    updater.force_update(); // immediately update the diagnostics status
 
     // stop image and dynamics threads
 
