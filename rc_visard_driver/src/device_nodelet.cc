@@ -103,8 +103,9 @@ DeviceNodelet::DeviceNodelet()
   stopRecoverThread = false;
   recoveryRequested = true;
   cntConsecutiveRecoveryFails = -1;  // first time not giving any warnings
-  cntIncompleteBuffer = 0;
-  cntTotalConnectionLosses = 0;
+  totalIncompleteBuffers = 0;
+  totalConnectionLosses = 0;
+  totalImageReceiveTimeouts = 0;
 }
 
 DeviceNodelet::~DeviceNodelet()
@@ -243,7 +244,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
     cntConsecutiveRecoveryFails++;
     if (cntConsecutiveRecoveryFails==1) {
-      cntTotalConnectionLosses++;
+      totalConnectionLosses++;
     }
     updater.force_update(); // immediately update the diagnostics status
 
@@ -1140,7 +1141,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 #else
             tlastimage = ros::WallTime::now();
 #endif
-            cntIncompleteBuffer++;
+            totalIncompleteBuffers++;
             ROS_WARN("rc_visard_driver: Received incomplete image buffer");
           }
           else if (buffer == 0)
@@ -1159,10 +1160,9 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
               if (t > 3)  // report error
               {
-                std::ostringstream out;
-
+                totalImageReceiveTimeouts++;
+                std::ostringstream out;                
                 out << "No images received for " << t << " seconds!";
-
                 throw std::underflow_error(out.str());
               }
             }
@@ -1563,13 +1563,15 @@ bool DeviceNodelet::removeSlamMap(std_srvs::Trigger::Request& req, std_srvs::Tri
 
 void DeviceNodelet::produce_connection_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat) 
 {
-  stat.add("connection_loss_total", cntTotalConnectionLosses);
+  stat.add("connection_loss_total", totalConnectionLosses);
+  stat.add("incomplete_buffers_total", totalIncompleteBuffers);
+  stat.add("image_receive_timeouts_total", totalImageReceiveTimeouts);
+  stat.add("current_reconnect_trial", cntConsecutiveRecoveryFails);
   
   // general connection status is supervised by the recoveryRequested variable
 
   if (recoveryRequested) {
     stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Disconnected");
-    stat.add("current_reconnect_trial", cntConsecutiveRecoveryFails);
     return;
   }
 
@@ -1577,7 +1579,6 @@ void DeviceNodelet::produce_connection_diagnostics(diagnostic_updater::Diagnosti
 
   stat.add("ip_address", dev_ipaddr);
   stat.add("gev_packet_size", gev_packet_size);
-  stat.add("incomplete_buffers_total", cntIncompleteBuffer);
 
   if (imageRequested) {
     if (imageSuccess) {
