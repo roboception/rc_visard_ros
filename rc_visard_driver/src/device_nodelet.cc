@@ -104,7 +104,7 @@ DeviceNodelet::DeviceNodelet()
   recoveryRequested = true;
   cntConsecutiveRecoveryFails = -1;  // first time not giving any warnings
   cntIncompleteBuffer = 0;
-  cntTotalRecoveries = 0;
+  cntTotalConnectionLosses = 0;
 }
 
 DeviceNodelet::~DeviceNodelet()
@@ -134,7 +134,8 @@ void DeviceNodelet::onInit()
   recoverThread = std::thread(&DeviceNodelet::keepAliveAndRecoverFromFails, this);
 
   // add callbacks for diagnostics publishing
-  updater.add("Connection", this, &DeviceNodelet::diag_check_connection);
+  updater.add("Connection", this, &DeviceNodelet::produce_connection_diagnostics);
+  updater.add("Device", this, &DeviceNodelet::produce_device_diagnostics);
 }
 
 void DeviceNodelet::keepAliveAndRecoverFromFails()
@@ -167,6 +168,8 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   {
     ROS_FATAL("The rc_visard device ID must be given in the private parameter 'device'!");
   }
+
+  updater.setHardwareID(device); // hardware ID is set to user-specified device
 
   rcg::Device::ACCESS access_id;
   if (access == "exclusive")
@@ -232,14 +235,19 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
       if ((cntConsecutiveRecoveryFails > 0) && allSucceeded)
       {
         cntConsecutiveRecoveryFails = 0;
-        cntTotalRecoveries++;
         ROS_INFO("rc_visard_driver: Device successfully recovered from previous fail(s)!");
       }
 
       usleep(1000 * 100);
       continue;
     }
+
+    // it's not running smoothly, we need recovery
+
     cntConsecutiveRecoveryFails++;
+    if (cntConsecutiveRecoveryFails==1) {
+      cntTotalConnectionLosses++;
+    }
 
     // stop image and dynamics threads
 
@@ -292,9 +300,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         dev_macaddr = rcg::getString(rcgnodemap, "GevMACAddress", true);
         dev_ipaddr = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
         dev_version = rcg::getString(rcgnodemap, "DeviceVersion", true);
-        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true);
+        gev_userid = rcg::getString(rcgnodemap, "DeviceUserID", true);
+        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true, true);
 
-        updater.setHardwareID(dev_serialno); 
         updater.force_update();
 
         // instantiating dynamics interface and autostart dynamics on sensor if desired
@@ -1554,9 +1562,9 @@ bool DeviceNodelet::removeSlamMap(std_srvs::Trigger::Request& req, std_srvs::Tri
   return true;
 }
 
-void DeviceNodelet::diag_check_connection(diagnostic_updater::DiagnosticStatusWrapper &stat) 
+void DeviceNodelet::produce_connection_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat) 
 {
-  stat.add("cnt_connection_loss", cntTotalRecoveries);
+  stat.add("connection_loss_total", cntTotalConnectionLosses);
   
   // general connection status is supervised by the recoveryRequested variable
 
@@ -1568,25 +1576,35 @@ void DeviceNodelet::diag_check_connection(diagnostic_updater::DiagnosticStatusWr
 
   // at least we are connected to gev server
 
-  stat.add("cnt_incomplete_buffers", cntIncompleteBuffer);
-  stat.add("mac_address", dev_macaddr);
   stat.add("ip_address", dev_ipaddr);
-  stat.add("firmware_version", dev_version);
-  stat.add("package_size", gev_packet_size);
+  stat.add("gev_packet_size", gev_packet_size);
+  stat.add("incomplete_buffers_total", cntIncompleteBuffer);
 
   if (imageRequested) {
     if (imageSuccess) {
       // someone subscribed to images, and we actually receive data via GigE vision
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Info");
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Streaming");
     } else {
       // someone subscribed to images, but we do not receive any data via GigE vision (yet)
       stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "No data");
     }
   } else {
     // no one requested images -> node is ok but stale
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Stale");
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Idle");
   }
   
+}
+
+void DeviceNodelet::produce_device_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat) {  
+  if (dev_serialno.empty()) {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Unknown");
+  } else {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Info");
+    stat.add("serial", dev_serialno);
+    stat.add("mac", dev_macaddr);
+    stat.add("user_id", gev_userid);
+    stat.add("image_version", dev_version);
+  }
 }
 
 }

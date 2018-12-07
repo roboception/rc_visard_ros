@@ -117,7 +117,8 @@ private:
 
   void keepAliveAndRecoverFromFails();
 
-  void diag_check_connection(diagnostic_updater::DiagnosticStatusWrapper &stat);
+  void produce_connection_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat);
+  void produce_device_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat);
 
 
   dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>* reconfig;
@@ -172,8 +173,8 @@ private:
 
   /// diagnostics publishing
   diagnostic_updater::Updater updater;
-  std::string dev_serialno, dev_macaddr, dev_ipaddr, dev_version, gev_packet_size;
-  unsigned int cntIncompleteBuffer, cntTotalRecoveries;
+  std::string dev_serialno, dev_macaddr, dev_ipaddr, dev_version, gev_userid, gev_packet_size;
+  unsigned int cntIncompleteBuffer, cntTotalConnectionLosses;
 };
 }
 
