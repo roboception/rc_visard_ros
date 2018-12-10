@@ -289,6 +289,36 @@ including the trajectory) to free the memory with
 * `slam_reset`
 
 
+Diagnostics
+-----------
+
+The rc_visard_driver uses the `diagnostics_updater` class from the
+[ROS diagnostics stack](https://wiki.ros.org/diagnostics) to regularly publish a 
+[DiagnosticStatus Message](http://docs.ros.org/api/diagnostic_msgs/html/msg/DiagnosticStatus.html).
+
+The regular publishing rate can be set via the `~diagnostic_period` parameter and defaults to 1 second.
+
+Currently two status are published:
+
+- `Device`: Information about the device that the driver is connected to. It covers the *rc_visard's*
+serial number, mac address, user-defined GeV ID, and the firmware image version.
+
+- `Connection`: Status of the current connection between rc_visard_driver and rc_visard. 
+It publishes 4 different messages:
+
+  - `Disconnected` (Error): The driver is currently not (yet) connected to the sensor and 
+  might try to reconnect several times according to the `max_reconnects` parameter. 
+  - `Idle` (Ok): The driver is connected but not publishing any data because 
+  no one is subscribed to any.
+  - `No data` (Warning): The driver is connected and required to publish data but 
+  itself does not receive any data from the sensor.
+  - `Streaming` (Ok): The driver is connected and properly streaming data.
+
+  The published status values are `connection_loss_total`,
+  `incomplete_buffers_total`, `image_receive_timeouts_total`, and
+  `current_reconnect_trial`. If not `Disconnected`, additionally the current `ip_address` and `gev_packet_size` are published.
+
+
 Launching
 ---------
 
