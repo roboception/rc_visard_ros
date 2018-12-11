@@ -103,6 +103,9 @@ DeviceNodelet::DeviceNodelet()
   stopRecoverThread = false;
   recoveryRequested = true;
   cntConsecutiveRecoveryFails = -1;  // first time not giving any warnings
+  totalIncompleteBuffers = 0;
+  totalConnectionLosses = 0;
+  totalImageReceiveTimeouts = 0;
 }
 
 DeviceNodelet::~DeviceNodelet()
@@ -130,6 +133,10 @@ void DeviceNodelet::onInit()
 {
   // run initialization and recover routine in separate thread
   recoverThread = std::thread(&DeviceNodelet::keepAliveAndRecoverFromFails, this);
+
+  // add callbacks for diagnostics publishing
+  updater.add("Connection", this, &DeviceNodelet::produce_connection_diagnostics);
+  updater.add("Device", this, &DeviceNodelet::produce_device_diagnostics);
 }
 
 void DeviceNodelet::keepAliveAndRecoverFromFails()
@@ -162,6 +169,8 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   {
     ROS_FATAL("The rc_visard device ID must be given in the private parameter 'device'!");
   }
+
+  updater.setHardwareID(device); // hardware ID is set to user-specified device
 
   rcg::Device::ACCESS access_id;
   if (access == "exclusive")
@@ -226,10 +235,18 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         ROS_INFO("rc_visard_driver: Device successfully recovered from previous fail(s)!");
       }
 
+      updater.update(); // regularly update the status for publishing diagnostics  (rate limited by parameter '~diagnostic_period')
       usleep(1000 * 100);
       continue;
     }
+
+    // it's not running smoothly, we need recovery
+
     cntConsecutiveRecoveryFails++;
+    if (cntConsecutiveRecoveryFails==1) {
+      totalConnectionLosses++;
+    }
+    updater.force_update(); // immediately update the diagnostics status
 
     // stop image and dynamics threads
 
@@ -268,13 +285,24 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         }
         rcgdev = rcg::getDevice(device.c_str());
         if (!rcgdev)
-        {
+        { 
+          updater.force_update();
           throw std::invalid_argument("Unknown or non-unique device '" + device + "'");
         }
 
         ROS_INFO_STREAM("rc_visard_driver: Opening connection to '" << rcgdev->getID() << "'");
         rcgdev->open(access_id);
         rcgnodemap = rcgdev->getRemoteNodeMap();
+
+        // extract some diagnostics data from device
+        dev_serialno = rcg::getString(rcgnodemap, "DeviceID", true);
+        dev_macaddr = rcg::getString(rcgnodemap, "GevMACAddress", true);
+        dev_ipaddr = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
+        dev_version = rcg::getString(rcgnodemap, "DeviceVersion", true);
+        gev_userid = rcg::getString(rcgnodemap, "DeviceUserID", true);
+        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true);
+
+        updater.force_update();
 
         // instantiating dynamics interface and autostart dynamics on sensor if desired
 
@@ -1030,8 +1058,9 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         stream[0]->open();
         stream[0]->startStreaming();
 
+        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true);
         ROS_INFO_STREAM("rc_visard_driver: Image streams ready (Package size "
-                        << rcg::getString(rcgnodemap, "GevSCPSPacketSize") << ")");
+                        << gev_packet_size << ")");
 
         // enter grabbing loop
 #if ROS_HAS_STEADYTIME
@@ -1112,6 +1141,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 #else
             tlastimage = ros::WallTime::now();
 #endif
+            totalIncompleteBuffers++;
             ROS_WARN("rc_visard_driver: Received incomplete image buffer");
           }
           else if (buffer == 0)
@@ -1130,10 +1160,9 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
               if (t > 3)  // report error
               {
-                std::ostringstream out;
-
+                totalImageReceiveTimeouts++;
+                std::ostringstream out;                
                 out << "No images received for " << t << " seconds!";
-
                 throw std::underflow_error(out.str());
               }
             }
@@ -1278,6 +1307,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
   {
     ROS_ERROR_STREAM("rc_visard_driver: Image grabbing failed.");
     recoveryRequested = true;
+    updater.force_update();
   }
 }
 
@@ -1530,6 +1560,53 @@ bool DeviceNodelet::removeSlamMap(std_srvs::Trigger::Request& req, std_srvs::Tri
 
   return true;
 }
+
+void DeviceNodelet::produce_connection_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat) 
+{
+  stat.add("connection_loss_total", totalConnectionLosses);
+  stat.add("incomplete_buffers_total", totalIncompleteBuffers);
+  stat.add("image_receive_timeouts_total", totalImageReceiveTimeouts);
+  stat.add("current_reconnect_trial", cntConsecutiveRecoveryFails);
+  
+  // general connection status is supervised by the recoveryRequested variable
+
+  if (recoveryRequested) {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Disconnected");
+    return;
+  }
+
+  // at least we are connected to gev server
+
+  stat.add("ip_address", dev_ipaddr);
+  stat.add("gev_packet_size", gev_packet_size);
+
+  if (imageRequested) {
+    if (imageSuccess) {
+      // someone subscribed to images, and we actually receive data via GigE vision
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Streaming");
+    } else {
+      // someone subscribed to images, but we do not receive any data via GigE vision (yet)
+      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "No data");
+    }
+  } else {
+    // no one requested images -> node is ok but stale
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Idle");
+  }
+  
+}
+
+void DeviceNodelet::produce_device_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat) {  
+  if (dev_serialno.empty()) {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Unknown");
+  } else {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Info");
+    stat.add("serial", dev_serialno);
+    stat.add("mac", dev_macaddr);
+    stat.add("user_id", gev_userid);
+    stat.add("image_version", dev_version);
+  }
+}
+
 }
 
 PLUGINLIB_EXPORT_CLASS(rc::DeviceNodelet, nodelet::Nodelet)
