@@ -120,6 +120,8 @@ stages:
     PACKAGE: "rc_visard_driver"
     ROS_DISTRO: "kinetic"
     RC_REPO: testing
+    DOCKERFILE: "Dockerfile"
+    DOCKERFILE_DIR: "."
   before_script:
     - docker info
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
@@ -127,10 +129,9 @@ stages:
     - if [ -n "$CI_COMMIT_TAG" ]; then export IMAGE_TAG=$CI_COMMIT_TAG ; else export IMAGE_TAG=$CI_COMMIT_REF_SLUG ; fi
     - if [ "$CI_COMMIT_REF_NAME" = "master" ]; then export IMAGE_TAG=testing ; fi
     - if [ -z "$DOCKER_BUILD_FLAGS" ]; then export DOCKER_BUILD_FLAGS="--pull --no-cache --build-arg ROS_DISTRO=$ROS_DISTRO --build-arg RC_REPO=$RC_REPO"; fi
-    - if [ -z "$DOCKERFILE_DIR" ]; then export DOCKERFILE_DIR=$PACKAGE/docker/$ROS_DISTRO; fi
   script:
     - echo "building docker image $IMAGE:$IMAGE_TAG with flags $DOCKER_BUILD_FLAGS"
-    - docker build $DOCKER_BUILD_FLAGS -t $IMAGE:$IMAGE_TAG $DOCKERFILE_DIR
+    - docker build $DOCKER_BUILD_FLAGS -t $IMAGE:$IMAGE_TAG -f $DOCKERFILE $DOCKERFILE_DIR
     - docker push $IMAGE:$IMAGE_TAG
     - if [ -n "$CI_COMMIT_TAG" ]; then docker tag $IMAGE:$IMAGE_TAG $IMAGE:latest ; docker push $IMAGE:latest ; fi
   tags:
@@ -276,11 +277,11 @@ image:rc_visard_driver:kinetic:testing:
   variables:
     PACKAGE: "rc_visard_driver"
     ROS_DISTRO: "kinetic"
-    DOCKERFILE_DIR: "rc_visard_driver"
+    DOCKERFILE: "Dockerfile.rc_visard_driver"
 
 image:rc_hand_eye_calibration_client:kinetic:testing:
   extends: .docker_build
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
     ROS_DISTRO: "kinetic"
-    DOCKERFILE_DIR: "rc_hand_eye_calibration_client"
+    DOCKERFILE: "Dockerfile.rc_hand_eye_calibration_client"
