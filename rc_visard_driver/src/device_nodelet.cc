@@ -217,9 +217,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
   // run start-keep-alive-and-recover loop
 
-  while (!stopRecoverThread && ( 
+  while (!stopRecoverThread && (
           (maxNumRecoveryTrials < 0) ||
-          (cntConsecutiveRecoveryFails <= maxNumRecoveryTrials) 
+          (cntConsecutiveRecoveryFails <= maxNumRecoveryTrials)
         ))
   {
     // check if everything is running smoothly. Recovery is requested only
@@ -260,9 +260,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
     // try discover, open and bring up device
 
     bool successfullyOpened = false;
-    while (!stopRecoverThread && !successfullyOpened && ( 
+    while (!stopRecoverThread && !successfullyOpened && (
           (maxNumRecoveryTrials < 0) ||
-          (cntConsecutiveRecoveryFails <= maxNumRecoveryTrials) 
+          (cntConsecutiveRecoveryFails <= maxNumRecoveryTrials)
         ))
     {
       // if we are recovering, put warning and wait before retrying
@@ -271,7 +271,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
       {
         ROS_ERROR_STREAM("rc_visard_driver: Failed or lost connection. Trying to recover"
                          " rc_visard_driver from failed state ("
-                         << cntConsecutiveRecoveryFails 
+                         << cntConsecutiveRecoveryFails
                          << ((maxNumRecoveryTrials>=0) ? std::string("/") + std::to_string(maxNumRecoveryTrials) : "" )
                          << ")...");
         usleep(1000 * 500);
@@ -285,7 +285,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         }
         rcgdev = rcg::getDevice(device.c_str());
         if (!rcgdev)
-        { 
+        {
           updater.force_update();
           throw std::invalid_argument("Unknown or non-unique device '" + device + "'");
         }
@@ -350,7 +350,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
     }
     if (stopRecoverThread)
       break;
-    
+
     if ( (maxNumRecoveryTrials >= 0) && (cntConsecutiveRecoveryFails > maxNumRecoveryTrials) )
     {
       ROS_FATAL_STREAM("rc_visard_driver: could not recover from failed state!");
@@ -1058,8 +1058,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         stream[0]->open();
         stream[0]->startStreaming();
 
-        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true);
-        ROS_INFO_STREAM("rc_visard_driver: Image streams ready (Package size "
+        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true, true);
+        ROS_INFO_STREAM("rc_visard_driver: Image streams ready (Packet size "
                         << gev_packet_size << ")");
 
         // enter grabbing loop
@@ -1161,7 +1161,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
               if (t > 3)  // report error
               {
                 totalImageReceiveTimeouts++;
-                std::ostringstream out;                
+                std::ostringstream out;
                 out << "No images received for " << t << " seconds!";
                 throw std::underflow_error(out.str());
               }
@@ -1561,13 +1561,13 @@ bool DeviceNodelet::removeSlamMap(std_srvs::Trigger::Request& req, std_srvs::Tri
   return true;
 }
 
-void DeviceNodelet::produce_connection_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat) 
+void DeviceNodelet::produce_connection_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
   stat.add("connection_loss_total", totalConnectionLosses);
   stat.add("incomplete_buffers_total", totalIncompleteBuffers);
   stat.add("image_receive_timeouts_total", totalImageReceiveTimeouts);
   stat.add("current_reconnect_trial", cntConsecutiveRecoveryFails);
-  
+
   // general connection status is supervised by the recoveryRequested variable
 
   if (recoveryRequested) {
@@ -1592,10 +1592,10 @@ void DeviceNodelet::produce_connection_diagnostics(diagnostic_updater::Diagnosti
     // no one requested images -> node is ok but stale
     stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Idle");
   }
-  
+
 }
 
-void DeviceNodelet::produce_device_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat) {  
+void DeviceNodelet::produce_device_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat) {
   if (dev_serialno.empty()) {
     stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Unknown");
   } else {
