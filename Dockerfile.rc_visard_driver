@@ -8,7 +8,7 @@ RUN mkdir build && cd build \
     && cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ../rc_visard_ros/rc_visard_driver \
     && make -j4 && make package
 
-FROM ros:${ROS_DISTRO}-ros-base
+FROM ros:${ROS_DISTRO}-perception
 COPY --from=builder /workspace/build/*.deb /tmp
 RUN DEBIAN_FRONTEND=noninteractive apt update \
     && DEBIAN_FRONTEND=noninteractive apt install -y /tmp/*.deb \
