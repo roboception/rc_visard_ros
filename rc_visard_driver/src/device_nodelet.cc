@@ -1053,14 +1053,12 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       std::vector<std::shared_ptr<rcg::Stream> > stream = rcgdev->getStreams();
 
+      gev_packet_size="";
+
       if (stream.size() > 0)
       {
         stream[0]->open();
         stream[0]->startStreaming();
-
-        gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true, true);
-        ROS_INFO_STREAM("rc_visard_driver: Image streams ready (Packet size "
-                        << gev_packet_size << ")");
 
         // enter grabbing loop
 #if ROS_HAS_STEADYTIME
@@ -1075,6 +1073,13 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
           if (buffer != 0 && !buffer->getIsIncomplete())
           {
+            if (gev_packet_size.size() == 0)
+            {
+              gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true, true);
+              ROS_INFO_STREAM("rc_visard_driver: Image streams ready (Packet size "
+                              << gev_packet_size << ")");
+            }
+
             // get out1 line status from chunk data if possible
 
             bool out1 = false;
