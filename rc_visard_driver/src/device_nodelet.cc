@@ -937,6 +937,10 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
     imageSuccess = false;
     try
     {
+      // mark all dynamic parameters as changed
+
+      level=0xffffffff;
+
       // initially switch off all components
 
       disableAll(rcgnodemap);
