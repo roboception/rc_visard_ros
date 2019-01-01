@@ -461,6 +461,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   v = rcg::getEnum(nodemap, "DepthQuality", true);
   cfg.depth_quality = v;
 
+  cfg.depth_static_scene = rcg::getBoolean(nodemap, "DepthStaticScene", false);
   cfg.depth_disprange = rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
   cfg.depth_seg = rcg::getInteger(nodemap, "DepthSeg", 0, 0, true);
   cfg.depth_median = rcg::getInteger(nodemap, "DepthMedian", 0, 0, true);
@@ -471,6 +472,32 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   cfg.depth_maxdeptherr = rcg::getFloat(nodemap, "DepthMaxDepthErr", 0, 0, true);
 
   cfg.ptp_enabled = rcg::getBoolean(nodemap, "GevIEEE1588", false);
+
+  // fix for rc_visard < 1.5
+
+  if (cfg.depth_quality[0] == 'S')
+  {
+    cfg.depth_quality = "High";
+    cfg.depth_static_scene = true;
+  }
+
+  // check for stereo_plus license
+
+  try
+  {
+    cfg.depth_smooth = rcg::getBoolean(nodemap, "DepthSmooth", true);
+    stereo_plus_avail = nodemap->_GetNode("DepthSmooth")->GetAccessMode() == GenApi::RW;
+
+    if (!stereo_plus_avail)
+    {
+      ROS_INFO("rc_visard_driver: License for stereo_plus not available, disabling depth_quality=Full and depth_smooth.");
+    }
+  }
+  catch (const std::exception&)
+  {
+    ROS_WARN("rc_visard_driver: rc_visard has an older firmware, disabling depth_quality=Full and depth_smooth.");
+    stereo_plus_avail = false;
+  }
 
   // check if io-control is available and get values
 
@@ -527,8 +554,10 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     pnh.param("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue, cfg.camera_wb_ratio_blue);
     pnh.param("depth_acquisition_mode", cfg.depth_acquisition_mode, cfg.depth_acquisition_mode);
     pnh.param("depth_quality", cfg.depth_quality, cfg.depth_quality);
+    pnh.param("depth_static_scene", cfg.depth_static_scene, cfg.depth_static_scene);
     pnh.param("depth_disprange", cfg.depth_disprange, cfg.depth_disprange);
     pnh.param("depth_seg", cfg.depth_seg, cfg.depth_seg);
+    pnh.param("depth_smooth", cfg.depth_smooth, cfg.depth_smooth);
     pnh.param("depth_median", cfg.depth_median, cfg.depth_median);
     pnh.param("depth_fill", cfg.depth_fill, cfg.depth_fill);
     pnh.param("depth_minconf", cfg.depth_minconf, cfg.depth_minconf);
@@ -551,8 +580,10 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     pnh.setParam("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue);
     pnh.setParam("depth_acquisition_mode", cfg.depth_acquisition_mode);
     pnh.setParam("depth_quality", cfg.depth_quality);
+    pnh.setParam("depth_static_scene", cfg.depth_static_scene);
     pnh.setParam("depth_disprange", cfg.depth_disprange);
     pnh.setParam("depth_seg", cfg.depth_seg);
+    pnh.setParam("depth_smooth", cfg.depth_smooth);
     pnh.setParam("depth_median", cfg.depth_median);
     pnh.setParam("depth_fill", cfg.depth_fill);
     pnh.setParam("depth_minconf", cfg.depth_minconf);
@@ -620,13 +651,19 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
   {
     c.depth_quality = "Medium";
   }
-  else if (c.depth_quality[0] == 'S')
+  else if (c.depth_quality[0] == 'F' && stereo_plus_avail)
   {
-    c.depth_quality = "StaticHigh";
+    c.depth_quality = "Full";
   }
   else
   {
     c.depth_quality = "High";
+  }
+
+  if (!stereo_plus_avail)
+  {
+    c.depth_smooth=false;
+    l &= ~4194304;
   }
 
   if (iocontrol_avail)
@@ -720,26 +757,28 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
 
         if (cfg.camera_wb_auto)
         {
-          rcg::setEnum(nodemap, "BalanceWhiteAuto", "Continuous", true);
+          rcg::setEnum(nodemap, "BalanceWhiteAuto", "Continuous", false);
         }
         else
         {
-          rcg::setEnum(nodemap, "BalanceWhiteAuto", "Off", true);
+          rcg::setEnum(nodemap, "BalanceWhiteAuto", "Off", false);
         }
       }
 
       if (lvl & 32768)
       {
         lvl &= ~32768;
-        rcg::setEnum(nodemap, "BalanceRatioSelector", "Red", true);
-        rcg::setFloat(nodemap, "BalanceRatio", cfg.camera_wb_ratio_red, true);
+
+        rcg::setEnum(nodemap, "BalanceRatioSelector", "Red", false);
+        rcg::setFloat(nodemap, "BalanceRatio", cfg.camera_wb_ratio_red, false);
       }
 
       if (lvl & 65536)
       {
         lvl &= ~65536;
-        rcg::setEnum(nodemap, "BalanceRatioSelector", "Blue", true);
-        rcg::setFloat(nodemap, "BalanceRatio", cfg.camera_wb_ratio_blue, true);
+
+        rcg::setEnum(nodemap, "BalanceRatioSelector", "Blue", false);
+        rcg::setFloat(nodemap, "BalanceRatio", cfg.camera_wb_ratio_blue, false);
       }
 
       if (lvl & 1048576)
@@ -772,7 +811,21 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         rcg::getEnum(nodemap, "DepthQuality", list, true);
 
         std::string val;
-        for (size_t i = 0; i < list.size(); i++)
+
+        if (cfg.depth_quality == "High" && cfg.depth_static_scene)
+        {
+          // support for rc_visard < 1.5
+
+          for (size_t i = 0; i < list.size() && val.size() == 0; i++)
+          {
+            if (list[i].compare(0, 1, "StaticHigh", 0, 1) == 0)
+            {
+              val = "StaticHigh";
+            }
+          }
+        }
+
+        for (size_t i = 0; i < list.size() && val.size() == 0; i++)
         {
           if (list[i].compare(0, 1, cfg.depth_quality, 0, 1) == 0)
           {
@@ -786,6 +839,40 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         }
       }
 
+      if (lvl & 2097152)
+      {
+        lvl &= ~2097152;
+
+        if (!rcg::setBoolean(nodemap, "DepthStaticScene", cfg.depth_static_scene, false))
+        {
+          // support for rc_visard < 1.5
+
+          std::string quality = cfg.depth_quality;
+
+          if (cfg.depth_static_scene && quality == "High")
+          {
+            quality = "StaticHigh";
+          }
+
+          std::vector<std::string> list;
+          rcg::getEnum(nodemap, "DepthQuality", list, true);
+
+          std::string val;
+          for (size_t i = 0; i < list.size() && val.size() == 0; i++)
+          {
+            if (list[i].compare(0, 1, quality, 0, 1) == 0)
+            {
+              val = list[i];
+            }
+          }
+
+          if (val.size() > 0)
+          {
+            rcg::setEnum(nodemap, "DepthQuality", val.c_str(), true);
+          }
+        }
+      }
+
       if (lvl & 32)
       {
         lvl &= ~32;
@@ -796,6 +883,12 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
       {
         lvl &= ~64;
         rcg::setInteger(nodemap, "DepthSeg", cfg.depth_seg, true);
+      }
+
+      if (lvl & 4194304)
+      {
+        lvl &= ~4194304;
+        rcg::setBoolean(nodemap, "DepthSmooth", cfg.depth_smooth, false);
       }
 
       if (lvl & 128)

@@ -48,10 +48,10 @@ Parameters to be set to the ROS param server before run-time.
   * 'off'       Switches gev access completely off. The node only streams pose
                 information if switched on.
 
-* `max_reconnects`: Maximum number of consecutive recovery trials in case 
-  the driver lost connection to the device or another error happened, 
-  e.g. during streaming data. 
-  If 0, no recovery is tried at all. If negative, the driver keeps trying to 
+* `max_reconnects`: Maximum number of consecutive recovery trials in case
+  the driver lost connection to the device or another error happened,
+  e.g. during streaming data.
+  If 0, no recovery is tried at all. If negative, the driver keeps trying to
   re-connect forever until a connection is re-established. Default: 5.
 
 * `enable_tf`: If true then the node subscribes to the rc_visard's
@@ -98,19 +98,23 @@ These parameters can be changed during runtime via dynamic reconfigure:
 * `depth_acquisition_mode`: Can be either `SingleFrame` or `Continuous`. Only
   the first letter will be checked, thus giving `S` or `C` is sufficient.
 
-* `depth_quality`: Quality can be `Low`, `Medium`, `High` and `StaticHigh`.
-  Only the first letter will be checked, thus specification of `L`, `M`,
-  `H` or `S` is sufficient.
+* `depth_quality`: Quality can be "Low", "Medium", "High" and "Full". Only the first
+  letter will be checked, thus specification of "L", "M", "H" or "F" is
+  sufficient. The quality setting effectively downscales the image after
+  the downscale factor as given above:
 
-  * `StaticHigh` quality means computation with 640x480 pixel, limited to 3 Hz
-    and accumulation input images. The scene must be static during image
-    accumulation! The timestamp of the disparity image is taken from the first
-    image that was used for accumulation.
-  * `High` quality means computation with 640x480 pixel.
-  * `Medium` quality means computation with 320x240 pixel.
-  * `Low` quality means computation with 214x160 pixel.
+  + Full does not downscale the image, i.e. factor is 1 (e.g. 1280x960).
+    NOTE: This mode requires the 'stereo_plus' license on the rc_visard.
+  + High downscales by factor 2 (e.g. 640x480).
+  + Medium downscales by factor 4 (e.g. 320x240).
+  + Low downscales by factor 6 (e.g. 214x160).
 
-  Default: `High`.
+* `depth_static_scene`: This parameter can be set to true if the scene and
+  camera is static. It only has an effect if quality is either High or Full.
+  If active, input images are accumulated and averaged for 300 ms to reduce
+  noise. This limits the frame rate to a maximum of 3 Hz. The timestamp of
+  the disparity image is taken from the first image that was used for
+  accumulation.
 
 * `depth_disprange`: Disparity range in pixel, related to the downscaled
   image at quality=H. The range is adapted to the quality.
@@ -120,6 +124,9 @@ These parameters can be changed during runtime via dynamic reconfigure:
 
 * `depth_seg`: Maximum size of isolated disparity regions that will be
   invalidated, related to full resolution.
+
+* `depth_smooth`: Switching smoothing of disparities on or off.
+  NOTE: Smoothing requires the 'stereo_plus' license on the rc_visard.
 
 * `depth_median`: Performs median filtering with the given window size.
 
@@ -293,7 +300,7 @@ Diagnostics
 -----------
 
 The rc_visard_driver uses the `diagnostics_updater` class from the
-[ROS diagnostics stack](https://wiki.ros.org/diagnostics) to regularly publish a 
+[ROS diagnostics stack](https://wiki.ros.org/diagnostics) to regularly publish a
 [DiagnosticStatus Message](http://docs.ros.org/api/diagnostic_msgs/html/msg/DiagnosticStatus.html).
 
 The regular publishing rate can be set via the `~diagnostic_period` parameter and defaults to 1 second.
@@ -303,14 +310,14 @@ Currently two status are published:
 - `Device`: Information about the device that the driver is connected to. It covers the *rc_visard's*
 serial number, mac address, user-defined GeV ID, and the firmware image version.
 
-- `Connection`: Status of the current connection between rc_visard_driver and rc_visard. 
+- `Connection`: Status of the current connection between rc_visard_driver and rc_visard.
 It publishes 4 different messages:
 
-  - `Disconnected` (Error): The driver is currently not (yet) connected to the sensor and 
-  might try to reconnect several times according to the `max_reconnects` parameter. 
-  - `Idle` (Ok): The driver is connected but not publishing any data because 
+  - `Disconnected` (Error): The driver is currently not (yet) connected to the sensor and
+  might try to reconnect several times according to the `max_reconnects` parameter.
+  - `Idle` (Ok): The driver is connected but not publishing any data because
   no one is subscribed to any.
-  - `No data` (Warning): The driver is connected and required to publish data but 
+  - `No data` (Warning): The driver is connected and required to publish data but
   itself does not receive any data from the sensor.
   - `Streaming` (Ok): The driver is connected and properly streaming data.
 

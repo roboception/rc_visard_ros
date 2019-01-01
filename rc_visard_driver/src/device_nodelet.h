@@ -133,6 +133,7 @@ private:
   std::shared_ptr<GenApi::CNodeMapRef> rcgnodemap;
 
   std::mutex mtx;
+  bool stereo_plus_avail;
   bool iocontrol_avail;
   rc_visard_driver::rc_visard_driverConfig config;
   std::atomic_uint_least32_t level;
