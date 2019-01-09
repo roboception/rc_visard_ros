@@ -60,6 +60,41 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <tf/transform_broadcaster.h>
 
+namespace {
+
+  /// Returns true if vendor name and model name indicate that genicam device is an rc_visard
+  bool isRcVisardDevice(const std::string& vendor, const std::string& model)
+  {
+    bool isKuka3DPerception = vendor.find("KUKA") != std::string::npos && model.find("3d_perception") != std::string::npos;
+    bool isRcVisard = vendor.find("Roboception") != std::string::npos && model.find("rc_visard") != std::string::npos;
+    return isKuka3DPerception || isRcVisard;
+  }
+
+  /// Iterates through all interfaces and looks for rc_visard devices. Returns all found device ids.
+  std::vector<std::string> discoverRcVisardDevices()
+  {
+    std::vector<std::string> device_ids;
+    for (auto system : rcg::System::getSystems())
+    {
+      system->open();
+      for (auto interf : system->getInterfaces())
+      {
+        interf->open();
+        for (auto dev : interf->getDevices())
+        {
+          if (isRcVisardDevice(dev->getVendor(), dev->getModel()))
+          {
+            device_ids.push_back(dev->getID());
+          }
+        }
+        interf->close();
+      }
+      system->close();
+    }
+    return device_ids;
+  }
+}
+
 namespace rc
 {
 namespace rcd = dynamics;
@@ -145,9 +180,9 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
   ros::NodeHandle pnh(getPrivateNodeHandle());
 
-  // device defaults to `rc_visard`, which is the default user defined name
-  // and works as long as only one sensor with that name is connected
-  std::string device = "rc_visard";
+  // device defaults to empty string which serves as a wildcard to connect to any 
+  // rc_visard as long as only one sensor is available in the network
+  std::string device = "";
   std::string access = "control";
   maxNumRecoveryTrials = 5;
 
@@ -164,13 +199,6 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
   pnh.param("autostart_dynamics_with_slam", autostartSlam, autostartSlam);
   pnh.param("autostop_dynamics", autostopDynamics, autostopDynamics);
   pnh.param("autopublish_trajectory", autopublishTrajectory, autopublishTrajectory);
-
-  if (device.size() == 0)
-  {
-    ROS_FATAL("The rc_visard device ID must be given in the private parameter 'device'!");
-  }
-
-  updater.setHardwareID(device); // hardware ID is set to user-specified device
 
   rcg::Device::ACCESS access_id;
   if (access == "exclusive")
@@ -283,7 +311,22 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         {
           rcgdev->close();
         }
-        rcgdev = rcg::getDevice(device.c_str());
+
+        if (device.size() == 0)
+        {
+          ROS_INFO("No device ID given in the private parameter 'device'! Trying to auto-detect a single rc_visard device in the network...");
+          auto device_ids = discoverRcVisardDevices();
+          if (device_ids.size() != 1)
+          {
+            updater.force_update();
+            throw std::runtime_error("Auto-connection with rc_visard device failed because none or multiple devices were found!");
+          }
+          ROS_INFO_STREAM("Found rc_visard device '" << device_ids[0] << "'");
+          rcgdev = rcg::getDevice(device_ids[0].c_str());
+        } else {
+          rcgdev = rcg::getDevice(device.c_str());
+        }
+
         if (!rcgdev)
         {
           updater.force_update();
@@ -302,6 +345,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         gev_userid = rcg::getString(rcgnodemap, "DeviceUserID", true);
         gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true);
 
+        updater.setHardwareID(dev_serialno);
         updater.force_update();
 
         // instantiating dynamics interface and autostart dynamics on sensor if desired
