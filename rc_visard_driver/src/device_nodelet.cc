@@ -180,7 +180,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
   ros::NodeHandle pnh(getPrivateNodeHandle());
 
-  // device defaults to empty string which serves as a wildcard to connect to any 
+  // device defaults to empty string which serves as a wildcard to connect to any
   // rc_visard as long as only one sensor is available in the network
   std::string device = "";
   std::string access = "control";
@@ -1311,6 +1311,17 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
                 out << "No images received for " << t << " seconds!";
                 throw std::underflow_error(out.str());
               }
+            }
+            else
+            {
+              // if nothing is expected then store current time as last time
+              // to avoid possible timeout after resubscription
+
+#if ROS_HAS_STEADYTIME
+              tlastimage = ros::SteadyTime::now();
+#else
+              tlastimage = ros::WallTime::now();
+#endif
             }
           }
 
