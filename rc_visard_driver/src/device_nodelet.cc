@@ -582,68 +582,68 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     iocontrol_avail = false;
   }
 
-  // setup reconfigure server
+
+  // try to get ROS parameters: if parameter is not set in parameter server, default to current sensor configuration
+
+  pnh.param("camera_fps", cfg.camera_fps, cfg.camera_fps);
+  pnh.param("camera_exp_auto", cfg.camera_exp_auto, cfg.camera_exp_auto);
+  pnh.param("camera_exp_value", cfg.camera_exp_value, cfg.camera_exp_value);
+  pnh.param("camera_gain_value", cfg.camera_gain_value, cfg.camera_gain_value);
+  pnh.param("camera_exp_max", cfg.camera_exp_max, cfg.camera_exp_max);
+  pnh.param("camera_wb_auto", cfg.camera_wb_auto, cfg.camera_wb_auto);
+  pnh.param("camera_wb_ratio_red", cfg.camera_wb_ratio_red, cfg.camera_wb_ratio_red);
+  pnh.param("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue, cfg.camera_wb_ratio_blue);
+  pnh.param("depth_acquisition_mode", cfg.depth_acquisition_mode, cfg.depth_acquisition_mode);
+  pnh.param("depth_quality", cfg.depth_quality, cfg.depth_quality);
+  pnh.param("depth_static_scene", cfg.depth_static_scene, cfg.depth_static_scene);
+  pnh.param("depth_disprange", cfg.depth_disprange, cfg.depth_disprange);
+  pnh.param("depth_seg", cfg.depth_seg, cfg.depth_seg);
+  pnh.param("depth_smooth", cfg.depth_smooth, cfg.depth_smooth);
+  pnh.param("depth_median", cfg.depth_median, cfg.depth_median);
+  pnh.param("depth_fill", cfg.depth_fill, cfg.depth_fill);
+  pnh.param("depth_minconf", cfg.depth_minconf, cfg.depth_minconf);
+  pnh.param("depth_mindepth", cfg.depth_mindepth, cfg.depth_mindepth);
+  pnh.param("depth_maxdepth", cfg.depth_maxdepth, cfg.depth_maxdepth);
+  pnh.param("depth_maxdeptherr", cfg.depth_maxdeptherr, cfg.depth_maxdeptherr);
+  pnh.param("ptp_enabled", cfg.ptp_enabled, cfg.ptp_enabled);
+  pnh.param("out1_mode", cfg.out1_mode, cfg.out1_mode);
+  pnh.param("out2_mode", cfg.out2_mode, cfg.out2_mode);
+
+  // set parameters on parameter server so that dynamic reconfigure picks them up
+
+  pnh.setParam("camera_fps", cfg.camera_fps);
+  pnh.setParam("camera_exp_auto", cfg.camera_exp_auto);
+  pnh.setParam("camera_exp_value", cfg.camera_exp_value);
+  pnh.setParam("camera_gain_value", cfg.camera_gain_value);
+  pnh.setParam("camera_exp_max", cfg.camera_exp_max);
+  pnh.setParam("camera_wb_auto", cfg.camera_wb_auto);
+  pnh.setParam("camera_wb_ratio_red", cfg.camera_wb_ratio_red);
+  pnh.setParam("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue);
+  pnh.setParam("depth_acquisition_mode", cfg.depth_acquisition_mode);
+  pnh.setParam("depth_quality", cfg.depth_quality);
+  pnh.setParam("depth_static_scene", cfg.depth_static_scene);
+  pnh.setParam("depth_disprange", cfg.depth_disprange);
+  pnh.setParam("depth_seg", cfg.depth_seg);
+  pnh.setParam("depth_smooth", cfg.depth_smooth);
+  pnh.setParam("depth_median", cfg.depth_median);
+  pnh.setParam("depth_fill", cfg.depth_fill);
+  pnh.setParam("depth_minconf", cfg.depth_minconf);
+  pnh.setParam("depth_mindepth", cfg.depth_mindepth);
+  pnh.setParam("depth_maxdepth", cfg.depth_maxdepth);
+  pnh.setParam("depth_maxdeptherr", cfg.depth_maxdeptherr);
+  pnh.setParam("ptp_enabled", cfg.ptp_enabled);
+  pnh.setParam("out1_mode", cfg.out1_mode);
+  pnh.setParam("out2_mode", cfg.out2_mode);
 
   if (reconfig == 0)
   {
-    // try to get ROS parameters: if parameter is not set in parameter server, default to current sensor configuration
-
-    pnh.param("camera_fps", cfg.camera_fps, cfg.camera_fps);
-    pnh.param("camera_exp_auto", cfg.camera_exp_auto, cfg.camera_exp_auto);
-    pnh.param("camera_exp_value", cfg.camera_exp_value, cfg.camera_exp_value);
-    pnh.param("camera_gain_value", cfg.camera_gain_value, cfg.camera_gain_value);
-    pnh.param("camera_exp_max", cfg.camera_exp_max, cfg.camera_exp_max);
-    pnh.param("camera_wb_auto", cfg.camera_wb_auto, cfg.camera_wb_auto);
-    pnh.param("camera_wb_ratio_red", cfg.camera_wb_ratio_red, cfg.camera_wb_ratio_red);
-    pnh.param("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue, cfg.camera_wb_ratio_blue);
-    pnh.param("depth_acquisition_mode", cfg.depth_acquisition_mode, cfg.depth_acquisition_mode);
-    pnh.param("depth_quality", cfg.depth_quality, cfg.depth_quality);
-    pnh.param("depth_static_scene", cfg.depth_static_scene, cfg.depth_static_scene);
-    pnh.param("depth_disprange", cfg.depth_disprange, cfg.depth_disprange);
-    pnh.param("depth_seg", cfg.depth_seg, cfg.depth_seg);
-    pnh.param("depth_smooth", cfg.depth_smooth, cfg.depth_smooth);
-    pnh.param("depth_median", cfg.depth_median, cfg.depth_median);
-    pnh.param("depth_fill", cfg.depth_fill, cfg.depth_fill);
-    pnh.param("depth_minconf", cfg.depth_minconf, cfg.depth_minconf);
-    pnh.param("depth_mindepth", cfg.depth_mindepth, cfg.depth_mindepth);
-    pnh.param("depth_maxdepth", cfg.depth_maxdepth, cfg.depth_maxdepth);
-    pnh.param("depth_maxdeptherr", cfg.depth_maxdeptherr, cfg.depth_maxdeptherr);
-    pnh.param("ptp_enabled", cfg.ptp_enabled, cfg.ptp_enabled);
-    pnh.param("out1_mode", cfg.out1_mode, cfg.out1_mode);
-    pnh.param("out2_mode", cfg.out2_mode, cfg.out2_mode);
-
-    // set parameters on parameter server so that dynamic reconfigure picks them up
-
-    pnh.setParam("camera_fps", cfg.camera_fps);
-    pnh.setParam("camera_exp_auto", cfg.camera_exp_auto);
-    pnh.setParam("camera_exp_value", cfg.camera_exp_value);
-    pnh.setParam("camera_gain_value", cfg.camera_gain_value);
-    pnh.setParam("camera_exp_max", cfg.camera_exp_max);
-    pnh.setParam("camera_wb_auto", cfg.camera_wb_auto);
-    pnh.setParam("camera_wb_ratio_red", cfg.camera_wb_ratio_red);
-    pnh.setParam("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue);
-    pnh.setParam("depth_acquisition_mode", cfg.depth_acquisition_mode);
-    pnh.setParam("depth_quality", cfg.depth_quality);
-    pnh.setParam("depth_static_scene", cfg.depth_static_scene);
-    pnh.setParam("depth_disprange", cfg.depth_disprange);
-    pnh.setParam("depth_seg", cfg.depth_seg);
-    pnh.setParam("depth_smooth", cfg.depth_smooth);
-    pnh.setParam("depth_median", cfg.depth_median);
-    pnh.setParam("depth_fill", cfg.depth_fill);
-    pnh.setParam("depth_minconf", cfg.depth_minconf);
-    pnh.setParam("depth_mindepth", cfg.depth_mindepth);
-    pnh.setParam("depth_maxdepth", cfg.depth_maxdepth);
-    pnh.setParam("depth_maxdeptherr", cfg.depth_maxdeptherr);
-    pnh.setParam("ptp_enabled", cfg.ptp_enabled);
-    pnh.setParam("out1_mode", cfg.out1_mode);
-    pnh.setParam("out2_mode", cfg.out2_mode);
-
     // TODO: we need to dismangle initialization of dynreconfserver from not-READONLY-access-condition
     reconfig = new dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>(pnh);
-    dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>::CallbackType cb;
-    cb = boost::bind(&DeviceNodelet::reconfigure, this, _1, _2);
-    reconfig->setCallback(cb);
   }
+  // always set callback to (re)load configuration even after recovery
+  dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>::CallbackType cb;
+  cb = boost::bind(&DeviceNodelet::reconfigure, this, _1, _2);
+  reconfig->setCallback(cb);
 }
 
 void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uint32_t l)
