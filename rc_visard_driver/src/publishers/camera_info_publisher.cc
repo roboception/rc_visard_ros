@@ -97,7 +97,7 @@ CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle& nh, const std::string&
   else
   {
     pub = nh.advertise<sensor_msgs::CameraInfo>("right/camera_info", 1);
-    info.P[3] = t;
+    info.P[3] = -f * t;
   }
 }
 
