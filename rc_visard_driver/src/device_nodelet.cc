@@ -250,9 +250,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
           (cntConsecutiveRecoveryFails <= maxNumRecoveryTrials)
         ))
   {
-    // check if everything is running smoothly. Recovery is requested only
-    // if one of the streaming threads (images or any dynamics) stopped working
-    recoveryRequested = recoveryRequested || dynamicsStreams->any_failed();
+    // check if everything is running smoothly
 
     if (!recoveryRequested)
     {
