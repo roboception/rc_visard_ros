@@ -93,12 +93,12 @@ CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle& nh, const std::string&
   if (left)
   {
     pub = nh.advertise<sensor_msgs::CameraInfo>("left/camera_info", 1);
-    p3 = 0;
+    p3_factor = 0;
   }
   else
   {
     pub = nh.advertise<sensor_msgs::CameraInfo>("right/camera_info", 1);
-    p3 = -f * t;
+    p3_factor = -f * t;
   }
 }
 
@@ -132,7 +132,7 @@ void CameraInfoPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
     info.P[2] = info.K[2] = info.width / 2.0;
     info.P[6] = info.K[5] = info.height / 2.0;
 
-    info.P[3] = p3 * info.width;
+    info.P[3] = p3_factor * info.width;
 
     pub.publish(info);
   }
