@@ -64,6 +64,7 @@ private:
   CameraInfoPublisher& operator=(const CameraInfoPublisher&);  // forbidden
 
   float f;
+  float p3;
 
   sensor_msgs::CameraInfo info;
   ros::Publisher pub;

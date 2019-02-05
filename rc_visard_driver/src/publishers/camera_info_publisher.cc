@@ -37,8 +37,8 @@
 
 namespace rc
 {
-CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double _f, double t,
-                                         bool left)
+CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix,
+                                         double _f, double t, bool left)
   : GenICam2RosPublisher(frame_id_prefix)
 {
   f = _f;
@@ -93,11 +93,12 @@ CameraInfoPublisher::CameraInfoPublisher(ros::NodeHandle& nh, const std::string&
   if (left)
   {
     pub = nh.advertise<sensor_msgs::CameraInfo>("left/camera_info", 1);
+    p3 = 0;
   }
   else
   {
     pub = nh.advertise<sensor_msgs::CameraInfo>("right/camera_info", 1);
-    info.P[3] = -f * t;
+    p3 = -f * t;
   }
 }
 
@@ -130,6 +131,8 @@ void CameraInfoPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint
 
     info.P[2] = info.K[2] = info.width / 2.0;
     info.P[6] = info.K[5] = info.height / 2.0;
+
+    info.P[3] = p3 * info.width;
 
     pub.publish(info);
   }
