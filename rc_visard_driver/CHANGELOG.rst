@@ -2,6 +2,20 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.0 (2019-02-05)
+------------------
+* add parameter for max number of reconnections
+* fix: enable driver to try to recover even if the very first time no connection worked out
+* add diagnostics
+* fix reporting of package size
+* Fixed hanging image streams after restart of sensor
+* Support for rc_visard firmware v1.5.0 additions (require `StereoPlus` license)
+  * quality full
+  * advanced smoothing
+* improved driver's auto-connect behavior
+* also reapply dynamic_reconfigure params after recovery
+* fix projection matrix in published right CameraInfo
+
 2.4.2 (2018-10-29)
 ------------------
 
