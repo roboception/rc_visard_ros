@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-# Don't set PROJECT_VERSION to empty string when no VERSION is given to project() command.
-if(POLICY CMP0048)
-cmake_policy(SET CMP0048 OLD)
-endif()
-
 project(rc_visard_driver)
 include(cmake/project_version.cmake)
 
@@ -16,8 +11,12 @@ endif ()
 
 # - Standard definitions -
 
+if (CMAKE_MAJOR_VERSION VERSION_LESS "3.1.0")
+  add_definitions(-std=c++11)
+else ()
+  set(CMAKE_CXX_STANDARD 11)
+endif ()
 add_definitions(-Wall)
-add_definitions(-std=c++11)
 add_definitions(-Wno-unknown-pragmas)
 
 # add a target to generate API documentation with Doxygen
