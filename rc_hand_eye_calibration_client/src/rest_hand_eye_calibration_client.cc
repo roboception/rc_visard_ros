@@ -31,7 +31,7 @@ void handleCPRResponse(cpr::Response r)
     throw runtime_error(toString(r));
   }
 }
-  
+
 }//anonymous ns
 
 
@@ -92,7 +92,7 @@ bool CalibrationWrapper::removeSrv(std_srvs::TriggerRequest &,
 
 bool CalibrationWrapper::setSlotSrv(rc_hand_eye_calibration_client::SetCalibrationPoseRequest &request,
                                     rc_hand_eye_calibration_client::SetCalibrationPoseResponse &response)
-{ 
+{
   // convert ros pose to json obj
   json js_pos, js_ori, js_pose;
   js_pos["x"] = request.pose.position.x;
@@ -210,19 +210,19 @@ void CalibrationWrapper::initConfiguration()
   auto json_resp = json::parse(rest_resp.text);
   for (auto& param : json_resp) {
     string name = param["name"];
-    if (param["name"] == "grid_width") 
+    if (param["name"] == "grid_width")
     {
       cfg.grid_width = param["value"];
-    } else if (param["name"] == "grid_height") 
+    } else if (param["name"] == "grid_height")
     {
       cfg.grid_height = param["value"];
-    } else if (param["name"] == "robot_mounted") 
+    } else if (param["name"] == "robot_mounted")
     {
-      cfg.robot_mounted = param["value"];
+      cfg.robot_mounted = (bool) param["value"];
     }
   }
 
-  // second, try to get ROS parameters: 
+  // second, try to get ROS parameters:
   // if parameter is not set in parameter server, we default to current sensor configuration
   nh_.param("grid_width", cfg.grid_width, cfg.grid_width);
   nh_.param("grid_height", cfg.grid_height, cfg.grid_height);
@@ -265,5 +265,5 @@ void CalibrationWrapper::dynamicReconfigureCb(rc_hand_eye_calibration_client::ha
                       cpr::Body{ js_params.dump() },
                       cpr::Header{ { "Content-Type", "application/json" } });
 
-  handleCPRResponse(rest_resp);  
+  handleCPRResponse(rest_resp);
 }
