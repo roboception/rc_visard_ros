@@ -1,0 +1,8 @@
+# Description: Persistently sets a load carrier.
+
+# Required
+LoadCarrier load_carrier
+
+---
+
+ReturnCode return_code

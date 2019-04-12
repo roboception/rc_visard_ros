@@ -1,3 +1,6 @@
 [submodule "rc_hand_eye_calibration_client/opt/cpr"]
 	path = rc_hand_eye_calibration_client/opt/cpr
 	url = https://github.com/whoshuu/cpr.git
+[submodule "rc_pick_client/opt/cpr"]
+	path = rc_pick_client/opt/cpr
+	url = https://github.com/whoshuu/cpr.git

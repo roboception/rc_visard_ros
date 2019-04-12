@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rc_pick_client</name>
+  <version>2.5.0</version>
+  <description>The ros client for roboception grasp generation modules</description>
+
+  <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/rc_pick_client</url>
+  <url type="repository">https://github.com/roboception/rc_visard_ros</url>
+  <url type="bugtracker">https://github.com/roboception/rc_visard_ros/issues</url>
+
+  <author email="monika.florek-jasinska@roboception.de">Monika Florek-Jasinska</author>
+
+  <!-- system dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>curl</depend>
+
+  <depend>roscpp</depend>
+  <depend>std_srvs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>shape_msgs</depend>
+  <depend>tf</depend>
+
+  <depend>dynamic_reconfigure</depend>
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
+  <doc_depend>doxygen</doc_depend>
+</package>
