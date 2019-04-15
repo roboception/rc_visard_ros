@@ -138,6 +138,7 @@ DeviceNodelet::DeviceNodelet()
   stopRecoverThread = false;
   recoveryRequested = true;
   cntConsecutiveRecoveryFails = -1;  // first time not giving any warnings
+  atLeastOnceSuccessfullyStarted = false;
   totalIncompleteBuffers = 0;
   totalConnectionLosses = 0;
   totalImageReceiveTimeouts = 0;
@@ -350,7 +351,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
         std::string currentIPAddress = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
         dynamicsInterface = rcd::RemoteInterface::create(currentIPAddress);
-        if (autostartDynamics || autostartSlam)
+        if (autostartDynamics || autostartSlam && !atLeastOnceSuccessfullyStarted)
         {
           std_srvs::Trigger::Request dummyreq;
           std_srvs::Trigger::Response dummyresp;
@@ -383,6 +384,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         }
 
         successfullyOpened = true;
+        atLeastOnceSuccessfullyStarted = true;
       }
       catch (std::exception& ex)
       {

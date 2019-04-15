@@ -146,6 +146,7 @@ private:
   bool recoveryRequested;
   int cntConsecutiveRecoveryFails;
   int maxNumRecoveryTrials;
+  bool atLeastOnceSuccessfullyStarted;
 
   ThreadedStream::Manager::Ptr dynamicsStreams;
 
