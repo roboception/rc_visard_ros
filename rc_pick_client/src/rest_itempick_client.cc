@@ -200,7 +200,7 @@ namespace itempick_client
 {
 
 ItempickWrapper::ItempickWrapper(const string &host, const ros::NodeHandle &nh)
-        : nh_(nh), rc_visard_communication(host, "rc_itempick", 10000), visualizer(nh)
+        : nh_(nh), rc_visard_communication_(host, "rc_itempick", 10000), visualizer_(nh)
 {
   initConfiguration();
   advertiseServices();
@@ -209,17 +209,28 @@ ItempickWrapper::ItempickWrapper(const string &host, const ros::NodeHandle &nh)
 
 ItempickWrapper::~ItempickWrapper()
 {
-  stopItempick();
+  try
+  {
+    stopItempick();
+  }
+  catch (const std::exception &ex)
+  {
+    ROS_FATAL("Exception during destruction of ItempickWrapper: %s", ex.what());
+  }
+  catch (...)
+  {
+    ROS_FATAL("Exception during destruction of ItempickWrapper");
+  }
 }
 
 void ItempickWrapper::startItempick()
 {
-  rc_visard_communication.servicePutRequest("start");
+  rc_visard_communication_.servicePutRequest("start");
 }
 
 void ItempickWrapper::stopItempick()
 {
-  rc_visard_communication.servicePutRequest("stop");
+  rc_visard_communication_.servicePutRequest("stop");
 }
 
 bool ItempickWrapper::detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest &request,
@@ -239,10 +250,10 @@ bool ItempickWrapper::detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRe
   }
 
   //communicating with rc_visard
-  auto json_resp = rc_visard_communication.servicePutRequest("detect_load_carriers", js_args);
+  auto json_resp = rc_visard_communication_.servicePutRequest("detect_load_carriers", js_args);
   parseReturnCode(response.return_code, json_resp["return_code"]);
   jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"], json_resp["timestamp"]);
-  visualizer.visualizeLoadCarriers(response.load_carriers);
+  visualizer_.visualizeLoadCarriers(response.load_carriers);
 
   return true;
 }
@@ -268,12 +279,12 @@ bool ItempickWrapper::computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &req
   if (!request.item_models.empty())rosItemModelsToJson(request.item_models, js_args["args"]["item_models"]);
 
   //communicating with rc_visard
-  auto json_resp = rc_visard_communication.servicePutRequest("compute_grasps", js_args);
+  auto json_resp = rc_visard_communication_.servicePutRequest("compute_grasps", js_args);
   parseReturnCode(response.return_code, json_resp["return_code"]);
   jsonGraspToRos(response.grasps, json_resp["grasps"]);
   jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"], json_resp["timestamp"]);
-  visualizer.visualizeGrasps(response.grasps);
-  visualizer.visualizeLoadCarriers(response.load_carriers);
+  visualizer_.visualizeGrasps(response.grasps);
+  visualizer_.visualizeLoadCarriers(response.load_carriers);
 
   return true;
 }
@@ -289,7 +300,7 @@ bool ItempickWrapper::deleteLoadCarriersSrv(rc_pick_client::DeleteLoadCarriersRe
   }
 
   //communicating with rc_visard
-  auto json_resp = rc_visard_communication.servicePutRequest("delete_load_carriers", json_args);
+  auto json_resp = rc_visard_communication_.servicePutRequest("delete_load_carriers", json_args);
   parseReturnCode(response.return_code, json_resp["return_code"]);
 
   return true;
@@ -306,7 +317,7 @@ bool ItempickWrapper::deleteROISrv(rc_pick_client::DeleteRegionsOfInterestReques
   }
 
   //communicating with rc_visard
-  auto json_resp = rc_visard_communication.servicePutRequest("delete_regions_of_interest", json_args);
+  auto json_resp = rc_visard_communication_.servicePutRequest("delete_regions_of_interest", json_args);
   parseReturnCode(response.return_code, json_resp["return_code"]);
 
   return true;
@@ -323,7 +334,7 @@ bool ItempickWrapper::getROIs(rc_pick_client::GetRegionsOfInterestRequest &reque
   }
 
   //communicating with rc_visard
-  json json_resp = rc_visard_communication.servicePutRequest("get_regions_of_interest", json_args);
+  json json_resp = rc_visard_communication_.servicePutRequest("get_regions_of_interest", json_args);
   jsonROIsToRos(response.regions_of_interest, json_resp["regions_of_interest"]);
   parseReturnCode(response.return_code, json_resp["return_code"]);
   return true;
@@ -341,7 +352,7 @@ bool ItempickWrapper::getLoadCarriers(rc_pick_client::GetLoadCarriersRequest &re
   }
 
   //communicating with rc_visard
-  json json_resp = rc_visard_communication.servicePutRequest("get_load_carriers", json_args);
+  json json_resp = rc_visard_communication_.servicePutRequest("get_load_carriers", json_args);
   jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"]);
   parseReturnCode(response.return_code, json_resp["return_code"]);
   return true;
@@ -361,7 +372,7 @@ bool ItempickWrapper::setLoadCarrier(rc_pick_client::SetLoadCarrierRequest &requ
   json_args_lc["args"]["load_carrier"] = json_args;
 
   //communicating with rc_visard
-  json json_resp = rc_visard_communication.servicePutRequest("set_load_carrier", json_args_lc);
+  json json_resp = rc_visard_communication_.servicePutRequest("set_load_carrier", json_args_lc);
   parseReturnCode(response.return_code, json_resp["return_code"]);
   return true;
 }
@@ -390,7 +401,7 @@ bool ItempickWrapper::setROIs(rc_pick_client::SetRegionOfInterestRequest &reques
   json_args_roi["args"]["region_of_interest"] = json_args;
 
   //communicating with rc_visard
-  json json_resp = rc_visard_communication.servicePutRequest("set_region_of_interest", json_args_roi);
+  json json_resp = rc_visard_communication_.servicePutRequest("set_region_of_interest", json_args_roi);
   parseReturnCode(response.return_code, json_resp["return_code"]);
   return true;
 }
@@ -398,13 +409,13 @@ bool ItempickWrapper::setROIs(rc_pick_client::SetRegionOfInterestRequest &reques
 void ItempickWrapper::advertiseServices()
 {
   srv_compute_grasps_ = nh_.advertiseService("compute_grasps", &ItempickWrapper::computeGraspsSrv, this);
-  srv_detect_lc = nh_.advertiseService("detect_load_carriers", &ItempickWrapper::detectLoadCarriersSrv, this);
-  srv_delete_lcs = nh_.advertiseService("delete_load_carriers", &ItempickWrapper::deleteLoadCarriersSrv, this);
-  srv_get_lcs = nh_.advertiseService("get_load_carriers", &ItempickWrapper::getLoadCarriers, this);
-  srv_set_lc = nh_.advertiseService("set_load_carrier", &ItempickWrapper::setLoadCarrier, this);
-  srv_delete_rois = nh_.advertiseService("delete_regions_of_interest", &ItempickWrapper::deleteROISrv, this);
-  srv_get_rois = nh_.advertiseService("get_regions_of_interest", &ItempickWrapper::getROIs, this);
-  srv_set_roi = nh_.advertiseService("set_region_of_interest", &ItempickWrapper::setROIs, this);
+  srv_detect_lc_ = nh_.advertiseService("detect_load_carriers", &ItempickWrapper::detectLoadCarriersSrv, this);
+  srv_delete_lcs_ = nh_.advertiseService("delete_load_carriers", &ItempickWrapper::deleteLoadCarriersSrv, this);
+  srv_get_lcs_ = nh_.advertiseService("get_load_carriers", &ItempickWrapper::getLoadCarriers, this);
+  srv_set_lc_ = nh_.advertiseService("set_load_carrier", &ItempickWrapper::setLoadCarrier, this);
+  srv_delete_rois_ = nh_.advertiseService("delete_regions_of_interest", &ItempickWrapper::deleteROISrv, this);
+  srv_get_rois_ = nh_.advertiseService("get_regions_of_interest", &ItempickWrapper::getROIs, this);
+  srv_set_roi_ = nh_.advertiseService("set_region_of_interest", &ItempickWrapper::setROIs, this);
 }
 
 void ItempickWrapper::initConfiguration()
@@ -412,7 +423,7 @@ void ItempickWrapper::initConfiguration()
   rc_pick_client::itempickConfig cfg;
 
   // first get the current values from sensor
-  auto json_resp = rc_visard_communication.getParameters();
+  auto json_resp = rc_visard_communication_.getParameters();
 
   for (auto &param : json_resp)
   {
@@ -508,7 +519,7 @@ void ItempickWrapper::dynamicReconfigureCallback(rc_pick_client::itempickConfig
   js_param["value"] = config.load_carrier_model_tolerance;
   js_params.push_back(js_param);
 
-  rc_visard_communication.setParameters(js_params);
+  rc_visard_communication_.setParameters(js_params);
 }
 
 }

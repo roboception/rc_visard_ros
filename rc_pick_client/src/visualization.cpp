@@ -8,26 +8,36 @@
 * 
 * Author: Monika Florek-Jasinska
 */
-#include "visulization.h"
+#include "visualization.h"
 
 namespace pick_visualization
 {
 
 Visualization::Visualization(const ros::NodeHandle &nh) : nh_(nh)
 {
-  grasp_marker_pub = nh_.advertise<visualization_msgs::MarkerArray>("grasp", 1);
-  lc_marker_pub = nh_.advertise<visualization_msgs::MarkerArray>("lc", 1);
-
-};
+  grasp_marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("grasp", 1);
+  lc_marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("lc", 1);
+}
 
 Visualization::~Visualization()
 {
-  deleteGraspMarkers();
-  deleteLoadCarrierMarkers();
+  try
+  {
+    deleteGraspMarkers();
+    deleteLoadCarrierMarkers();
+  }
+  catch (const std::exception &ex)
+  {
+    ROS_FATAL("Exception during destruction of Visualization: %s", ex.what());
+  }
+  catch (...)
+  {
+    ROS_FATAL("Exception during destruction of Visualization");
+  }
 }
 
 void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray &marker_array,
-                                              const rc_pick_client::LoadCarrier &lc, const int &lc_no)
+                                         const rc_pick_client::LoadCarrier &lc, const int &lc_no)
 {
   visualization_msgs::Marker marker;
   marker.header.frame_id = lc.pose.header.frame_id;
@@ -110,23 +120,23 @@ void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray &marker
 
 void Visualization::deleteLoadCarrierMarkers()
 {
-  for (auto &i : markers_lcs.markers)
+  for (auto &i : markers_lcs_.markers)
   {
     i.action = visualization_msgs::Marker::DELETE;
   }
-  lc_marker_pub.publish(markers_lcs);
-  markers_lcs.markers.clear();
+  lc_marker_pub_.publish(markers_lcs_);
+  markers_lcs_.markers.clear();
 
 }
 
 void Visualization::deleteGraspMarkers()
 {
-  for (auto &i : markers_grasps.markers)
+  for (auto &i : markers_grasps_.markers)
   {
     i.action = visualization_msgs::Marker::DELETE;
   }
-  grasp_marker_pub.publish(markers_grasps);
-  markers_grasps.markers.clear();
+  grasp_marker_pub_.publish(markers_grasps_);
+  markers_grasps_.markers.clear();
 }
 
 void Visualization::publishLCTf(const std::vector<rc_pick_client::LoadCarrier> &ros_lcs)
@@ -138,7 +148,7 @@ void Visualization::publishLCTf(const std::vector<rc_pick_client::LoadCarrier> &
                                     ros_lcs[i].pose.pose.position.z));
     transform.setRotation(tf::Quaternion(ros_lcs[i].pose.pose.orientation.x, ros_lcs[i].pose.pose.orientation.y,
                                          ros_lcs[i].pose.pose.orientation.z, ros_lcs[i].pose.pose.orientation.w));
-    br.sendTransform(
+    br_.sendTransform(
             tf::StampedTransform(transform, ros::Time::now(), ros_lcs[i].pose.header.frame_id,
                                  std::string(nh_.getNamespace() + "/lc_" + std::to_string(i))));
   }
@@ -146,9 +156,9 @@ void Visualization::publishLCTf(const std::vector<rc_pick_client::LoadCarrier> &
 
 void Visualization::publishLCMarkers(const std::vector<rc_pick_client::LoadCarrier> &ros_lcs)
 {
-  for (unsigned int i = 0; i < ros_lcs.size(); i++) constructLoadCarrier(markers_lcs, ros_lcs[i], i);
+  for (unsigned int i = 0; i < ros_lcs.size(); i++) constructLoadCarrier(markers_lcs_, ros_lcs[i], i);
 
-  lc_marker_pub.publish(markers_lcs);
+  lc_marker_pub_.publish(markers_lcs_);
 }
 
 
@@ -172,7 +182,7 @@ void Visualization::publishGraspTf(const std::vector<rc_pick_client::SuctionGras
 
     transform.setRotation(tf::Quaternion(ros_grasps[i].pose.pose.orientation.x, ros_grasps[i].pose.pose.orientation.y,
                                          ros_grasps[i].pose.pose.orientation.z, ros_grasps[i].pose.pose.orientation.w));
-    br.sendTransform(
+    br_.sendTransform(
             tf::StampedTransform(transform, ros::Time::now(), ros_grasps[i].pose.header.frame_id,
                                  std::string(nh_.getNamespace() + "/grasp_" + std::to_string(i))));
   }
@@ -196,9 +206,9 @@ void Visualization::publishGraspMarkers(const std::vector<rc_pick_client::Suctio
     marker.pose = ros_grasps[i].pose.pose;
     marker.scale.y = ros_grasps[i].max_suction_surface_width;
     marker.scale.x = ros_grasps[i].max_suction_surface_length;
-    markers_grasps.markers.push_back(marker);
+    markers_grasps_.markers.push_back(marker);
   }
-  grasp_marker_pub.publish(markers_grasps);
+  grasp_marker_pub_.publish(markers_grasps_);
 }
 
 

@@ -11,24 +11,23 @@
 #ifndef RC_ITEMPICK_CLIENT_CPR_HELPER_H
 #define RC_ITEMPICK_CLIENT_CPR_HELPER_H
 
-#include "json/json.hpp"
-#include <cpr/cpr.h>
-#include <exception>
-#include <iostream>
+#include <json/json.hpp>
+
+#include <string>
+
 using json = nlohmann::json;
+
 namespace rc_itempick_cpr
 {
 class CommunicationHelper
 {
   public:
-    CommunicationHelper(const std::string &host, const std::string &node_name, int timeout);
+    CommunicationHelper(const std::string &host, const std::string &node_name,
+                        int timeout);
 
-    /*
-     *
-     */
-    json servicePutRequest(std::string service_name);
+    json servicePutRequest(const std::string &service_name);
 
-    json servicePutRequest(std::string service_name, json js_args);
+    json servicePutRequest(const std::string &service_name, const json &js_args);
 
     json getParameters();
 
@@ -36,9 +35,8 @@ class CommunicationHelper
 
   private:
     // REST stuff
-    std::string host_, servicesUrl_, paramsUrl_;
-    int timeoutCurl_; // ms
-
+    const std::string host_, services_url_, params_url_;
+    const int timeout_curl_; // ms
 };
 
 }

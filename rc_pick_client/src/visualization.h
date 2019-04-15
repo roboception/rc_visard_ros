@@ -25,7 +25,7 @@ namespace pick_visualization
 class Visualization
 {
   public:
-    Visualization(const ros::NodeHandle &nh);
+    explicit Visualization(const ros::NodeHandle &nh);
 
     ~Visualization();
 
@@ -55,18 +55,19 @@ class Visualization
 
   private:
     ros::NodeHandle nh_;
-    ros::Publisher grasp_marker_pub;
-    ros::Publisher lc_marker_pub;
-    tf::TransformBroadcaster br;
-    visualization_msgs::MarkerArray markers_lcs;
-    visualization_msgs::MarkerArray markers_grasps;
+    ros::Publisher grasp_marker_pub_;
+    ros::Publisher lc_marker_pub_;
+    tf::TransformBroadcaster br_;
+    visualization_msgs::MarkerArray markers_lcs_;
+    visualization_msgs::MarkerArray markers_grasps_;
 
     /*
      * Construct model of the load carrier that consist of 5 cube meshes representing 5 walls of the load carrier and
      * append it to marker_array
      */
-    void constructLoadCarrier(visualization_msgs::MarkerArray &marker_array, const rc_pick_client::LoadCarrier &lc,
-                              const int &lc_no);
+    static void constructLoadCarrier(visualization_msgs::MarkerArray &marker_array,
+                                     const rc_pick_client::LoadCarrier &lc,
+                                     const int &lc_no);
 
     /*
      * Convert rc_pick_client::SuctionGrasp into markers and publish it

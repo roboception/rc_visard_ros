@@ -4,19 +4,20 @@
 
 std::unique_ptr<itempick_client::ItempickWrapper> itempick_wrapper;
 
-void sigintHandler(int sig)
+void sigintHandler(int)
 {
   itempick_wrapper.reset();
   ros::shutdown();
 }
 
-
 int main(int argc, char **argv)
 {
   std::string name = "rc_itempick";
-  ros::init(argc, argv, name);
+  ros::init(argc, argv, name, ros::init_options::NoSigintHandler);
   signal(SIGINT, sigintHandler);
+
   ros::NodeHandle pnh("~");
+
   std::string host;
   pnh.param("host", host, host);
   if (host.empty()) {
@@ -38,10 +39,5 @@ int main(int argc, char **argv)
   ROS_INFO_STREAM("Itempick node started for host: " << host);
   ros::Rate loop_rate(10);
 
-  while (ros::ok())
-  {
-    ros::spinOnce();
-    loop_rate.sleep();
-  }
-  itempick_wrapper.reset();
+  ros::spin();
 }

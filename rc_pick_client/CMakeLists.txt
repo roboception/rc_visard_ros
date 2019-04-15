@@ -78,7 +78,7 @@ include_directories(
 
 
 ## Declare a cpp executable
-add_executable(rc_itempick_client_node src/rc_itempick_client_node.cpp src/rest_itempick_client.cc src/communication_helper.cpp src/visulization.cpp)
+add_executable(rc_itempick_client_node src/rc_itempick_client_node.cpp src/rest_itempick_client.cc src/communication_helper.cpp src/visualization.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes

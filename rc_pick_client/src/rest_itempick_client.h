@@ -18,16 +18,16 @@
 #include <rc_pick_client/SetRegionOfInterest.h>
 #include <rc_pick_client/itempickConfig.h>
 #include "communication_helper.h"
-#include "visulization.h"
+#include "visualization.h"
 
 namespace itempick_client
 {
 class ItempickWrapper
 {
   public:
-
     ItempickWrapper(const std::string &host, const ros::NodeHandle &nh);
     ~ItempickWrapper();
+
   private:
 
     bool computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &request,
@@ -71,18 +71,18 @@ class ItempickWrapper
 
     ros::NodeHandle nh_;
     ros::ServiceServer srv_compute_grasps_;
-    ros::ServiceServer srv_detect_lc;
-    ros::ServiceServer srv_set_lc;
-    ros::ServiceServer srv_get_lcs;
-    ros::ServiceServer srv_delete_lcs;
-    ros::ServiceServer srv_set_roi;
-    ros::ServiceServer srv_get_rois;
-    ros::ServiceServer srv_delete_rois;
+    ros::ServiceServer srv_detect_lc_;
+    ros::ServiceServer srv_set_lc_;
+    ros::ServiceServer srv_get_lcs_;
+    ros::ServiceServer srv_delete_lcs_;
+    ros::ServiceServer srv_set_roi_;
+    ros::ServiceServer srv_get_rois_;
+    ros::ServiceServer srv_delete_rois_;
 
     std::unique_ptr<dynamic_reconfigure::Server<rc_pick_client::itempickConfig> > server_;
 
-    rc_itempick_cpr::CommunicationHelper rc_visard_communication;
-    pick_visualization::Visualization visualizer;
+    rc_itempick_cpr::CommunicationHelper rc_visard_communication_;
+    pick_visualization::Visualization visualizer_;
 
 };
 }
