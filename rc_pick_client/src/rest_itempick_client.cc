@@ -448,10 +448,6 @@ void ItempickWrapper::initConfiguration()
     {
       cfg.clustering_patch_size = param["value"];
     }
-    else if (param["name"] == "item_model_tolerance")
-    {
-      cfg.item_model_tolerance = param["value"];
-    }
     else if (param["name"] == "load_carrier_crop_distance")
     {
       cfg.load_carrier_crop_distance = param["value"];
@@ -470,7 +466,6 @@ void ItempickWrapper::initConfiguration()
             cfg.clustering_discontinuity_factor);
   nh_.param("clustering_max_surface_rmse", cfg.clustering_max_surface_rmse, cfg.clustering_max_surface_rmse);
   nh_.param("clustering_patch_size", cfg.clustering_patch_size, cfg.clustering_patch_size);
-  nh_.param("item_model_tolerance", cfg.item_model_tolerance, cfg.item_model_tolerance);
   nh_.param("load_carrier_crop_distance", cfg.load_carrier_crop_distance, cfg.load_carrier_crop_distance);
   nh_.param("load_carrier_model_tolerance", cfg.load_carrier_model_tolerance, cfg.load_carrier_model_tolerance);
 
@@ -480,7 +475,6 @@ void ItempickWrapper::initConfiguration()
   nh_.setParam("clustering_discontinuity_factor", cfg.clustering_discontinuity_factor);
   nh_.setParam("clustering_max_surface_rmse", cfg.clustering_max_surface_rmse);
   nh_.setParam("clustering_patch_size", cfg.clustering_patch_size);
-  nh_.setParam("item_model_tolerance", cfg.item_model_tolerance);
   nh_.setParam("load_carrier_crop_distance", cfg.load_carrier_crop_distance);
   nh_.setParam("load_carrier_model_tolerance", cfg.load_carrier_model_tolerance);
 
@@ -510,8 +504,6 @@ void ItempickWrapper::dynamicReconfigureCallback(rc_pick_client::itempickConfig
   js_param["name"] = "clustering_patch_size";
   js_param["value"] = config.clustering_patch_size;
   js_params.push_back(js_param);
-  js_param["name"] = "item_model_tolerance";
-  js_param["value"] = config.item_model_tolerance;
   js_param["name"] = "load_carrier_crop_distance";
   js_param["value"] = config.load_carrier_crop_distance;
   js_params.push_back(js_param);
