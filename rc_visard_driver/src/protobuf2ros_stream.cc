@@ -94,8 +94,7 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
         stringstream msg;
         msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
         msg << "\nWaiting until rc_dynamics node is running...." << endl;
-        msg << "\(Hint: Either use one of this node's /dynamics_start* services "
-            << "or start this node with one of its autostart_dynamics* parameters.)" << endl;
+        msg << "\(Hint: Use one of this node's /dynamics_start* services.)" << endl;
         ROS_WARN_STREAM_THROTTLE(30, msg.str());
         usleep(1000 * 1000);
         continue;
@@ -143,8 +142,8 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
         }
 
         ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
-                                               << "Either rc_visard stopped streaming or is turned off, "
-                                               << "or you seem to have serious network/connection problems!");
+                                               << "There seems to problems with network or connection to rc_visard! "
+                                               << "Please check https://tutorials.roboception.de/rc_visard_general/network_setup for proper setup!");
         continue;  // wait for next packet
       }
 
@@ -210,8 +209,7 @@ bool PoseStream::startReceivingAndPublishingAsRos()
         stringstream msg;
         msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
         msg << "\nWaiting until rc_dynamics node is running...." << endl;
-        msg << "\(Hint: Either use one of this node's /dynamics_start* services "
-            << "or start this node with one of its autostart_dynamics* parameters.)" << endl;
+        msg << "\(Hint: Use one of this node's /dynamics_start* services.)" << endl;
         ROS_WARN_STREAM_THROTTLE(30, msg.str());
         usleep(1000 * 1000);
         continue;
@@ -259,8 +257,8 @@ bool PoseStream::startReceivingAndPublishingAsRos()
         }
 
         ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
-                                               << "Either rc_visard stopped streaming or is turned off, "
-                                               << "or you seem to have serious network/connection problems!");
+                        << "There seems to problems with your network or connection to rc_visard! "
+                        << "Please check https://tutorials.roboception.de/rc_visard_general/network_setup for proper network setup!");
         continue;  // wait for next packet
       }
 
@@ -354,8 +352,7 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
         stringstream msg;
         msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
         msg << "\nWaiting until rc_dynamics node is running...." << endl;
-        msg << "\(Hint: Either use one of this node's /dynamics_start* services "
-            << "or start this node with one of its autostart_dynamics* parameters.)" << endl;
+        msg << "\(Hint: Use one of this node's /dynamics_start* services.)" << endl;
         ROS_WARN_STREAM_THROTTLE(30, msg.str());
         usleep(1000 * 1000);
         continue;
@@ -403,8 +400,8 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
         }
 
         ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
-                                               << "Either rc_visard stopped streaming or is turned off, "
-                                               << "or you seem to have serious network/connection problems!");
+                                               << "There seems to problems with network or connection to rc_visard! "
+                                               << "Please check https://tutorials.roboception.de/rc_visard_general/network_setup for proper setup!");
         continue;  // wait for next packet
       }
 
