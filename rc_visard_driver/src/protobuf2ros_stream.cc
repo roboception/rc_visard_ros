@@ -81,30 +81,39 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
     // initialize data stream to this host
 
     rcd::DataReceiver::Ptr receiver;
-    try
+    while (!_stop && rosPublisher.used() && !receiver)
     {
-      receiver = _rcdyn->createReceiverForStream(_stream);
+      try
+      {
+        receiver = _rcdyn->createReceiverForStream(_stream);
+        receiver->setTimeout(timeoutMillis);
+        ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
+      }
+      catch (rcd::RemoteInterface::dynamics_not_running& e)
+      {
+        stringstream msg;
+        msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
+        msg << "\nWaiting until rc_dynamics node is running...." << endl;
+        msg << "\(Hint: Either use one of this node's /dynamics_start* services "
+            << "or start this node with one of its autostart_dynamics* parameters.)" << endl;
+        ROS_WARN_STREAM_THROTTLE(30, msg.str());
+        usleep(1000 * 1000);
+        continue;
+      }
+      catch (exception& e)
+      {
+        ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ") + _stream + ": " + e.what());
+        failed = true;
+        _stop = true;
+        break;
+      }
     }
-    catch (rcd::UnexpectedReceiveTimeout& e)
-    {
-      stringstream msg;
-      msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
-      ROS_WARN_STREAM_THROTTLE(5, msg.str());
-      continue;
-    }
-    catch (exception& e)
-    {
-      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ") + _stream + ": " + e.what());
-      failed = true;
-      break;
-    }
-    receiver->setTimeout(timeoutMillis);
-    ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
 
     // main loop for listening, receiving and republishing data to ROS
 
     shared_ptr<::google::protobuf::Message> pbMsg;
-    while (!_stop && rosPublisher.used())
+    bool dynamics_stopped = false;
+    while (!_stop && rosPublisher.used() && !dynamics_stopped)
     {
       // try receive msg; blocking call (timeout)
       try
@@ -122,6 +131,17 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
       // timeout happened
       if (!pbMsg)
       {
+        // check if dynamics node is still running
+        string state = _rcdyn->getState();
+        if (state != rcd::RemoteInterface::State::RUNNING &&
+            state != rcd::RemoteInterface::State::RUNNING_WITH_SLAM)
+        {
+           ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms "
+                                               << "because rc_visard's dynamics node switch to state " << state << "!");
+           dynamics_stopped = true;
+           continue;
+        }
+
         ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
                                                << "Either rc_visard stopped streaming or is turned off, "
                                                << "or you seem to have serious network/connection problems!");
@@ -133,6 +153,7 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
       // convert to ROS message and publish
       rosPublisher.publish(pbMsg);
     }
+    if (dynamics_stopped) continue;
 
     ROS_INFO_STREAM("rc_visard_driver: Disabled rc-dynamics stream: " << _stream);
   }
@@ -172,33 +193,43 @@ bool PoseStream::startReceivingAndPublishingAsRos()
     _success = false;
     ROS_INFO_STREAM("rc_visard_driver: Enabled rc-dynamics stream: " << _stream);
 
-    // initialize data stream to this host
+     // initialize data stream to this host
 
     rcd::DataReceiver::Ptr receiver;
-    try
+    while (!_stop && someoneListens && !receiver)
     {
-      receiver = _rcdyn->createReceiverForStream(_stream);
+      someoneListens = _tfEnabled || pub.getNumSubscribers() > 0;
+      try
+      {
+        receiver = _rcdyn->createReceiverForStream(_stream);
+        receiver->setTimeout(timeoutMillis);
+        ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
+      }
+      catch (rcd::RemoteInterface::dynamics_not_running& e)
+      {
+        stringstream msg;
+        msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
+        msg << "\nWaiting until rc_dynamics node is running...." << endl;
+        msg << "\(Hint: Either use one of this node's /dynamics_start* services "
+            << "or start this node with one of its autostart_dynamics* parameters.)" << endl;
+        ROS_WARN_STREAM_THROTTLE(30, msg.str());
+        usleep(1000 * 1000);
+        continue;
+      }
+      catch (exception& e)
+      {
+        ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ") + _stream + ": " + e.what());
+        failed = true;
+        _stop = true;
+        break;
+      }
     }
-    catch (rcd::UnexpectedReceiveTimeout& e)
-    {
-      stringstream msg;
-      msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
-      ROS_WARN_STREAM_THROTTLE(5, msg.str());
-      continue;
-    }
-    catch (exception& e)
-    {
-      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ") + _stream + ": " + e.what());
-      failed = true;
-      break;
-    }
-    receiver->setTimeout(timeoutMillis);
-    ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
 
     // main loop for listening, receiving and republishing data to ROS
 
     shared_ptr<roboception::msgs::Frame> protoFrame;
-    while (!_stop && someoneListens)
+    bool dynamics_stopped = false;
+    while (!_stop && someoneListens && !dynamics_stopped)
     {
       // try receive msg; blocking call (timeout)
       try
@@ -216,6 +247,17 @@ bool PoseStream::startReceivingAndPublishingAsRos()
       // timeout happened
       if (!protoFrame)
       {
+        // check if dynamics node is still running
+        string state = _rcdyn->getState();
+        if (state != rcd::RemoteInterface::State::RUNNING &&
+            state != rcd::RemoteInterface::State::RUNNING_WITH_SLAM)
+        {
+           ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms "
+                                               << "because rc_visard's dynamics node switch to state " << state << "!");
+           dynamics_stopped = true;
+           continue;
+        }
+
         ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
                                                << "Either rc_visard stopped streaming or is turned off, "
                                                << "or you seem to have serious network/connection problems!");
@@ -241,6 +283,7 @@ bool PoseStream::startReceivingAndPublishingAsRos()
       // check if still someone is listening
       someoneListens = _tfEnabled || pub.getNumSubscribers() > 0;
     }
+    if (dynamics_stopped) continue;
 
     ROS_INFO_STREAM("rc_visard_driver: Disabled rc-dynamics stream: " << _stream);
   }
@@ -297,30 +340,40 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
     // initialize data stream to this host
 
     rcd::DataReceiver::Ptr receiver;
-    try
+    while (!_stop && someoneListens && !receiver)
     {
-      receiver = _rcdyn->createReceiverForStream(_stream);
+      someoneListens = pub_odom.getNumSubscribers() > 0 || (publishVisualizationMarkers && pub_markers.getNumSubscribers() > 0);
+      try
+      {
+        receiver = _rcdyn->createReceiverForStream(_stream);
+        receiver->setTimeout(timeoutMillis);
+        ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
+      }
+      catch (rcd::RemoteInterface::dynamics_not_running& e)
+      {
+        stringstream msg;
+        msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
+        msg << "\nWaiting until rc_dynamics node is running...." << endl;
+        msg << "\(Hint: Either use one of this node's /dynamics_start* services "
+            << "or start this node with one of its autostart_dynamics* parameters.)" << endl;
+        ROS_WARN_STREAM_THROTTLE(30, msg.str());
+        usleep(1000 * 1000);
+        continue;
+      }
+      catch (exception& e)
+      {
+        ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ") + _stream + ": " + e.what());
+        failed = true;
+        _stop = true;
+        break;
+      }
     }
-    catch (rcd::UnexpectedReceiveTimeout& e)
-    {
-      stringstream msg;
-      msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
-      ROS_WARN_STREAM_THROTTLE(5, msg.str());
-      continue;
-    }
-    catch (exception& e)
-    {
-      ROS_ERROR_STREAM(std::string("Could not initialize rc-dynamics stream: ") + _stream + ": " + e.what());
-      failed = true;
-      break;
-    }
-    receiver->setTimeout(timeoutMillis);
-    ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
 
     // main loop for listening, receiving and republishing data to ROS
 
     shared_ptr<roboception::msgs::Dynamics> protoMsg;
-    while (!_stop && someoneListens)
+    bool dynamics_stopped = false;
+    while (!_stop && someoneListens && !dynamics_stopped)
     {
       // try receive msg; blocking call (timeout)
       try
@@ -338,6 +391,17 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
       // timeout happened
       if (!protoMsg)
       {
+        // check if dynamics node is still running
+        string state = _rcdyn->getState();
+        if (state != rcd::RemoteInterface::State::RUNNING &&
+            state != rcd::RemoteInterface::State::RUNNING_WITH_SLAM)
+        {
+           ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms "
+                                               << "because rc_visard's dynamics node switch to state " << state << "!");
+           dynamics_stopped = true;
+           continue;
+        }
+
         ROS_WARN_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
                                                << "Either rc_visard stopped streaming or is turned off, "
                                                << "or you seem to have serious network/connection problems!");
@@ -461,6 +525,7 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
       someoneListens =
           pub_odom.getNumSubscribers() > 0 || (publishVisualizationMarkers && pub_markers.getNumSubscribers() > 0);
     }
+    if (dynamics_stopped) continue;
 
     ROS_INFO_STREAM("rc_visard_driver: Disabled rc-dynamics stream: " << _stream);
   }
