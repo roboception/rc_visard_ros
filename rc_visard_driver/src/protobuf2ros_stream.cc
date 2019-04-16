@@ -89,7 +89,7 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
         receiver->setTimeout(timeoutMillis);
         ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
       }
-      catch (rcd::RemoteInterface::dynamics_not_running& e)
+      catch (rcd::RemoteInterface::DynamicsNotRunning& e)
       {
         stringstream msg;
         msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
@@ -132,7 +132,7 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
       if (!pbMsg)
       {
         // check if dynamics node is still running
-        string state = _rcdyn->getState();
+        string state = _rcdyn->getDynamicsState();
         if (state != rcd::RemoteInterface::State::RUNNING &&
             state != rcd::RemoteInterface::State::RUNNING_WITH_SLAM)
         {
@@ -205,7 +205,7 @@ bool PoseStream::startReceivingAndPublishingAsRos()
         receiver->setTimeout(timeoutMillis);
         ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
       }
-      catch (rcd::RemoteInterface::dynamics_not_running& e)
+      catch (rcd::RemoteInterface::DynamicsNotRunning& e)
       {
         stringstream msg;
         msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
@@ -248,7 +248,7 @@ bool PoseStream::startReceivingAndPublishingAsRos()
       if (!protoFrame)
       {
         // check if dynamics node is still running
-        string state = _rcdyn->getState();
+        string state = _rcdyn->getDynamicsState();
         if (state != rcd::RemoteInterface::State::RUNNING &&
             state != rcd::RemoteInterface::State::RUNNING_WITH_SLAM)
         {
@@ -349,7 +349,7 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
         receiver->setTimeout(timeoutMillis);
         ROS_INFO_STREAM("rc_visard_driver: rc-dynamics stream ready: " << _stream);
       }
-      catch (rcd::RemoteInterface::dynamics_not_running& e)
+      catch (rcd::RemoteInterface::DynamicsNotRunning& e)
       {
         stringstream msg;
         msg << "Could not initialize rc-dynamics stream: " << _stream << ":" << endl << e.what();
@@ -392,7 +392,7 @@ bool DynamicsStream::startReceivingAndPublishingAsRos()
       if (!protoMsg)
       {
         // check if dynamics node is still running
-        string state = _rcdyn->getState();
+        string state = _rcdyn->getDynamicsState();
         if (state != rcd::RemoteInterface::State::RUNNING &&
             state != rcd::RemoteInterface::State::RUNNING_WITH_SLAM)
         {
