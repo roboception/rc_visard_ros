@@ -42,9 +42,9 @@ void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray &marker
   visualization_msgs::Marker marker;
   marker.header.frame_id = lc.pose.header.frame_id;
   marker.type = marker.CUBE;
-  marker.color.r = 1.0f;
-  marker.color.g = 0.0f;
-  marker.color.b = 0.0f;
+  marker.color.r = 0.0f;
+  marker.color.g = 0.20f;
+  marker.color.b = 0.80f;
   marker.color.a = 0.3;
   tf2::Transform bin_transform(tf2::Quaternion(lc.pose.pose.orientation.x, lc.pose.pose.orientation.y,
                                                lc.pose.pose.orientation.z,
@@ -193,10 +193,10 @@ void Visualization::publishGraspMarkers(const std::vector<rc_pick_client::Suctio
   visualization_msgs::Marker marker;
   marker.type = marker.SPHERE;
   marker.scale.z = 0.001;
-  marker.color.r = 0.0f;
-  marker.color.g = 1.0f;
+  marker.color.r = 0.800f;
+  marker.color.g = 0.20f;
   marker.color.b = 0.0f;
-  marker.color.a = 1.0;
+  marker.color.a = 0.80;
   marker.action = visualization_msgs::Marker::ADD;
 
   for (unsigned int i = 0; i < ros_grasps.size(); i++)
