@@ -34,10 +34,15 @@
 #ifndef RC_VISARD_ROS_PROTOBUF2ROS_STREAM_H
 #define RC_VISARD_ROS_PROTOBUF2ROS_STREAM_H
 
+#include <memory>
+
 #include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
+
 #include <rc_dynamics_api/remote_interface.h>
 
 #include "ThreadedStream.h"
+#include "publishers/protobuf2ros_publisher.h"
 
 namespace rc
 {
@@ -58,29 +63,45 @@ public:
   }
 
 protected:
+  virtual void initRosPublishers();
+  virtual bool checkRosPublishersUsed();
+  virtual void publishToRos(std::shared_ptr<::google::protobuf::Message> pbMsg);
+
   virtual bool startReceivingAndPublishingAsRos() override;
 
+  std::shared_ptr<Protobuf2RosPublisher> _rosPublisher;
   const std::string _tfPrefix;
 };
 
 /**
- * Specific implementation for roboception::msgs::Frame messages. It publishes
+ * Specific implementation for roboception::msgs::Frame messages that publishes
  * received messages not only as ros StampedPoses but also on tf if desired.
  *
  * Again, the resulting ros topic is the dynamics stream name.
  */
-class PoseStream : public Protobuf2RosStream
+class PoseAndTFStream : public Protobuf2RosStream
 {
 public:
-  PoseStream(rc::dynamics::RemoteInterface::Ptr rcdIface, const std::string& stream, ros::NodeHandle& nh,
+  PoseAndTFStream(rc::dynamics::RemoteInterface::Ptr rcdIface, const std::string& stream, ros::NodeHandle& nh,
              const std::string& frame_id_prefix, bool tfEnabled)
     : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix), _tfEnabled(tfEnabled)
   {
+    std::string pbMsgType = _rcdyn->getPbMsgTypeOfStream(_stream);
+    if (pbMsgType != "Frame")
+    {
+      std::stringstream msg;
+      msg << "Invalid stream type! Can instantiate PoseAndTFStream only for rc_dynamics streams of type 'Frame' "
+          << "but got stream '" << stream << "' which is of type '" << pbMsgType << "'!";
+      throw std::invalid_argument(msg.str());
+    }
   }
 
 protected:
-  virtual bool startReceivingAndPublishingAsRos() override;
+  virtual void initRosPublishers() override;
+  virtual bool checkRosPublishersUsed() override;
+  virtual void publishToRos(std::shared_ptr<::google::protobuf::Message> pbMsg) override;
 
+  std::shared_ptr<tf::TransformBroadcaster> _tf_pub;
   bool _tfEnabled;
 };
 
@@ -96,12 +117,28 @@ class DynamicsStream : public Protobuf2RosStream
 public:
   DynamicsStream(rc::dynamics::RemoteInterface::Ptr rcdIface, const std::string& stream, ros::NodeHandle& nh,
                  const std::string& frame_id_prefix)
-    : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix)
+    : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix), _publishVisualizationMarkers(false)
   {
+    std::string pbMsgType = _rcdyn->getPbMsgTypeOfStream(_stream);
+    if (pbMsgType != "Dynamics")
+    {
+      std::stringstream msg;
+      msg << "Invalid stream type! Can instantiate DynamicsStream only for rc_dynamics streams of type 'Dynamics' "
+          << "but got stream '" << stream << "' which is of type '" << pbMsgType << "'!";
+      throw std::invalid_argument(msg.str());
+    }
   }
 
 protected:
-  virtual bool startReceivingAndPublishingAsRos() override;
+  virtual void initRosPublishers() override;
+  virtual bool checkRosPublishersUsed() override;
+  virtual void publishToRos(std::shared_ptr<::google::protobuf::Message> pbMsg) override;
+
+  std::shared_ptr<tf::TransformBroadcaster> _tf_pub;
+  std::shared_ptr<ros::Publisher> _pub_odom;
+  std::shared_ptr<ros::Publisher> _pub_markers;
+  bool _publishVisualizationMarkers;
 };
+
 }
 #endif  // RC_VISARD_ROS_PROTOBUF2ROS_STREAM_H

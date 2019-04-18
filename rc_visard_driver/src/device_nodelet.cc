@@ -107,7 +107,7 @@ ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(rcd::RemoteInterfa
 {
   if (stream == "pose")
   {
-    return ThreadedStream::Ptr(new PoseStream(rcdIface, stream, nh, frame_id_prefix, tfEnabled));
+    return ThreadedStream::Ptr(new PoseAndTFStream(rcdIface, stream, nh, frame_id_prefix, tfEnabled));
   }
   if (stream == "pose_ins" || stream == "pose_rt" || stream == "pose_rt_ins" || stream == "imu")
   {
