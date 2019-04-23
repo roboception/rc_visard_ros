@@ -336,6 +336,21 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         rcgdev->open(access_id);
         rcgnodemap = rcgdev->getRemoteNodeMap();
 
+        // in newer rc_visard image versions, we can check if rc_visard is ready
+
+        try {
+          bool isReady = rcg::getBoolean(rcgnodemap, "RcSystemReady", true, true);
+          if (!isReady)
+          {
+            ROS_INFO_STREAM("rc_visard_driver: rc_visard device not yet ready. Trying again...");
+            continue;  // to next trial!
+          }
+        } catch (std::invalid_argument& e)
+        {
+          // genicam feature is not implemented in this version of rc_visard's firmware,
+          // so we have to assume rc_visard is ready and continue
+        }
+
         // extract some diagnostics data from device
         dev_serialno = rcg::getString(rcgnodemap, "DeviceID", true);
         dev_macaddr = rcg::getString(rcgnodemap, "GevMACAddress", true);
