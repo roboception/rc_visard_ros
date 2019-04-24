@@ -351,7 +351,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
         std::string currentIPAddress = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
         dynamicsInterface = rcd::RemoteInterface::create(currentIPAddress);
-        if (autostartDynamics || autostartSlam && !atLeastOnceSuccessfullyStarted)
+        if ((autostartDynamics || autostartSlam) && !atLeastOnceSuccessfullyStarted)
         {
           std_srvs::Trigger::Request dummyreq;
           std_srvs::Trigger::Response dummyresp;
