@@ -132,7 +132,7 @@ private:
   std::shared_ptr<rcg::Device> rcgdev;
   std::shared_ptr<GenApi::CNodeMapRef> rcgnodemap;
 
-  std::mutex mtx;
+  boost::recursive_mutex mtx;
   bool stereo_plus_avail;
   bool iocontrol_avail;
   rc_visard_driver::rc_visard_driverConfig config;

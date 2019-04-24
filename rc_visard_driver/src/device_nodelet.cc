@@ -638,7 +638,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   if (reconfig == 0)
   {
     // TODO: we need to dismangle initialization of dynreconfserver from not-READONLY-access-condition
-    reconfig = new dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>(pnh);
+    reconfig = new dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>(mtx, pnh);
   }
   // always set callback to (re)load configuration even after recovery
   dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>::CallbackType cb;
@@ -648,7 +648,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
 void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uint32_t l)
 {
-  std::lock_guard<std::mutex> lock(mtx);
+  boost::recursive_mutex::scoped_lock lock(mtx);
 
   // check and correct parameters
 
@@ -1400,6 +1400,18 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             setConfiguration(rcgnodemap, cfg, lvl, iocontrol_avail);
 
             disprange = cfg.depth_disprange;
+
+            // if exposure mode to manual, read current exposure value and gain again
+            if (lvl & 2 && !cfg.camera_exp_auto)
+            {
+              boost::recursive_mutex::scoped_lock lock(mtx);
+              cfg.camera_exp_value = rcg::getFloat(rcgnodemap, "ExposureTime", 0, 0, true, true) / 1000000;
+              if (dev_supports_gain)
+              {
+                cfg.camera_gain_value = rcg::getFloat(rcgnodemap, "Gain", 0, 0, true, true);
+              }
+              reconfig->updateConfig(cfg);
+            }
 
             // if in alternate mode, then make publishers aware of it
 
