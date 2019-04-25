@@ -115,6 +115,7 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
 
     string pbMsgType = _rcdyn->getPbMsgTypeOfStream(_stream);
     shared_ptr<::google::protobuf::Message> pbMsg;
+    unsigned int consecutive_timeouts = 0;
     while (!_stop && someoneListens)
     {
       someoneListens = checkRosPublishersUsed();
@@ -153,8 +154,11 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
             break; // stop receiving loop
         }
 
-        ROS_WARN_STREAM_THROTTLE(1, "There seems to problems with your network or connection to rc_visard! "
+        if (++consecutive_timeouts>3) {
+          // dynamics state takes a while to change to a non-running state; give warning only if we are sure to still be in running-state
+          ROS_WARN_STREAM_THROTTLE(1, "There seems to problems with your network or connection to rc_visard! "
                         << "Please check https://tutorials.roboception.de/rc_visard_general/network_setup for proper network setup!");
+        }
         continue;  // wait for next packet
       }
 
