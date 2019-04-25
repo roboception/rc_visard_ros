@@ -336,16 +336,15 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         rcgdev->open(access_id);
         rcgnodemap = rcgdev->getRemoteNodeMap();
 
-        // in newer rc_visard image versions, we can check if rc_visard is ready
+        // in newer rc_visard image versions, we can check via genicam if rc_visard is ready
 
         try {
           bool isReady = rcg::getBoolean(rcgnodemap, "RcSystemReady", true, true);
           if (!isReady)
           {
-            ROS_INFO_STREAM("rc_visard_driver: rc_visard device not yet ready. Trying again...");
+            ROS_INFO_STREAM("rc_visard_driver: rc_visard device not yet ready (GEV). Trying again...");
             continue;  // to next trial!
           }
-          usleep(1000 * 1000); // we still have to wait for some uninitialized services
         } catch (std::invalid_argument& e)
         {
           // genicam feature is not implemented in this version of rc_visard's firmware,
@@ -363,18 +362,37 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         updater.setHardwareID(dev_serialno);
         updater.force_update();
 
-        // instantiating dynamics interface and autostart dynamics on sensor if desired
+        // instantiating dynamics interface, check if ready, and autostart dynamics on sensor if desired
 
-        std::string currentIPAddress = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
-        dynamicsInterface = rcd::RemoteInterface::create(currentIPAddress);
+        dynamicsInterface = rcd::RemoteInterface::create(dev_ipaddr);
+        try {
+          if (!dynamicsInterface->checkSystemReady())
+          {
+            ROS_INFO_STREAM("rc_visard_driver: rc_visard device not yet ready (REST). Trying again...");
+            continue;  // to next trial!
+          }
+        } catch (std::exception& e)
+        {
+          ROS_ERROR_STREAM("rc_visard_driver: checking system ready failed: " << e.what());
+        }
+
         if ((autostartDynamics || autostartSlam) && !atLeastOnceSuccessfullyStarted)
         {
+          ROS_INFO_STREAM("rc_visard_driver: Auto-start requested (" <<
+                          "autostart_dynamics=" << autostartDynamics << ", "
+                          "autostart_dynamics_with_slam=" << autostartSlam << ")");
+
           std_srvs::Trigger::Request dummyreq;
           std_srvs::Trigger::Response dummyresp;
-          if (!((autostartSlam && this->dynamicsStartSlam(dummyreq, dummyresp)) ||
-                (autostartDynamics && this->dynamicsStart(dummyreq, dummyresp))))
-          {  // autostart failed!
-            ROS_WARN("rc_visard_driver: Could not auto-start dynamics module!");
+
+          bool autostart_failed = false;
+          autostart_failed |= (autostartSlam     && !this->dynamicsStartSlam(dummyreq, dummyresp));
+          autostart_failed |= (!autostartSlam && autostartDynamics && !this->dynamicsStart(dummyreq, dummyresp));
+          autostart_failed |= !dummyresp.success;
+
+          if (autostart_failed)
+          {
+            ROS_WARN_STREAM("rc_visard_driver: Could not auto-start dynamics module! " << dummyresp.message);
             cntConsecutiveRecoveryFails++;
             continue;  // to next trial!
           }
