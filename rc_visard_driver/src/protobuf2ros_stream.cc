@@ -149,7 +149,7 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
           }
         } catch (exception& e)
         {
-            ROS_ERROR_STREAM("Could not access state of rc_visard's rc_dynamics modules: " << e.what());
+            ROS_ERROR_STREAM("Could not access state of rc_visard's rc_dynamics module: " << e.what());
             break; // stop receiving loop
         }
 
