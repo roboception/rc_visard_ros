@@ -22,9 +22,12 @@ link_directories(${RC_GENICAM_API_LIBRARY_DIRS})
 
 add_library(rc_visard_driver_nodelet ${SRC})
 
-target_link_libraries(rc_visard_driver_nodelet ${catkin_LIBRARIES})
-target_link_libraries(rc_visard_driver_nodelet ${RC_GENICAM_API_LIBRARIES})
-target_link_libraries(rc_visard_driver_nodelet ${RC_DYNAMICS_API_LIBRARIES})
+target_link_libraries(rc_visard_driver_nodelet
+  PUBLIC
+    ${catkin_LIBRARIES}
+  PRIVATE
+    rc_genicam_api::rc_genicam_api
+    ${RC_DYNAMICS_API_LIBRARIES})
 
 add_executable(rc_visard_driver device_node.cc)
 target_link_libraries(rc_visard_driver ${catkin_LIBRARIES})
