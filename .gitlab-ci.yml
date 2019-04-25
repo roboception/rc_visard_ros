@@ -118,7 +118,7 @@ stages:
   stage: image
   variables:
     PACKAGE: "rc_visard_driver"
-    ROS_DISTRO: "kinetic"
+    ROS_DISTRO: "melodic"
     RC_REPO: testing
     DOCKERFILE: "Dockerfile"
     DOCKERFILE_DIR: "."
@@ -278,26 +278,26 @@ image:rc_visard_driver:kinetic:testing:
   variables:
     PACKAGE: "rc_visard_driver"
     ROS_DISTRO: "kinetic"
-    DOCKERFILE: "Dockerfile.rc_visard_driver"
+    DOCKERFILE_DIR: "rc_visard_driver"
 
 image:rc_visard_driver:melodic:testing:
   extends: .docker_build
   variables:
     PACKAGE: "rc_visard_driver"
     ROS_DISTRO: "melodic"
-    DOCKERFILE: "Dockerfile.rc_visard_driver"
+    DOCKERFILE_DIR: "rc_visard_driver"
 
 image:rc_hand_eye_calibration_client:kinetic:testing:
   extends: .docker_build
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
     ROS_DISTRO: "kinetic"
-    DOCKERFILE: "Dockerfile.rc_hand_eye_calibration_client"
+    DOCKERFILE_DIR: "rc_hand_eye_calibration_client"
 
 image:rc_hand_eye_calibration_client:melodic:testing:
   extends: .docker_build
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
     ROS_DISTRO: "melodic"
-    DOCKERFILE: "Dockerfile.rc_hand_eye_calibration_client"
+    DOCKERFILE_DIR: "rc_hand_eye_calibration_client"
 
