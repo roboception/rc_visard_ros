@@ -345,6 +345,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
             ROS_INFO_STREAM("rc_visard_driver: rc_visard device not yet ready. Trying again...");
             continue;  // to next trial!
           }
+          usleep(1000 * 1000); // we still have to wait for some uninitialized services
         } catch (std::invalid_argument& e)
         {
           // genicam feature is not implemented in this version of rc_visard's firmware,
