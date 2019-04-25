@@ -1041,6 +1041,9 @@ void disableAll(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap)
 
   rcg::setEnum(nodemap, "ComponentSelector", "Intensity");
   rcg::setEnum(nodemap, "PixelFormat", "Mono8");
+
+  // if multipart is available, still send single components per buffer
+  rcg::setEnum(nodemap, "AcquisitionMultiPartMode", "SingleComponent");
 }
 
 /*
