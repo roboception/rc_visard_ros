@@ -21,6 +21,8 @@
   <depend>roscpp</depend>
   <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
 
   <depend>dynamic_reconfigure</depend>
   <depend>message_generation</depend>

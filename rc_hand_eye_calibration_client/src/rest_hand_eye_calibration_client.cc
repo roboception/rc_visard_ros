@@ -43,8 +43,34 @@ CalibrationWrapper::CalibrationWrapper(std::string host, ros::NodeHandle nh)
   timeoutCurl_ = 2000;
   initConfiguration();
   advertiseServices();
+  initTimers();
 }
 
+void CalibrationWrapper::initTimers()
+{
+  if(calib_request_period_ >= 0.0)//negative is documented to turn all auto-requesting off
+  {
+    bool only_once = calib_request_period_ == 0.0;//special meaning as documented in README.md
+    ROS_DEBUG_COND(only_once, "Requesting (and broadcasting) calibration from rc_visard once");
+    ROS_DEBUG_COND(!only_once, "Requesting (and broadcasting) calibration every %.3f seconds from "
+                   "rc_visard", calib_request_period_);
+    calib_request_timer_ = nh_.createSteadyTimer(ros::WallDuration(calib_request_period_),
+                                                 &CalibrationWrapper::requestCalibration, this,
+                                                 only_once, true);
+  }
+
+  if(calib_publish_period_ > 0.0 && //only need the timer at all if there's a valid intervall
+  //every calibration request broadcasts: no need for extra publishing if request is done more often
+     (calib_request_period_ <= 0.0 || calib_publish_period_ < calib_request_period_))
+  {
+    ROS_DEBUG("Broadcasting calibration every %.3f seconds on /tf", calib_publish_period_);
+    //the two booleans at the end: *one-shot* is kept default (false), *autostart* is set to false,
+    //because we start publishing only when the first calibration result was received
+    calib_publish_timer_ = nh_.createSteadyTimer(ros::WallDuration(calib_publish_period_),
+                                                 &CalibrationWrapper::sendCachedCalibration, this,
+                                                 false, false);
+  }
+}
 
 bool CalibrationWrapper::saveSrv(std_srvs::TriggerRequest &,
                                  std_srvs::TriggerResponse &response)
@@ -56,8 +82,6 @@ bool CalibrationWrapper::saveSrv(std_srvs::TriggerRequest &,
   auto json_resp = json::parse(rest_resp.text)["response"];
   response.success = (bool) json_resp["success"];
   response.message = json_resp["message"];
-  return true;
-
   return true;
 }
 
@@ -86,6 +110,14 @@ bool CalibrationWrapper::removeSrv(std_srvs::TriggerRequest &,
   auto json_resp = json::parse(rest_resp.text)["response"];
   response.success = (bool) json_resp["success"];
   response.message = json_resp["message"];
+
+  if(response.success)
+  {
+    calib_publish_timer_.stop();//does nothing if already stopped
+    ROS_INFO("Calibration has been removed, stopped /tf broadcasting.");
+  }
+  else { ROS_WARN("Failed to remove calibration: %s", response.message.c_str()); }
+
   return true;
 }
 
@@ -124,12 +156,11 @@ bool CalibrationWrapper::setSlotSrv(rc_hand_eye_calibration_client::SetCalibrati
   return true;
 }
 
-
-bool CalibrationWrapper::calibSrv(rc_hand_eye_calibration_client::CalibrationRequest &,
-                                  rc_hand_eye_calibration_client::CalibrationResponse &response)
+bool CalibrationWrapper::calibResultCommon(const char* service_name,
+                                           rc_hand_eye_calibration_client::CalibrationResponse &response)
 {
   // do service request
-  cpr::Url url = cpr::Url{ servicesUrl_ + "calibrate" };
+  cpr::Url url = cpr::Url{ servicesUrl_ + service_name};
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
   handleCPRResponse(rest_resp);
 
@@ -150,38 +181,70 @@ bool CalibrationWrapper::calibSrv(rc_hand_eye_calibration_client::CalibrationReq
   response.pose.orientation.z = js_pose["orientation"]["z"];
   response.pose.orientation.w = js_pose["orientation"]["w"];
 
+  if(response.success)
+  {
+    ROS_DEBUG("Calibration request successful. Broadcasting new calibration.");
+    updateCalibrationCache(response);
+    sendCachedCalibration();
+    calib_publish_timer_.start();//does nothing if already started.
+  }
+  else { ROS_WARN("Calibration was not successfully requested from rc_visard."); }
   return true;
+}
+
+bool CalibrationWrapper::calibSrv(rc_hand_eye_calibration_client::CalibrationRequest &,
+                                  rc_hand_eye_calibration_client::CalibrationResponse &response)
+{
+  return calibResultCommon("calibrate", response);
 }
 
 
 bool CalibrationWrapper::getCalibResultSrv(rc_hand_eye_calibration_client::CalibrationRequest &,
                                            rc_hand_eye_calibration_client::CalibrationResponse &response)
 {
-  // do service request
-  cpr::Url url = cpr::Url{ servicesUrl_ + "get_calibration" };
-  auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
-  handleCPRResponse(rest_resp);
-
-  // parse json response into ros message
-  auto json_resp = json::parse(rest_resp.text)["response"];
-  response.success = (bool) json_resp["success"];
-  response.status = json_resp["status"];
-  response.message = json_resp["message"];
-  response.error = json_resp["error"];
-  response.robot_mounted = (bool) json_resp["robot_mounted"];
-
-  json js_pose = json_resp["pose"];
-  response.pose.position.x = js_pose["position"]["x"];
-  response.pose.position.y = js_pose["position"]["y"];
-  response.pose.position.z = js_pose["position"]["z"];
-  response.pose.orientation.x = js_pose["orientation"]["x"];
-  response.pose.orientation.y = js_pose["orientation"]["y"];
-  response.pose.orientation.z = js_pose["orientation"]["z"];
-  response.pose.orientation.w = js_pose["orientation"]["w"];
-
-  return true;
+  return calibResultCommon("get_calibration" , response);
 }
 
+void CalibrationWrapper::requestCalibration(const ros::SteadyTimerEvent&)
+{
+  rc_hand_eye_calibration_client::CalibrationRequest request;
+  rc_hand_eye_calibration_client::CalibrationResponse response;
+  getCalibResultSrv(request, response);
+}
+
+
+void CalibrationWrapper::updateCalibrationCache(const rc_hand_eye_calibration_client::CalibrationResponse& response)
+{
+  current_calibration_.header.frame_id = camera_frame_id_;
+  //Select child frame based on the type of calibration hand-eye (on-robot-cam) or base-eye (external cam)
+  current_calibration_.child_frame_id = response.robot_mounted ? endeff_frame_id_ : base_frame_id_;
+  current_calibration_.transform.translation.x = response.pose.position.x;
+  current_calibration_.transform.translation.y = response.pose.position.y;
+  current_calibration_.transform.translation.z = response.pose.position.z;
+  current_calibration_.transform.rotation.x = response.pose.orientation.x;
+  current_calibration_.transform.rotation.y = response.pose.orientation.y;
+  current_calibration_.transform.rotation.z = response.pose.orientation.z;
+  current_calibration_.transform.rotation.w = response.pose.orientation.w;
+}
+
+void CalibrationWrapper::sendCachedCalibration(const ros::SteadyTimerEvent&)
+{
+  if(calib_publish_period_ <= 0.0)//if there's no period use static tf
+  {
+    //Timestamp doesn't (or at least shouldn't) matter for static transforms
+    //Time::now makes it easy to see when it was updated though
+    current_calibration_.header.stamp = ros::Time::now();
+    static_tf2_broadcaster_.sendTransform(current_calibration_);
+  }
+  else //periodic sending
+  {
+    //Pre-date, so the transformation can be directly used by clients until the next one is sent.
+    //I.e., don't cause lag when looking up transformations because one has to wait for
+    //the current calibration.
+    current_calibration_.header.stamp = ros::Time::now() + ros::Duration(calib_publish_period_);
+    dynamic_tf2_broadcaster_.sendTransform(current_calibration_);
+  }
+}
 
 void CalibrationWrapper::advertiseServices()
 {
@@ -227,6 +290,13 @@ void CalibrationWrapper::initConfiguration()
   nh_.param("grid_width", cfg.grid_width, cfg.grid_width);
   nh_.param("grid_height", cfg.grid_height, cfg.grid_height);
   nh_.param("robot_mounted", cfg.robot_mounted, cfg.robot_mounted);
+
+  // see if those parameters are available otherwise use default (set in class header)
+  nh_.param("rc_visard_frame_id", camera_frame_id_, camera_frame_id_);
+  nh_.param("end_effector_frame_id", endeff_frame_id_, endeff_frame_id_);
+  nh_.param("base_frame_id", base_frame_id_, base_frame_id_);
+  nh_.param("calibration_publication_period", calib_publish_period_, calib_publish_period_);
+  nh_.param("calibration_request_period", calib_request_period_, calib_request_period_);
 
   // set parameters on parameter server so that dynamic reconfigure picks them up
   nh_.setParam("grid_width", cfg.grid_width);
