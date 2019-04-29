@@ -135,8 +135,6 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
       // timeout happened
       if (!pbMsg)
       {
-        ROS_WARN_STREAM_THROTTLE(1, "Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. ");
-
         // check if dynamics node is still running
 
         try
@@ -145,19 +143,34 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
           if (state != rcd::RemoteInterface::State::RUNNING &&
               state != rcd::RemoteInterface::State::RUNNING_WITH_SLAM)
           {
-            ROS_WARN_STREAM_THROTTLE(1, "Reason seems to be that rc_visard's dynamics node switched to state " << state << "!");
-            break; // stop receiving loop
+            ROS_WARN_STREAM_THROTTLE(30, "Not receiving any " << _stream << " messages because rc_visard's dynamics node is in state " << state << "!");
+            continue; // still keep stream alive and retry until dynamics is turned on
           }
         } catch (exception& e)
         {
-            ROS_ERROR_STREAM("Could not access state of rc_visard's rc_dynamics module: " << e.what());
+            ROS_ERROR_STREAM("Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
+                              << "Could not access state of rc_visard's rc_dynamics module: " << e.what());
             break; // stop receiving loop
         }
 
+        // check if stream is still active on rc_visard
+
+        string stream_dest = receiver->getIpAddress() + ":" + std::to_string(receiver->getPort());
+        list<string> active_destinations = _rcdyn->getDestinationsOfStream(_stream);
+        if (std::find(active_destinations.begin(), active_destinations.end(), stream_dest) == active_destinations.end())
+        {
+          ROS_WARN_STREAM("Not receiving any " << _stream << " messages because rc_visard stopped streaming to destination "
+                          << stream_dest << "! (Did someone delete this stream destination?) Re-creating stream... ");
+          break; // stop receiving loop and re-create receiver
+        }
+
+
         if (++consecutive_timeouts>3) {
           // dynamics state takes a while to change to a non-running state; give warning only if we are sure to still be in running-state
-          ROS_WARN_STREAM_THROTTLE(1, "There seems to problems with your network or connection to rc_visard! "
-                        << "Please check https://tutorials.roboception.de/rc_visard_general/network_setup for proper network setup!");
+          ROS_WARN_STREAM_THROTTLE(1, "Did not receive any " << _stream << " message within the last " << timeoutMillis << " ms. "
+                        << "There seems to problems with your network or connection to rc_visard! Resetting stream..."
+                        << "(Please check https://tutorials.roboception.de/rc_visard_general/network_setup for proper network setup!)");
+          break; // stop receiving loop
         }
         continue;  // wait for next packet
       }
