@@ -1,0 +1,12 @@
+build
+cmake-build*
+
+*~
+*.swp
+
+.*
+!.gitignore
+!.gitlab-ci.yml
+!.gitmodules
+!.clang-format
+!.dockerignore

@@ -7,4 +7,4 @@ string[] load_carrier_ids
 
 LoadCarrier[] load_carriers
 
-ReturnCode return_code
+rc_common_msgs/ReturnCode return_code

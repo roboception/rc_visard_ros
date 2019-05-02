@@ -7,4 +7,4 @@ string[] region_of_interest_ids
 
 RegionOfInterest[] regions_of_interest
 
-ReturnCode return_code
+rc_common_msgs/ReturnCode return_code

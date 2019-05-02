@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(rc_pick_client)
 include(cmake/project_version.cmake)
@@ -23,7 +23,7 @@ add_subdirectory(opt)
 # add a target for the submodule CPR doing the REST api calls
 
 find_package(catkin REQUIRED COMPONENTS
-        roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure shape_msgs tf
+        roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure shape_msgs tf rc_common_msgs
         )
 
 ################################################
@@ -44,6 +44,7 @@ generate_messages(
         DEPENDENCIES
         geometry_msgs
         shape_msgs
+        rc_common_msgs
 )
 
 ################################################
@@ -63,7 +64,7 @@ generate_dynamic_reconfigure_options(cfg/itempick.cfg)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-        CATKIN_DEPENDS message_runtime geometry_msgs
+        CATKIN_DEPENDS message_runtime geometry_msgs rc_common_msgs
 )
 
 ###########

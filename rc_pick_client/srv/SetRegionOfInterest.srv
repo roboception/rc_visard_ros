@@ -8,4 +8,4 @@ geometry_msgs/Pose robot_pose
 
 ---
 
-ReturnCode return_code
+rc_common_msgs/ReturnCode return_code

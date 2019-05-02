@@ -5,4 +5,4 @@ string[] load_carrier_ids
 
 ---
 
-ReturnCode return_code
+rc_common_msgs/ReturnCode return_code

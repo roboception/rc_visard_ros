@@ -21,4 +21,4 @@ geometry_msgs/Pose robot_pose
 
 LoadCarrier[] load_carriers
 
-ReturnCode return_code
+rc_common_msgs/ReturnCode return_code

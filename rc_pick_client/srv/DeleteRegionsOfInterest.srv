@@ -5,4 +5,4 @@ string[] region_of_interest_ids
 
 ---
 
-ReturnCode return_code
+rc_common_msgs/ReturnCode return_code

@@ -35,4 +35,4 @@ LoadCarrier[] load_carriers
 
 SuctionGrasp[] grasps
 
-ReturnCode return_code
+rc_common_msgs/ReturnCode return_code

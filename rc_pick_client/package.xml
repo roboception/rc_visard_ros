@@ -18,15 +18,17 @@
 
   <depend>curl</depend>
 
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
   <depend>roscpp</depend>
   <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
   <depend>shape_msgs</depend>
   <depend>tf</depend>
-
   <depend>dynamic_reconfigure</depend>
-  <depend>message_generation</depend>
-  <depend>message_runtime</depend>
+
+  <depend>rc_common_msgs</depend>
 
   <doc_depend>doxygen</doc_depend>
 </package>

@@ -5,4 +5,4 @@ LoadCarrier load_carrier
 
 ---
 
-ReturnCode return_code
+rc_common_msgs/ReturnCode return_code

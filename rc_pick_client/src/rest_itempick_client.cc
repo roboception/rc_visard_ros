@@ -1,13 +1,15 @@
 #include "rest_itempick_client.h"
 #include "json/json.hpp"
 
+#include <rc_common_msgs/ReturnCode.h>
+
 using namespace std;
 using json = nlohmann::json;
 
 namespace //anonymous
 {
 
-void parseReturnCode(rc_pick_client::ReturnCode &return_code, json &json_resp)
+void parseReturnCode(rc_common_msgs::ReturnCode &return_code, json &json_resp)
 {
   return_code.value = json_resp["value"];
   return_code.message = json_resp["message"];
