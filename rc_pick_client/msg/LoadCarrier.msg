@@ -1,4 +1,4 @@
-# This represents a load carrier by i
+# This represents a load carrier by its geometry and its pose in the pose_frame reference frame
 
 string id
 

@@ -255,6 +255,7 @@ bool ItempickWrapper::detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRe
   auto json_resp = rc_visard_communication_.servicePutRequest("detect_load_carriers", js_args);
   parseReturnCode(response.return_code, json_resp["return_code"]);
   jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"], json_resp["timestamp"]);
+  jsonTimestampToRos(response.timestamp, json_resp["timestamp"]);
   visualizer_.visualizeLoadCarriers(response.load_carriers);
 
   return true;
@@ -285,6 +286,7 @@ bool ItempickWrapper::computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &req
   parseReturnCode(response.return_code, json_resp["return_code"]);
   jsonGraspToRos(response.grasps, json_resp["grasps"]);
   jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"], json_resp["timestamp"]);
+  jsonTimestampToRos(response.timestamp, json_resp["timestamp"]);
   visualizer_.visualizeGrasps(response.grasps);
   visualizer_.visualizeLoadCarriers(response.load_carriers);
 

@@ -19,6 +19,8 @@ geometry_msgs/Pose robot_pose
 
 ---
 
+time timestamp
+
 LoadCarrier[] load_carriers
 
 rc_common_msgs/ReturnCode return_code

@@ -2,6 +2,9 @@
 
 string uuid
 
+# Optional
+string item_uuid
+
 # The grasp orientation is defined such that:
 # - the z axis is the normal of the surface at the grasp position
 # - the x axis is directed along the direction of maximum elongation of the surface
