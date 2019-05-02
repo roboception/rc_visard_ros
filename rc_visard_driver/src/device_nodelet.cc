@@ -107,7 +107,7 @@ ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(rcd::RemoteInterfa
 {
   if (stream == "pose")
   {
-    return ThreadedStream::Ptr(new PoseStream(rcdIface, stream, nh, frame_id_prefix, tfEnabled));
+    return ThreadedStream::Ptr(new PoseAndTFStream(rcdIface, stream, nh, frame_id_prefix, tfEnabled));
   }
   if (stream == "pose_ins" || stream == "pose_rt" || stream == "pose_rt_ins" || stream == "imu")
   {
@@ -336,6 +336,21 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         rcgdev->open(access_id);
         rcgnodemap = rcgdev->getRemoteNodeMap();
 
+        // in newer rc_visard image versions, we can check via genicam if rc_visard is ready
+
+        try {
+          bool isReady = rcg::getBoolean(rcgnodemap, "RcSystemReady", true, true);
+          if (!isReady)
+          {
+            ROS_INFO_STREAM("rc_visard_driver: rc_visard device not yet ready (GEV). Trying again...");
+            continue;  // to next trial!
+          }
+        } catch (std::invalid_argument& e)
+        {
+          // genicam feature is not implemented in this version of rc_visard's firmware,
+          // so we have to assume rc_visard is ready and continue
+        }
+
         // extract some diagnostics data from device
         dev_serialno = rcg::getString(rcgnodemap, "DeviceID", true);
         dev_macaddr = rcg::getString(rcgnodemap, "GevMACAddress", true);
@@ -347,18 +362,37 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         updater.setHardwareID(dev_serialno);
         updater.force_update();
 
-        // instantiating dynamics interface and autostart dynamics on sensor if desired
+        // instantiating dynamics interface, check if ready, and autostart dynamics on sensor if desired
 
-        std::string currentIPAddress = rcg::getString(rcgnodemap, "GevCurrentIPAddress", true);
-        dynamicsInterface = rcd::RemoteInterface::create(currentIPAddress);
-        if (autostartDynamics || autostartSlam && !atLeastOnceSuccessfullyStarted)
+        dynamicsInterface = rcd::RemoteInterface::create(dev_ipaddr);
+        try {
+          if (!dynamicsInterface->checkSystemReady())
+          {
+            ROS_INFO_STREAM("rc_visard_driver: rc_visard device not yet ready (REST). Trying again...");
+            continue;  // to next trial!
+          }
+        } catch (std::exception& e)
         {
+          ROS_ERROR_STREAM("rc_visard_driver: checking system ready failed: " << e.what());
+        }
+
+        if ((autostartDynamics || autostartSlam) && !atLeastOnceSuccessfullyStarted)
+        {
+          ROS_INFO_STREAM("rc_visard_driver: Auto-start requested (" <<
+                          "autostart_dynamics=" << autostartDynamics << ", "
+                          "autostart_dynamics_with_slam=" << autostartSlam << ")");
+
           std_srvs::Trigger::Request dummyreq;
           std_srvs::Trigger::Response dummyresp;
-          if (!((autostartSlam && this->dynamicsStartSlam(dummyreq, dummyresp)) ||
-                (autostartDynamics && this->dynamicsStart(dummyreq, dummyresp))))
-          {  // autostart failed!
-            ROS_WARN("rc_visard_driver: Could not auto-start dynamics module!");
+
+          bool autostart_failed = false;
+          autostart_failed |= (autostartSlam     && !this->dynamicsStartSlam(dummyreq, dummyresp));
+          autostart_failed |= (!autostartSlam && autostartDynamics && !this->dynamicsStart(dummyreq, dummyresp));
+          autostart_failed |= !dummyresp.success;
+
+          if (autostart_failed)
+          {
+            ROS_WARN_STREAM("rc_visard_driver: Could not auto-start dynamics module! " << dummyresp.message);
             cntConsecutiveRecoveryFails++;
             continue;  // to next trial!
           }
@@ -638,7 +672,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   if (reconfig == 0)
   {
     // TODO: we need to dismangle initialization of dynreconfserver from not-READONLY-access-condition
-    reconfig = new dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>(pnh);
+    reconfig = new dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>(mtx, pnh);
   }
   // always set callback to (re)load configuration even after recovery
   dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>::CallbackType cb;
@@ -648,7 +682,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
 void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uint32_t l)
 {
-  std::lock_guard<std::mutex> lock(mtx);
+  boost::recursive_mutex::scoped_lock lock(mtx);
 
   // check and correct parameters
 
@@ -1026,6 +1060,9 @@ void disableAll(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap)
 
   rcg::setEnum(nodemap, "ComponentSelector", "Intensity");
   rcg::setEnum(nodemap, "PixelFormat", "Mono8");
+
+  // if multipart is available, still send single components per buffer
+  rcg::setEnum(nodemap, "AcquisitionMultiPartMode", "SingleComponent");
 }
 
 /*
@@ -1400,6 +1437,18 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             setConfiguration(rcgnodemap, cfg, lvl, iocontrol_avail);
 
             disprange = cfg.depth_disprange;
+
+            // if exposure mode to manual, read current exposure value and gain again
+            if (lvl & 2 && !cfg.camera_exp_auto)
+            {
+              boost::recursive_mutex::scoped_lock lock(mtx);
+              cfg.camera_exp_value = rcg::getFloat(rcgnodemap, "ExposureTime", 0, 0, true, true) / 1000000;
+              if (dev_supports_gain)
+              {
+                cfg.camera_gain_value = rcg::getFloat(rcgnodemap, "Gain", 0, 0, true, true);
+              }
+              reconfig->updateConfig(cfg);
+            }
 
             // if in alternate mode, then make publishers aware of it
 

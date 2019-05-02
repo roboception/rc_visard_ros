@@ -18,18 +18,6 @@ stages:
 ##################
 # Anchor templates
 ##################
-.amd64_trusty_t: &amd64_trusty_job
-  image: registry.roboception.de/tools/docker_images:indigo-perception-pcl
-  tags:
-    - amd64
-    - docker
-
-.armhf_trusty_t: &armhf_trusty_job
-  image: registry.roboception.de/tools/docker_images:armhf-indigo-perception
-  tags:
-    - armhf
-    - docker
-
 .amd64_xenial_t: &amd64_xenial_job
   image: ros:kinetic-perception
   tags:
@@ -118,9 +106,8 @@ stages:
   stage: image
   variables:
     PACKAGE: "rc_visard_driver"
-    ROS_DISTRO: "kinetic"
+    ROS_DISTRO: "melodic"
     RC_REPO: testing
-    DOCKERFILE: "Dockerfile"
     DOCKERFILE_DIR: "."
   before_script:
     - docker info
@@ -129,9 +116,10 @@ stages:
     - if [ -n "$CI_COMMIT_TAG" ]; then export IMAGE_TAG=$CI_COMMIT_TAG ; else export IMAGE_TAG=$CI_COMMIT_REF_SLUG ; fi
     - if [ "$CI_COMMIT_REF_NAME" = "master" ]; then export IMAGE_TAG=testing ; fi
     - if [ -z "$DOCKER_BUILD_FLAGS" ]; then export DOCKER_BUILD_FLAGS="--pull --no-cache --build-arg ROS_DISTRO=$ROS_DISTRO --build-arg RC_REPO=$RC_REPO"; fi
+    - if [ -n "$DOCKERFILE" ]; then export DOCKER_BUILD_FLAGS="$DOCKER_BUILD_FLAGS -f $DOCKERFILE"; fi
   script:
-    - echo "building docker image $IMAGE:$IMAGE_TAG with flags $DOCKER_BUILD_FLAGS"
-    - docker build $DOCKER_BUILD_FLAGS -t $IMAGE:$IMAGE_TAG -f $DOCKERFILE $DOCKERFILE_DIR
+    - echo "building docker image $IMAGE:$IMAGE_TAG with flags $DOCKER_BUILD_FLAGS in $DOCKERFILE_DIR"
+    - docker build $DOCKER_BUILD_FLAGS -t $IMAGE:$IMAGE_TAG $DOCKERFILE_DIR
     - docker push $IMAGE:$IMAGE_TAG
     - if [ -n "$CI_COMMIT_TAG" ]; then docker tag $IMAGE:$IMAGE_TAG $IMAGE:latest; docker push $IMAGE:latest; docker rmi $IMAGE:latest; fi
     - docker rmi $IMAGE:$IMAGE_TAG || true
@@ -158,69 +146,57 @@ stages:
 
 # Test against latest (on every commit)
 #######################################
-test:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .test_latest
-
-test:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .test_latest
-
-test:xenial:amd64:
+test:rc_visard_driver:xenial:amd64:
   <<: *amd64_xenial_job
   extends: .test_latest
 
-test:xenial:armhf:
-  <<: *armhf_xenial_job
-  extends: .test_latest
-
-test:bionic:amd64:
+test:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .test_latest
 
+test:rc_hand_eye_calibration_client:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
+
+test:rc_hand_eye_calibration_client:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
+
 # Test against stable (is allowed to fail)
 ##########################################
-test_stable:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .test_stable
-
-test_stable:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .test_stable
-
-test_stable:xenial:amd64:
+test_stable:rc_visard_driver:xenial:amd64:
   <<: *amd64_xenial_job
   extends: .test_stable
 
-test_stable:xenial:armhf:
-  <<: *armhf_xenial_job
-  extends: .test_stable
-
-test_stable:bionic:amd64:
+test_stable:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .test_stable
 
 # Deploy testing (only on master)
 #################################
-package_testing:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .package_testing
-
-package_testing:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .package_testing
-
-package_testing:xenial:amd64:
+package_testing:rc_visard_driver:xenial:amd64:
   <<: *amd64_xenial_job
   extends: .package_testing
 
-package_testing:xenial:armhf:
-  <<: *armhf_xenial_job
-  extends: .package_testing
-
-package_testing:bionic:amd64:
+package_testing:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .package_testing
+
+package_testing:rc_hand_eye_calibration_client:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .package_testing
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
+
+package_testing:rc_hand_eye_calibration_client:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .package_testing
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
 
 ################
 # Stable builds
@@ -228,47 +204,35 @@ package_testing:bionic:amd64:
 
 # Test against stable if it is a release
 ########################################
-test_release:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .test_release
-
-test_release:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .test_release
-
-test_release:xenial:amd64:
+test_release:rc_visard_driver:xenial:amd64:
   <<: *amd64_xenial_job
   extends: .test_release
 
-test_release:xenial:armhf:
-  <<: *armhf_xenial_job
-  extends: .test_release
-
-test_release:bionic:amd64:
+test_release:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .test_release
 
 # Deploy stable (only for releases, version tags)
 #################################################
-package_stable:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .package_stable
-
-package_stable:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .package_stable
-
-package_stable:xenial:amd64:
+package_stable:rc_visard_driver:xenial:amd64:
   <<: *amd64_xenial_job
   extends: .package_stable
 
-package_stable:xenial:armhf:
-  <<: *armhf_xenial_job
-  extends: .package_stable
-
-package_stable:bionic:amd64:
+package_stable:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .package_stable
+
+package_stable:rc_hand_eye_calibration_client:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .package_stable
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
+
+package_stable:rc_hand_eye_calibration_client:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .package_stable
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
 
 ###############
 # Docker images
@@ -278,26 +242,26 @@ image:rc_visard_driver:kinetic:testing:
   variables:
     PACKAGE: "rc_visard_driver"
     ROS_DISTRO: "kinetic"
-    DOCKERFILE: "Dockerfile.rc_visard_driver"
+    DOCKERFILE_DIR: "rc_visard_driver"
 
 image:rc_visard_driver:melodic:testing:
   extends: .docker_build
   variables:
     PACKAGE: "rc_visard_driver"
     ROS_DISTRO: "melodic"
-    DOCKERFILE: "Dockerfile.rc_visard_driver"
+    DOCKERFILE_DIR: "rc_visard_driver"
 
 image:rc_hand_eye_calibration_client:kinetic:testing:
   extends: .docker_build
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
     ROS_DISTRO: "kinetic"
-    DOCKERFILE: "Dockerfile.rc_hand_eye_calibration_client"
+    DOCKERFILE_DIR: "rc_hand_eye_calibration_client"
 
 image:rc_hand_eye_calibration_client:melodic:testing:
   extends: .docker_build
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
     ROS_DISTRO: "melodic"
-    DOCKERFILE: "Dockerfile.rc_hand_eye_calibration_client"
+    DOCKERFILE_DIR: "rc_hand_eye_calibration_client"
 

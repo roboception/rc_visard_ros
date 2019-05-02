@@ -27,7 +27,7 @@ add_subdirectory(opt)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure
+  roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure tf2 tf2_ros
 )
 
 
@@ -121,7 +121,7 @@ generate_dynamic_reconfigure_options(cfg/hand_eye_calibration.cfg)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES logging
- CATKIN_DEPENDS message_runtime geometry_msgs
+ CATKIN_DEPENDS message_runtime geometry_msgs tf2 tf2_ros
 #  DEPENDS system_lib
 )
 
