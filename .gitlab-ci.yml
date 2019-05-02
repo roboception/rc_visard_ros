@@ -275,6 +275,9 @@ package_stable:rc_pick_client:bionic:amd64:
 ###############
 image:rc_visard_driver:kinetic:testing:
   extends: .docker_build
+  only:
+    - master
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
   variables:
     PACKAGE: "rc_visard_driver"
     ROS_DISTRO: "kinetic"
@@ -282,6 +285,9 @@ image:rc_visard_driver:kinetic:testing:
 
 image:rc_visard_driver:melodic:testing:
   extends: .docker_build
+  only:
+    - master
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
   variables:
     PACKAGE: "rc_visard_driver"
     ROS_DISTRO: "melodic"
@@ -289,6 +295,9 @@ image:rc_visard_driver:melodic:testing:
 
 image:rc_hand_eye_calibration_client:kinetic:testing:
   extends: .docker_build
+  only:
+    - master
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
     ROS_DISTRO: "kinetic"
@@ -296,6 +305,9 @@ image:rc_hand_eye_calibration_client:kinetic:testing:
 
 image:rc_hand_eye_calibration_client:melodic:testing:
   extends: .docker_build
+  only:
+    - master
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
     ROS_DISTRO: "melodic"
