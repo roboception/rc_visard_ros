@@ -166,6 +166,18 @@ test:rc_hand_eye_calibration_client:bionic:amd64:
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
 
+test:rc_pick_client:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_pick_client"
+
+test:rc_pick_client:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_pick_client"
+
 # Test against stable (is allowed to fail)
 ##########################################
 test_stable:rc_visard_driver:xenial:amd64:
@@ -197,6 +209,18 @@ package_testing:rc_hand_eye_calibration_client:bionic:amd64:
   extends: .package_testing
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
+
+package_testing:rc_pick_client:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .package_testing
+  variables:
+    PACKAGE: "rc_pick_client"
+
+package_testing:rc_pick_client:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .package_testing
+  variables:
+    PACKAGE: "rc_pick_client"
 
 ################
 # Stable builds
@@ -233,6 +257,18 @@ package_stable:rc_hand_eye_calibration_client:bionic:amd64:
   extends: .package_stable
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
+
+package_stable:rc_pick_client:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .package_stable
+  variables:
+    PACKAGE: "rc_pick_client"
+
+package_stable:rc_pick_client:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .package_stable
+  variables:
+    PACKAGE: "rc_pick_client"
 
 ###############
 # Docker images
