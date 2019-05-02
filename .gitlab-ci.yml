@@ -18,18 +18,6 @@ stages:
 ##################
 # Anchor templates
 ##################
-.amd64_trusty_t: &amd64_trusty_job
-  image: registry.roboception.de/tools/docker_images:indigo-perception-pcl
-  tags:
-    - amd64
-    - docker
-
-.armhf_trusty_t: &armhf_trusty_job
-  image: registry.roboception.de/tools/docker_images:armhf-indigo-perception
-  tags:
-    - armhf
-    - docker
-
 .amd64_xenial_t: &amd64_xenial_job
   image: ros:kinetic-perception
   tags:
@@ -158,20 +146,8 @@ stages:
 
 # Test against latest (on every commit)
 #######################################
-test:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .test_latest
-
-test:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .test_latest
-
 test:xenial:amd64:
   <<: *amd64_xenial_job
-  extends: .test_latest
-
-test:xenial:armhf:
-  <<: *armhf_xenial_job
   extends: .test_latest
 
 test:bionic:amd64:
@@ -180,20 +156,8 @@ test:bionic:amd64:
 
 # Test against stable (is allowed to fail)
 ##########################################
-test_stable:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .test_stable
-
-test_stable:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .test_stable
-
 test_stable:xenial:amd64:
   <<: *amd64_xenial_job
-  extends: .test_stable
-
-test_stable:xenial:armhf:
-  <<: *armhf_xenial_job
   extends: .test_stable
 
 test_stable:bionic:amd64:
@@ -202,20 +166,8 @@ test_stable:bionic:amd64:
 
 # Deploy testing (only on master)
 #################################
-package_testing:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .package_testing
-
-package_testing:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .package_testing
-
 package_testing:xenial:amd64:
   <<: *amd64_xenial_job
-  extends: .package_testing
-
-package_testing:xenial:armhf:
-  <<: *armhf_xenial_job
   extends: .package_testing
 
 package_testing:bionic:amd64:
@@ -228,20 +180,8 @@ package_testing:bionic:amd64:
 
 # Test against stable if it is a release
 ########################################
-test_release:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .test_release
-
-test_release:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .test_release
-
 test_release:xenial:amd64:
   <<: *amd64_xenial_job
-  extends: .test_release
-
-test_release:xenial:armhf:
-  <<: *armhf_xenial_job
   extends: .test_release
 
 test_release:bionic:amd64:
@@ -250,20 +190,8 @@ test_release:bionic:amd64:
 
 # Deploy stable (only for releases, version tags)
 #################################################
-package_stable:trusty:amd64:
-  <<: *amd64_trusty_job
-  extends: .package_stable
-
-package_stable:trusty:armhf:
-  <<: *armhf_trusty_job
-  extends: .package_stable
-
 package_stable:xenial:amd64:
   <<: *amd64_xenial_job
-  extends: .package_stable
-
-package_stable:xenial:armhf:
-  <<: *armhf_xenial_job
   extends: .package_stable
 
 package_stable:bionic:amd64:
