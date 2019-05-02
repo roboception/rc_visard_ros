@@ -48,22 +48,28 @@ CalibrationWrapper::CalibrationWrapper(std::string host, ros::NodeHandle nh)
 
 void CalibrationWrapper::initTimers()
 {
-  if(calib_request_period_ >= 0.0)//negative is documented to turn all auto-requesting off
+  if (calib_request_period_ >= 0.0)//negative is documented to turn all auto-requesting off
   {
-    bool only_once = calib_request_period_ == 0.0;//special meaning as documented in README.md
-    ROS_DEBUG_COND(only_once, "Requesting (and broadcasting) calibration from rc_visard once");
-    ROS_DEBUG_COND(!only_once, "Requesting (and broadcasting) calibration every %.3f seconds from "
-                   "rc_visard", calib_request_period_);
-    calib_request_timer_ = nh_.createSteadyTimer(ros::WallDuration(calib_request_period_),
-                                                 &CalibrationWrapper::requestCalibration, this,
-                                                 only_once, true);
+    if (calib_request_period_ == 0.0) //special meaning as documented in README.md
+    {
+      ROS_INFO("Requesting (and broadcasting) calibration from rc_visard once");
+    }
+    else
+    {
+      ROS_INFO("Requesting (and broadcasting) calibration every %.3f seconds from rc_visard",
+               calib_request_period_);
+      calib_request_timer_ = nh_.createSteadyTimer(ros::WallDuration(calib_request_period_),
+                                                   &CalibrationWrapper::requestCalibration, this);
+    }
+    // request once immediately at startup
+    requestCalibration({});
   }
 
-  if(calib_publish_period_ > 0.0 && //only need the timer at all if there's a valid intervall
+  if (calib_publish_period_ > 0.0 && //only need the timer at all if there's a valid intervall
   //every calibration request broadcasts: no need for extra publishing if request is done more often
      (calib_request_period_ <= 0.0 || calib_publish_period_ < calib_request_period_))
   {
-    ROS_DEBUG("Broadcasting calibration every %.3f seconds on /tf", calib_publish_period_);
+    ROS_INFO("Broadcasting calibration every %.3f seconds on /tf", calib_publish_period_);
     //the two booleans at the end: *one-shot* is kept default (false), *autostart* is set to false,
     //because we start publishing only when the first calibration result was received
     calib_publish_timer_ = nh_.createSteadyTimer(ros::WallDuration(calib_publish_period_),
@@ -111,7 +117,7 @@ bool CalibrationWrapper::removeSrv(std_srvs::TriggerRequest &,
   response.success = (bool) json_resp["success"];
   response.message = json_resp["message"];
 
-  if(response.success)
+  if (response.success)
   {
     calib_publish_timer_.stop();//does nothing if already stopped
     ROS_INFO("Calibration has been removed, stopped /tf broadcasting.");
@@ -181,14 +187,14 @@ bool CalibrationWrapper::calibResultCommon(const char* service_name,
   response.pose.orientation.z = js_pose["orientation"]["z"];
   response.pose.orientation.w = js_pose["orientation"]["w"];
 
-  if(response.success)
+  if (response.success)
   {
-    ROS_DEBUG("Calibration request successful. Broadcasting new calibration.");
+    ROS_INFO("Calibration request successful. Broadcasting new calibration.");
     updateCalibrationCache(response);
     sendCachedCalibration();
     calib_publish_timer_.start();//does nothing if already started.
   }
-  else { ROS_WARN("Calibration was not successfully requested from rc_visard."); }
+  else { ROS_WARN_STREAM("Could not get calibration: " << response.message); }
   return true;
 }
 
@@ -229,7 +235,7 @@ void CalibrationWrapper::updateCalibrationCache(const rc_hand_eye_calibration_cl
 
 void CalibrationWrapper::sendCachedCalibration(const ros::SteadyTimerEvent&)
 {
-  if(calib_publish_period_ <= 0.0)//if there's no period use static tf
+  if (calib_publish_period_ <= 0.0)//if there's no period use static tf
   {
     //Timestamp doesn't (or at least shouldn't) matter for static transforms
     //Time::now makes it easy to see when it was updated though
