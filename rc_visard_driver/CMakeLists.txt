@@ -55,7 +55,7 @@ generate_messages(
 
 ## System dependencies are found with CMake's conventions
 find_package(RC_GENICAM_API 2.0.0 REQUIRED)
-find_package(RC_DYNAMICS_API REQUIRED)
+find_package(RC_DYNAMICS_API 0.8 REQUIRED)
 
 #########################################
 ## Definitions for dynamic reconfigure ##

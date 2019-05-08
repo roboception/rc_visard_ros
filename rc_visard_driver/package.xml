@@ -21,8 +21,8 @@
   <build_depend>protobuf-dev</build_depend>
   <exec_depend>protobuf</exec_depend>
   <depend>curl</depend>
-  <depend version_gte="1.3.12">rc_genicam_api</depend>
-  <depend version_gte="0.7">rc_dynamics_api</depend>
+  <depend version_gte="2.0.0">rc_genicam_api</depend>
+  <depend version_gte="0.8.0">rc_dynamics_api</depend>
 
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
