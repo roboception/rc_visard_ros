@@ -1,0 +1,7 @@
+# Description: Triggers a detection for the given tags
+
+# Tags to detect. For pose estimation by homography, the sizes of the tags
+# must be set.
+Tag[] tags
+
+---

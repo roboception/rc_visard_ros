@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rc_tagdetect_client</name>
+  <version>2.5.0</version>
+  <description>The ros client for roboception tag detection modules</description>
+
+  <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/rc_tagdetect_client</url>
+  <url type="repository">https://github.com/roboception/rc_visard_ros</url>
+  <url type="bugtracker">https://github.com/roboception/rc_visard_ros/issues</url>
+
+  <author email="monika.florek-jasinska@roboception.de">Monika Florek-Jasinska</author>
+  <author email="Raphael.Schaller@roboception.de">Raphael Schaller</author>
+
+  <!-- system dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>curl</depend>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+  <depend>roscpp</depend>
+  <depend>std_srvs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>rc_common_msgs</depend>
+  <depend>tf</depend>
+  <depend>tf2_geometry_msgs</depend>
+
+  <depend>dynamic_reconfigure</depend>
+
+  <doc_depend>doxygen</doc_depend>
+</package>
