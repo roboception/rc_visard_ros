@@ -47,7 +47,7 @@ void parseReturnCode(rc_common_msgs::ReturnCode &return_code, json &json_resp)
   return_code.message = json_resp["message"];
 }
 
-void rosPoseToJson(const geometry_msgs::Pose &pose, json js_pose)
+void rosPoseToJson(const geometry_msgs::Pose &pose, json &js_pose)
 {
   json js_ori, js_pos;
   js_pos["x"] = pose.position.x;
@@ -432,9 +432,10 @@ bool ItempickWrapper::setROIs(rc_pick_client::SetRegionOfInterestRequest &reques
     throw runtime_error("frame_id of a region of interest has to be of type \"camera\" or \"external\"");
   }
   rosSolidPrimitiveToJson(request.region_of_interest.primitive, json_args);
-  rosPoseToJson(request.robot_pose, json_args["robot_pose"]);
+  rosPoseToJson(request.region_of_interest.pose.pose, json_args["pose"]);
   json json_args_roi;
   json_args_roi["args"]["region_of_interest"] = json_args;
+  rosPoseToJson(request.robot_pose, json_args_roi["args"]["robot_pose"]);
 
   //communicating with rc_visard
   json json_resp = rc_visard_communication_.servicePutRequest("set_region_of_interest", json_args_roi);
