@@ -1,0 +1,6 @@
+- builder: doxygen
+  file_patterns: '*.c *.cpp *.h *.cc *.hh *.dox *.md'
+  exclude_patterns: '*/rc_tagdetection_client/opt/*'
+  use_mdfile_as_mainpage: README.md
+  tab_size: 2
+  javadoc_autobrief: YES
