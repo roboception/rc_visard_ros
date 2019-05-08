@@ -1,0 +1,11 @@
+# Description: Sets a region of interest and/or updates its visualization.
+
+# Required
+RegionOfInterest region_of_interest
+
+# Required only if reference frame = external and sensor is robot-mounted
+geometry_msgs/Pose robot_pose
+
+---
+
+rc_common_msgs/ReturnCode return_code

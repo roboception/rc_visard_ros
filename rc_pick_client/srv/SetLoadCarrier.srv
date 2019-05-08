@@ -1,0 +1,8 @@
+# Description: Persistently sets a load carrier.
+
+# Required
+LoadCarrier load_carrier
+
+---
+
+rc_common_msgs/ReturnCode return_code

@@ -1,0 +1,10 @@
+# Description: Returns the configured load carriers with the requested ids. If no ids are provided, all configured load carriers are returned.
+
+# Optional
+string[] load_carrier_ids
+
+---
+
+LoadCarrier[] load_carriers
+
+rc_common_msgs/ReturnCode return_code

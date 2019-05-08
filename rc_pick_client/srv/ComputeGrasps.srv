@@ -1,0 +1,42 @@
+# Description: Triggers the computation of grasp poses for the given items and suction surface.
+
+# A valid pose_frame (either camera or external) is required in the request.
+# It can be provided either with the pose_frame field, as pose_frame of the selected region of interest
+# or as pose_frame of the selected load carrier.
+# If more than one pose_frame is provided, they must to be consistent.
+
+# Optional. Pose frame for output poses.
+string pose_frame
+
+# Optional
+string region_of_interest_id
+
+# Optional
+string load_carrier_id
+
+# Optional
+Compartment load_carrier_compartment
+
+# Optional. If empty, means one item of type unknown without dimensions
+ItemModel[] item_models
+
+# Required. Dimensions of the gripper suction surface
+# In case of circular suction cups, the two values are expected to be the same and set to the suction cup diameter
+# Different values are expected for grippers with multiple suction cups or non-circular suction cups (e.g. oval cups)
+float64 suction_surface_length
+float64 suction_surface_width
+
+# Required only if reference frame = external and sensor is robot-mounted
+geometry_msgs/Pose robot_pose
+
+---
+
+time timestamp
+
+LoadCarrier[] load_carriers
+
+Item[] items
+
+SuctionGrasp[] grasps
+
+rc_common_msgs/ReturnCode return_code

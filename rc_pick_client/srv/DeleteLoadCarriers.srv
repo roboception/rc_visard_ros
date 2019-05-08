@@ -1,0 +1,8 @@
+# Description: Deletes the configured load carriers with the requested ids. If no ids are provided, all configured load carriers are deleted.
+
+# Optional
+string[] load_carrier_ids
+
+---
+
+rc_common_msgs/ReturnCode return_code
