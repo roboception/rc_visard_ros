@@ -27,6 +27,7 @@
   <depend>shape_msgs</depend>
   <depend>tf</depend>
   <depend>dynamic_reconfigure</depend>
+  <depend>tf2_geometry_msgs</depend>
 
   <depend>rc_common_msgs</depend>
 
