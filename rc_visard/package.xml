@@ -21,6 +21,7 @@
   <exec_depend>rc_visard_description</exec_depend>
   <exec_depend>rc_hand_eye_calibration_client</exec_depend>
   <exec_depend>rc_pick_client</exec_depend>
+  <exec_depend>rc_tagdetect_client</exec_depend>
 
   <export>
     <metapackage />
