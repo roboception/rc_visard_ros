@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv)
 {
-  std::string name = "rc_hand_eye_calibration";
+  std::string name = "rc_hand_eye_calibration_client";
   ros::init(argc, argv, name);
 
   ros::NodeHandle pnh("~");
