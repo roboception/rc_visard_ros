@@ -48,6 +48,18 @@ CalibrationWrapper::CalibrationWrapper(std::string host, ros::NodeHandle nh)
 
 void CalibrationWrapper::initTimers()
 {
+  if (calib_publish_period_ > 0.0 && //only need the timer at all if there's a valid intervall
+  //every calibration request broadcasts: no need for extra publishing if request is done more often
+     (calib_request_period_ <= 0.0 || calib_publish_period_ < calib_request_period_))
+  {
+    ROS_INFO("Broadcasting calibration every %.3f seconds on /tf", calib_publish_period_);
+    //the two booleans at the end: *one-shot* is kept default (false), *autostart* is set to false,
+    //because we start publishing only when the first calibration result was received
+    calib_publish_timer_ = nh_.createSteadyTimer(ros::WallDuration(calib_publish_period_),
+                                                 &CalibrationWrapper::sendCachedCalibration, this,
+                                                 false, false);
+  }
+
   if (calib_request_period_ >= 0.0)//negative is documented to turn all auto-requesting off
   {
     if (calib_request_period_ == 0.0) //special meaning as documented in README.md
@@ -63,18 +75,6 @@ void CalibrationWrapper::initTimers()
     }
     // request once immediately at startup
     requestCalibration({});
-  }
-
-  if (calib_publish_period_ > 0.0 && //only need the timer at all if there's a valid intervall
-  //every calibration request broadcasts: no need for extra publishing if request is done more often
-     (calib_request_period_ <= 0.0 || calib_publish_period_ < calib_request_period_))
-  {
-    ROS_INFO("Broadcasting calibration every %.3f seconds on /tf", calib_publish_period_);
-    //the two booleans at the end: *one-shot* is kept default (false), *autostart* is set to false,
-    //because we start publishing only when the first calibration result was received
-    calib_publish_timer_ = nh_.createSteadyTimer(ros::WallDuration(calib_publish_period_),
-                                                 &CalibrationWrapper::sendCachedCalibration, this,
-                                                 false, false);
   }
 }
 
@@ -192,7 +192,10 @@ bool CalibrationWrapper::calibResultCommon(const char* service_name,
     ROS_INFO("Calibration request successful. Broadcasting new calibration.");
     updateCalibrationCache(response);
     sendCachedCalibration();
-    calib_publish_timer_.start();//does nothing if already started.
+    if(calib_publish_timer_.isValid())//don't start it if it is invalid
+    {
+      calib_publish_timer_.start();//does nothing if already started.
+    }
   }
   else { ROS_WARN_STREAM("Could not get calibration: " << response.message); }
   return true;
