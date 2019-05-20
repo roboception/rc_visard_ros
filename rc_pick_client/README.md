@@ -1,15 +1,23 @@
 ROS client for Roboception's grasp generation modules
-=========================================================
+=====================================================
 
-This node provides ROS service calls and parameters for itempick node .
-For detail description of the itempick module check rc_visard manual: https://doc.rc-visard.com.
-
+This node provides ROS service calls and parameters for ItemPick node.
+For detail description of the ItemPick module check rc_visard manual: https://doc.rc-visard.com/latest/en/itempick.html
 
 Installation
 ------------
 
+On Debian/Ubuntu add the ROS sources and
+
+```bash
+sudo apt-get install ros-${ROS_DISTRO}-rc-pick-client
+```
+
+### From Source
+
 This package relies on git submodules for the cpr library which need to be initialized before building from source.
-~~~
+
+~~~bash
 git submodule update --init --recursive
 ~~~
 

@@ -11,23 +11,31 @@ if the advertised ROS services `calibrate` or `get_calibration` are called.
 The calibration routine consists of several steps:
 
 1. Setting calibration parameters, i.e. grid size and mounting, via dynamic reconfigure.
-0. For a user-defined number of robot calibration poses repeat
-    
-    1. Move the robot to the pose (calibration grid must be visible in the rc_visard's view).
-    0. Send the robot pose to rc_visard (`set_pose`)
+2. For a user-defined number of robot calibration poses repeat
 
-0. Trigger the calibration tranformation to be calculated (`calibrate`).
+    1. Move the robot to the pose (calibration grid must be visible in the rc_visard's view).
+    2. Send the robot pose to rc_visard (`set_pose`)
+
+3. Trigger the calibration tranformation to be calculated (`calibrate`).
 
 After the calibration transform is calculated and tested, it should be saved to the rc_visard (`save_calibration`).
 
 For detailed instructions on the calibration routine consult the rc_visard manual: https://doc.rc-visard.com.
 
-
 Installation
 ------------
 
+On Debian/Ubuntu add the ROS sources and
+
+```bash
+sudo apt-get install ros-${ROS_DISTRO}-rc-hand-eye-calibration-client
+```
+
+### From Source
+
 This package relies on git submodules for the cpr library which need to be initialized before building from source.
-~~~
+
+~~~bash
 git submodule update --init --recursive
 ~~~
 
@@ -73,6 +81,6 @@ Launching
 
 Using command line parameters:
 
-~~~
+~~~bash
 rosrun rc_hand_eye_calibration_client rc_hand_eye_calibration_client_node _host:="10.0.2.44"
 ~~~

@@ -1,15 +1,23 @@
 ROS client for Roboception's tag detection modules
 ==================================================
 
-This node provides ROS service calls and parameters for tagdetection node .
-For detail description of the tagdetection module check rc_visard manual: https://doc.rc-visard.com.
-
+This node provides ROS service calls and parameters for TagDetect node.
+For detail description of the TagDetect check rc_visard manual: https://doc.rc-visard.com/latest/en/tagdetect.html
 
 Installation
 ------------
 
+On Debian/Ubuntu add the ROS sources and
+
+```bash
+sudo apt-get install ros-${ROS_DISTRO}-rc-tagdetect-client
+```
+
+### From Source
+
 This package relies on git submodules for the cpr library which need to be initialized before building from source.
-~~~
+
+~~~bash
 git submodule update --init --recursive
 ~~~
 

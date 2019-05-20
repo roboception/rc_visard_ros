@@ -2,16 +2,71 @@
 rc_visard_driver
 ----------------
 
-This nodelet provides data from a [Roboception rc_visard](https://roboception.com/rc_visard) sensor on several ROS
-topics.
+Nodelet/node providing a ROS interface to configure a [Roboception rc_visard](https://roboception.com/rc_visard) and receive
+images/poses.
 
 Please also consult the manual for more details: https://doc.rc-visard.com
 
-Build/Installation
-------------------
+Installation
+------------
 
-See the [main README](../README.md)
+On Debian/Ubuntu add the ROS sources and
 
+```bash
+sudo apt-get install ros-${ROS_DISTRO}-rc-visard-driver
+```
+
+### From Source
+
+This rc_visard_driver depends on
+
+* [rc_genicam_api](https://github.com/roboception/rc_genicam_api)
+* [rc_dynamics_api](https://github.com/roboception/rc_dynamics_api)
+
+The dependencies can also be installed via rosdep.
+
+```
+rosdep install --from-paths rc_visard_driver --ignore-src rc_visard_driver -r -y
+```
+
+Building and installing the package follows the typical ROS catkin workflow.
+
+As an alternative, the cmake build-flow would be something like
+
+```bash
+mkdir build && cd build
+cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ../rc_visard_driver
+make
+make install
+```
+
+Alternatively, instead of the final `make install`, you can also use
+`make package` and `sudo dpkg -i install ros-melodic-rc-visard-driver_*.deb`.
+
+### GenICam GenTL Transport Layer
+
+The rc_visard_driver uses [rc_genicam_api](https://github.com/roboception/rc_genicam_api)
+for interfacing with the rc_visard sensor via GenICam/GigE Vision and requires a
+transport layer called a GenTL producer (shared library with the suffix `.cti`).
+For convenience rc_genicam_api comes with producers from Baumer for common
+architectures.
+
+The path to the producer can be set with the `GENICAM_GENTL64_PATH`
+environment variable (or `GENICAM_GENTL32_PATH` for 32 bit systems).
+If not set, rc_visard_driver will fall back to searching for the Baumer
+producer where rc_genicam_api is installed.
+
+If the producer .cti can't be found and you will get an error message like
+```
+[ERROR] [1512568083.512790905]: rc_visard_driver: No transport layers found in path /opt/ros/melodic/lib/rc_genicam_api
+```
+
+In this case you need either need to actually install rc_genicam_api properly or
+set the environment variable when running it. E.g. export:
+
+```bash
+GENICAM_GENTL64_PATH=/path/to/rc_genicam_api/baumer/Ubuntu-14.04/x86_64
+```
 
 Configuration
 -------------
@@ -330,13 +385,13 @@ Launching
 ---------
 
 * Using command line parameters:
-
-      rosrun rc_visard_driver rc_visard_driver _device:=:02912345 _enable_tf:=True _autostart_dynamics:=True _autostop_dynamics:=True
-
+  ```bash
+  rosrun rc_visard_driver rc_visard_driver _device:=:02912345 _enable_tf:=True _autostart_dynamics:=True _autostop_dynamics:=True
+  ```
 * As a nodelet, and in a separate **namespace**:
-
-      ROS_NAMESPACE=my_visard rosrun nodelet nodelet standalone rc_visard_driver _device:=:02912345
-
+  ```bash
+  ROS_NAMESPACE=my_visard rosrun nodelet nodelet standalone rc_visard_driver _device:=:02912345
+  ```
   Note that in this setup all frame_ids in all ros messages (including
   tf-messages) will be prefixed with `my_visard`, e.g., the frame_id of
   the published camera images will be `my_visard_camera`, the frame_id
