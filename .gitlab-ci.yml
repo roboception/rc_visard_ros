@@ -272,19 +272,19 @@ package_testing:rc_visard_description:bionic:amd64:
     PACKAGE: "rc_visard_description"
 
 
-package2_testing:rc_visard:xenial:amd64:
-  <<: *amd64_xenial_job
-  extends: .package_testing
-  stage: package2
-  variables:
-    PACKAGE: "rc_visard"
-
-package2_testing:rc_visard:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .package_testing
-  stage: package2
-  variables:
-    PACKAGE: "rc_visard"
+#package2_testing:rc_visard:xenial:amd64:
+#  <<: *amd64_xenial_job
+#  extends: .package_testing
+#  stage: package2
+#  variables:
+#    PACKAGE: "rc_visard"
+#
+#package2_testing:rc_visard:bionic:amd64:
+#  <<: *amd64_bionic_job
+#  extends: .package_testing
+#  stage: package2
+#  variables:
+#    PACKAGE: "rc_visard"
 
 ################
 # Stable builds
@@ -359,32 +359,32 @@ package_stable:rc_visard_description:bionic:amd64:
     PACKAGE: "rc_visard_description"
 
 
-package2_stable:rc_visard:xenial:amd64:
-  <<: *amd64_xenial_job
-  extends: .package_stable
-  stage: package2
-  variables:
-    PACKAGE: "rc_visard"
-
-package2_stable:rc_visard:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .package_stable
-  stage: package2
-  variables:
-    PACKAGE: "rc_visard"
+#package2_stable:rc_visard:xenial:amd64:
+#  <<: *amd64_xenial_job
+#  extends: .package_stable
+#  stage: package2
+#  variables:
+#    PACKAGE: "rc_visard"
+#
+#package2_stable:rc_visard:bionic:amd64:
+#  <<: *amd64_bionic_job
+#  extends: .package_stable
+#  stage: package2
+#  variables:
+#    PACKAGE: "rc_visard"
 
 ###############
 # Docker images
 ###############
-image:rc_visard:melodic:testing:
-  extends: .docker_build
-  only:
-    - master
-    - /^v[0-9]+\.[0-9]+\.[0-9]+/
-  variables:
-    PACKAGE: "rc_visard"
-    ROS_DISTRO: "melodic"
-    DOCKERFILE_DIR: "rc_visard/docker"
+#image:rc_visard:melodic:testing:
+#  extends: .docker_build
+#  only:
+#    - master
+#    - /^v[0-9]+\.[0-9]+\.[0-9]+/
+#  variables:
+#    PACKAGE: "rc_visard"
+#    ROS_DISTRO: "melodic"
+#    DOCKERFILE_DIR: "rc_visard/docker"
 
 image:rc_visard_driver:melodic:testing:
   extends: .docker_build
