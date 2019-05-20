@@ -2,6 +2,10 @@
 Changelog for package rc_visard
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.1 (2019-05-20)
+------------------
+* "fix" CMakeLists.txt so it's not treated as invalid metapackage
+
 2.6.0 (2019-05-20)
 ------------------
 * add rc_pick_client and rc_tagdetect_client packages

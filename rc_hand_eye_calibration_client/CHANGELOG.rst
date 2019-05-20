@@ -2,6 +2,9 @@
 Changelog for package rc_hand_eye_calibration_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.1 (2019-05-20)
+------------------
+
 2.6.0 (2019-05-20)
 ------------------
 * Enforce bool for robot_mounted parameter.

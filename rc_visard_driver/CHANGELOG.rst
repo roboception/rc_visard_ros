@@ -2,6 +2,9 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.1 (2019-05-20)
+------------------
+
 2.6.0 (2019-05-20)
 ------------------
 * auto-start dynamics only on the very first startup
