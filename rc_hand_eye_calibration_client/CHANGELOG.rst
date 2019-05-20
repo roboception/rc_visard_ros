@@ -2,6 +2,12 @@
 Changelog for package rc_hand_eye_calibration_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2019-05-20)
+------------------
+* Enforce bool for robot_mounted parameter.
+  This should make it compatible to older rc_visard firmware versions.
+* Publish hand-eye calibration via tf
+
 2.5.0 (2019-02-05)
 ------------------
 * rename `ip` parameter to `host`

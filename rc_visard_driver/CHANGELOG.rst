@@ -2,6 +2,15 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.0 (2019-05-20)
+------------------
+* auto-start dynamics only on the very first startup
+* improve handling and error messages for dynamics streams
+* update exposure and gain after switching from auto to manual
+* add check if rc_visard ready (genicam feature: RcSystemReady)
+* if multipart is available, still send single components per buffer
+* refactoring/cleanup
+
 2.5.0 (2019-02-05)
 ------------------
 * add parameter for max number of reconnections
