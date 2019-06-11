@@ -23,7 +23,7 @@ add_subdirectory(opt)
 # add a target for the submodule CPR doing the REST api calls
 
 find_package(catkin REQUIRED COMPONENTS
-        roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure shape_msgs tf rc_common_msgs tf2_geometry_msgs
+        roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure shape_msgs visualization_msgs tf rc_common_msgs tf2_geometry_msgs
         )
 
 ################################################
