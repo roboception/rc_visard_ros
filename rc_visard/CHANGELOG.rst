@@ -2,6 +2,9 @@
 Changelog for package rc_visard
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.2 (2019-06-11)
+------------------
+
 2.6.1 (2019-05-20)
 ------------------
 * "fix" CMakeLists.txt so it's not treated as invalid metapackage
