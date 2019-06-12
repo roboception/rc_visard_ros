@@ -27,7 +27,7 @@ add_subdirectory(opt)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure tf2 tf2_ros
+  roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure tf2 tf2_ros tf2_geoemtry_msgs
 )
 
 
