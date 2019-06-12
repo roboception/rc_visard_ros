@@ -7,6 +7,13 @@
 #include "json.hpp"
 #include <cpr/cpr.h>
 
+#include "tf2/convert.h"
+#include "tf2/transform_datatypes.h"
+#include "tf2/LinearMath/Transform.h"
+#include "tf2/LinearMath/Vector3.h"
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+
 using namespace std;
 using json = nlohmann::json;
 
@@ -224,16 +231,16 @@ void CalibrationWrapper::requestCalibration(const ros::SteadyTimerEvent&)
 
 void CalibrationWrapper::updateCalibrationCache(const rc_hand_eye_calibration_client::CalibrationResponse& response)
 {
-  current_calibration_.header.frame_id = camera_frame_id_;
-  //Select child frame based on the type of calibration hand-eye (on-robot-cam) or base-eye (external cam)
-  current_calibration_.child_frame_id = response.robot_mounted ? endeff_frame_id_ : base_frame_id_;
-  current_calibration_.transform.translation.x = response.pose.position.x;
-  current_calibration_.transform.translation.y = response.pose.position.y;
-  current_calibration_.transform.translation.z = response.pose.position.z;
-  current_calibration_.transform.rotation.x = response.pose.orientation.x;
-  current_calibration_.transform.rotation.y = response.pose.orientation.y;
-  current_calibration_.transform.rotation.z = response.pose.orientation.z;
-  current_calibration_.transform.rotation.w = response.pose.orientation.w;
+  // create transform
+  tf2::Stamped<tf2::Transform> tf;
+  tf.setOrigin(tf2::Vector3(response.pose.position.x, response.pose.position.y, response.pose.position.z));
+  tf.setRotation(tf2::Quaternion(response.pose.orientation.x, response.pose.orientation.y, response.pose.orientation.z, response.pose.orientation.w));
+
+  //Select frame_id based on the type of calibration hand-eye (on-robot-cam) or base-eye (external cam)
+  current_calibration_.header.frame_id = response.robot_mounted ? endeff_frame_id_ : base_frame_id_;
+  current_calibration_.child_frame_id = camera_frame_id_;
+  // set inverse of transform
+  tf2::convert(tf.inverse(), current_calibration_.transform);
 }
 
 void CalibrationWrapper::sendCachedCalibration(const ros::SteadyTimerEvent&)
