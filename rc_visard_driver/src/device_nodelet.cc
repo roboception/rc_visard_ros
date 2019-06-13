@@ -764,6 +764,37 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
     c.out2_mode = "Low";
   }
 
+  // If camera_exp_auto (ExposureAuto) is changed, immediately set new value here
+  // so that ExposureTime and Gain can be read and published again.
+  // If we do this in the grabbing thread we have a race condition and another parameter update
+  // in the meantime could be lost because we need to overwrite the config with the updated time and gain values.
+  if (l & 2)
+  {
+    l &= ~2;
+
+    if (rcgnodemap)
+    {
+      if (c.camera_exp_auto)
+      {
+        rcg::setEnum(rcgnodemap, "ExposureAuto", "Continuous", true);
+      }
+      else
+      {
+        rcg::setEnum(rcgnodemap, "ExposureAuto", "Off", true);
+      }
+
+      // if exposure mode changed to manual, read current exposure value and gain again
+      if (!c.camera_exp_auto)
+      {
+        c.camera_exp_value = rcg::getFloat(rcgnodemap, "ExposureTime", 0, 0, true, true) / 1000000;
+        if (dev_supports_gain)
+        {
+          c.camera_gain_value = rcg::getFloat(rcgnodemap, "Gain", 0, 0, true, true);
+        }
+      }
+    }
+  }
+
   // copy config for using it in the grabbing thread
 
   config = c;
@@ -797,19 +828,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         rcg::setFloat(nodemap, "AcquisitionFrameRate", cfg.camera_fps, true);
       }
 
-      if (lvl & 2)
-      {
-        lvl &= ~2;
-
-        if (cfg.camera_exp_auto)
-        {
-          rcg::setEnum(nodemap, "ExposureAuto", "Continuous", true);
-        }
-        else
-        {
-          rcg::setEnum(nodemap, "ExposureAuto", "Off", true);
-        }
-      }
+      // lvl 2 (camera_exp_auto) is immediately set in dynamic reconfigure callback
 
       if (lvl & 4)
       {
@@ -1437,18 +1456,6 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             setConfiguration(rcgnodemap, cfg, lvl, iocontrol_avail);
 
             disprange = cfg.depth_disprange;
-
-            // if exposure mode to manual, read current exposure value and gain again
-            if (lvl & 2 && !cfg.camera_exp_auto)
-            {
-              boost::recursive_mutex::scoped_lock lock(mtx);
-              cfg.camera_exp_value = rcg::getFloat(rcgnodemap, "ExposureTime", 0, 0, true, true) / 1000000;
-              if (dev_supports_gain)
-              {
-                cfg.camera_gain_value = rcg::getFloat(rcgnodemap, "Gain", 0, 0, true, true);
-              }
-              reconfig->updateConfig(cfg);
-            }
 
             // if in alternate mode, then make publishers aware of it
 
