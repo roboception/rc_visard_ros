@@ -1,6 +1,7 @@
 
 set(SRC
     device_nodelet.cc
+    dynamics_handlers.cc
     protobuf2ros_stream.cc
     ThreadedStream.cc
     publishers/camera_info_publisher.cc
