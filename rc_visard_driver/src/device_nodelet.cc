@@ -99,8 +99,6 @@ namespace rc
 {
 namespace rcd = dynamics;
 
-#define ROS_HAS_STEADYTIME (ROS_VERSION_MINIMUM(1, 13, 1) || ((ROS_VERSION_MINOR == 12) && ROS_VERSION_PATCH >= 8))
-
 ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(rcd::RemoteInterface::Ptr rcdIface,
                                                               const std::string& stream, ros::NodeHandle& nh,
                                                               const std::string& frame_id_prefix, bool tfEnabled)
@@ -1258,11 +1256,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         stream[0]->startStreaming();
 
         // enter grabbing loop
-#if ROS_HAS_STEADYTIME
         ros::SteadyTime tlastimage = ros::SteadyTime::now();
-#else
-        ros::WallTime tlastimage = ros::WallTime::now();
-#endif
 
         while (!stopImageThread)
         {
@@ -1293,11 +1287,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
               if (buffer->getImagePresent(part))
               {
                 // reset counter of consecutive missing images and failures
-#if ROS_HAS_STEADYTIME
                 tlastimage = ros::SteadyTime::now();
-#else
-                tlastimage = ros::WallTime::now();
-#endif
                 cntConsecutiveFails = 0;
                 imageSuccess = true;
 
@@ -1338,11 +1328,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           }
           else if (buffer != 0 && buffer->getIsIncomplete())
           {
-#if ROS_HAS_STEADYTIME
             tlastimage = ros::SteadyTime::now();
-#else
-            tlastimage = ros::WallTime::now();
-#endif
             totalIncompleteBuffers++;
             ROS_WARN("rc_visard_driver: Received incomplete image buffer");
           }
@@ -1354,11 +1340,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             if (cintensity || cintensitycombined ||
                 (is_depth_acquisition_continuous && (cdisparity || cconfidence || cerror)))
             {
-#if ROS_HAS_STEADYTIME
               double t = (ros::SteadyTime::now() - tlastimage).toSec();
-#else
-              double t = (ros::WallTime::now() - tlastimage).toSec();
-#endif
 
               if (t > 3)  // report error
               {
@@ -1373,11 +1355,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
               // if nothing is expected then store current time as last time
               // to avoid possible timeout after resubscription
 
-#if ROS_HAS_STEADYTIME
               tlastimage = ros::SteadyTime::now();
-#else
-              tlastimage = ros::WallTime::now();
-#endif
             }
           }
 
@@ -1484,11 +1462,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             {
               if (is_depth_acquisition_continuous)
               {
-#if ROS_HAS_STEADYTIME
                 tlastimage = ros::SteadyTime::now();
-#else
-                tlastimage = ros::WallTime::now();
-#endif
               }
             }
           }
