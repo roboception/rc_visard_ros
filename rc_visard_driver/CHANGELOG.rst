@@ -2,6 +2,12 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.4 (2019-06-19)
+------------------
+* fix race condition when changing exposure mode from auto to manual
+* require ROS version with SteadyTime
+* use enums in dynamic reconfigure for easier usage
+
 2.6.3 (2019-06-12)
 ------------------
 
