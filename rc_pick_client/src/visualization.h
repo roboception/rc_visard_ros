@@ -38,6 +38,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_broadcaster.h>
 #include <rc_pick_client/LoadCarrier.h>
+#include <rc_pick_client/BoxItem.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
@@ -66,6 +67,17 @@ class Visualization
     void visualizeLoadCarriers(const std::vector<rc_pick_client::LoadCarrier> &ros_lcs);
 
     /*
+     * Remove previously published markers of this type.
+     * Publish box item position as tf frame (name: boxitem_#) and cube markers on topic boxitem in node_namespace
+     */
+    void visualizeDetectedBoxes(const std::vector<rc_pick_client::BoxItem> &ros_boxitems);
+
+    /*
+     * Remove previously published box item markers.
+     */
+    void deleteBoxItemMarkers();
+
+    /*
      * Remove previously published load carrier markers.
      */
     void deleteLoadCarrierMarkers();
@@ -76,13 +88,16 @@ class Visualization
     void deleteGraspMarkers();
 
   private:
+
     ros::NodeHandle nh_;
+
     ros::Publisher grasp_marker_pub_;
     ros::Publisher lc_marker_pub_;
+    ros::Publisher box_marker_pub_;
     tf::TransformBroadcaster br_;
     visualization_msgs::MarkerArray markers_lcs_;
     visualization_msgs::MarkerArray markers_grasps_;
-
+    visualization_msgs::MarkerArray markers_boxes_;
     /*
      * Construct model of the load carrier that consist of 5 cube meshes representing 5 walls of the load carrier and
      * append it to marker_array
@@ -90,17 +105,15 @@ class Visualization
     static void constructLoadCarrier(visualization_msgs::MarkerArray &marker_array,
                                      const rc_pick_client::LoadCarrier &lc,
                                      const int &lc_no);
+    /*
+     * Set markers characteristics
+     */
+    void setMarker(visualization_msgs::Marker &marker, const geometry_msgs::Pose &item_pose, const rc_pick_client::Rectangle &rectangle, std::string frame_id, int marker_id);
 
     /*
-     * Convert rc_pick_client::SuctionGrasp into markers and publish it
+     * Publish given pose as tf frame
      */
-    void publishGraspMarkers(const std::vector<rc_pick_client::SuctionGrasp> &ros_grasps);
-
-    void publishLCMarkers(const std::vector<rc_pick_client::LoadCarrier> &ros_lcs);
-
-    void publishGraspTf(const std::vector<rc_pick_client::SuctionGrasp> &ros_grasps);
-
-    void publishLCTf(const std::vector<rc_pick_client::LoadCarrier> &ros_lcs);
+    void publishTf(const geometry_msgs::Pose &ros_pose, std::string frame_id, std::string id);
 
 
 };

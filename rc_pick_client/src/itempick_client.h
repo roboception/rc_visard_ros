@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019 Roboception GmbH
  *
- * Author: Monika Florek-Jasinska
+ * Author: Carlos Xavier Garcia Briones, Monika Florek-Jasinska
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,46 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rest_itempick_client.h"
-#include <ros/ros.h>
-#include <signal.h>
+#ifndef ITEMPICK_CLIENT_H
+#define ITEMPICK_CLIENT_H
+#include "pick_client.h"
+#include <rc_pick_client/ComputeGrasps.h>
 
-std::unique_ptr<itempick_client::ItempickWrapper> itempick_wrapper;
 
-void sigintHandler(int)
-{
-  itempick_wrapper.reset();
-  ros::shutdown();
+namespace ros_pick_client {
+    class ItempickClient : public PickClient {
+    public:
+        ItempickClient(const std::string &host, const ros::NodeHandle &nh);
+
+        virtual ~ItempickClient() = default;
+
+    private:
+
+        ros::ServiceServer srv_compute_grasps_;
+
+        bool computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &request,
+                              rc_pick_client::ComputeGraspsResponse &response);
+
+        void dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t);
+    };
 }
 
-int main(int argc, char **argv)
-{
-  std::string name = "rc_itempick";
-  ros::init(argc, argv, name, ros::init_options::NoSigintHandler);
-  signal(SIGINT, sigintHandler);
-
-  ros::NodeHandle pnh("~");
-
-  std::string host;
-  pnh.param("host", host, host);
-  if (host.empty()) {
-    ROS_FATAL("No host set! Please set the parameter 'host'!");
-    return 1;
-  }
-
-  try
-  {
-    // instantiate wrapper and advertise services
-    itempick_wrapper.reset(new itempick_client::ItempickWrapper(host, pnh));
-  }
-  catch (const std::exception &ex)
-  {
-    ROS_FATAL("Client could not be created due to an error: %s", ex.what());
-    return 1;
-  }
-
-  ROS_INFO_STREAM("Itempick node started for host: " << host);
-  ros::Rate loop_rate(10);
-
-  ros::spin();
-}
+#endif //ITEMPICK_CLIENT_H

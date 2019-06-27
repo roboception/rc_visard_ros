@@ -23,8 +23,12 @@ add_subdirectory(opt)
 # add a target for the submodule CPR doing the REST api calls
 
 find_package(catkin REQUIRED COMPONENTS
-        roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure shape_msgs visualization_msgs tf rc_common_msgs tf2_geometry_msgs
-        )
+        roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure shape_msgs visualization_msgs tf
+        rc_common_msgs tf2_geometry_msgs
+  )
+
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -45,6 +49,7 @@ generate_messages(
         geometry_msgs
         shape_msgs
         rc_common_msgs
+
 )
 
 ################################################
@@ -52,7 +57,7 @@ generate_messages(
 ################################################
 
 # Generate dynamic reconfigure parameters in the 'cfg' folder
-generate_dynamic_reconfigure_options(cfg/itempick.cfg)
+generate_dynamic_reconfigure_options(cfg/pickModule.cfg)
 
 ###################################
 ## catkin specific configuration ##
@@ -79,15 +84,35 @@ include_directories(
 
 
 ## Declare a cpp executable
-add_executable(rc_itempick_client_node src/rc_itempick_client_node.cpp src/rest_itempick_client.cc src/communication_helper.cpp src/visualization.cpp)
+
+set(common_pick_src
+        src/rc_pick_client_node.cpp
+        src/itempick_client.cc
+        src/boxpick_client.cc
+        src/communication_helper.cpp
+        src/visualization.cpp
+        src/pick_client.cc
+        src/utils.cpp
+        )
+
+add_executable(rc_itempick_client_node ${common_pick_src})
+target_compile_definitions(rc_itempick_client_node PRIVATE -DPICK_TYPE="rc_itempick")
+add_executable(rc_boxpick_client_node ${common_pick_src})
+target_compile_definitions(rc_boxpick_client_node PRIVATE -DPICK_TYPE="rc_boxpick")
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(rc_itempick_client_node rc_pick_client_generate_messages_cpp)
+add_dependencies(rc_itempick_client_node rc_pick_client_generate_messages_cpp ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(rc_itempick_client_node rc_pick_client_gencfg)
+add_dependencies(rc_boxpick_client_node rc_pick_client_generate_messages_cpp ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(rc_boxpick_client_node rc_pick_client_gencfg)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(rc_itempick_client_node
+        ${catkin_LIBRARIES}
+        ${CPR_LIBRARIES}
+)
+target_link_libraries(rc_boxpick_client_node
         ${catkin_LIBRARIES}
         ${CPR_LIBRARIES}
         )
@@ -102,7 +127,11 @@ install(TARGETS rc_itempick_client_node
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
-
+install(TARGETS rc_boxpick_client_node
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        )
 
 #############
 ## Testing ##
