@@ -54,13 +54,21 @@ The following services are offered by the node:
 * `detect_load_carrier`: Triggers a load carrier detection.
 * `compute_grasps`: Triggers the computation of grasping poses for a suction device. All images used by the node are guaranteed to be newer than the service trigger time.
 
+For the BoxPick node, an additional service is offered:
+* `detect_items`: Triggers the detection of rectangles.
 
 
-Launching
----------
+Launch
+------
 
 Using command line parameters:
 
+ItemPick:
 ~~~
 rosrun rc_pick_client rc_itempick_client_node _host:=sensor_ip
+~~~
+
+BoxPick:
+~~~
+rosrun rc_pick_client rc_boxpick_client_node _host:=sensor_ip
 ~~~
