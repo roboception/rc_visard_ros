@@ -29,7 +29,7 @@ add_subdirectory(doc)
 find_package(catkin REQUIRED COMPONENTS
   nodelet
   roscpp
-  std_srvs
+  rc_common_msgs
   sensor_msgs
   image_transport
   dynamic_reconfigure
@@ -75,7 +75,7 @@ generate_dynamic_reconfigure_options(cfg/rc_visard_driver.cfg)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rc_stereocamera
-  CATKIN_DEPENDS nodelet roscpp sensor_msgs geometry_msgs std_srvs nav_msgs
+  CATKIN_DEPENDS nodelet roscpp sensor_msgs geometry_msgs rc_common_msgs nav_msgs
 #  DEPENDS
 )
 

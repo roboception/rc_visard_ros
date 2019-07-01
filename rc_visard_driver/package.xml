@@ -31,7 +31,7 @@
   <!-- depend is a shorthand for build_depend, build_export_depend and exec_depend -->
   <depend>nodelet</depend>
   <depend>roscpp</depend>
-  <depend>std_srvs</depend>
+  <depend>rc_common_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>stereo_msgs</depend>
   <depend>image_transport</depend>

@@ -59,6 +59,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <tf/transform_broadcaster.h>
+#include <rc_common_msgs/ReturnCodeConstants.h>
 
 namespace {
 
@@ -98,6 +99,7 @@ namespace {
 namespace rc
 {
 namespace rcd = dynamics;
+using rc_common_msgs::ReturnCodeConstants;
 
 ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(rcd::RemoteInterface::Ptr rcdIface,
                                                               const std::string& stream, ros::NodeHandle& nh,
@@ -380,17 +382,17 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
                           "autostart_dynamics=" << autostartDynamics << ", "
                           "autostart_dynamics_with_slam=" << autostartSlam << ")");
 
-          std_srvs::Trigger::Request dummyreq;
-          std_srvs::Trigger::Response dummyresp;
+          rc_common_msgs::Trigger::Request dummyreq;
+          rc_common_msgs::Trigger::Response dummyresp;
 
           bool autostart_failed = false;
           autostart_failed |= (autostartSlam     && !this->dynamicsStartSlam(dummyreq, dummyresp));
           autostart_failed |= (!autostartSlam && autostartDynamics && !this->dynamicsStart(dummyreq, dummyresp));
-          autostart_failed |= !dummyresp.success;
+          autostart_failed |= dummyresp.return_code.value < ReturnCodeConstants::SUCCESS;
 
           if (autostart_failed)
           {
-            ROS_WARN_STREAM("rc_visard_driver: Could not auto-start dynamics module! " << dummyresp.message);
+            ROS_WARN_STREAM("rc_visard_driver: Could not auto-start dynamics module! " << dummyresp.return_code.message);
             cntConsecutiveRecoveryFails++;
             continue;  // to next trial!
           }
@@ -445,8 +447,8 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
 
   if (autostopDynamics)
   {
-    std_srvs::Trigger::Request dummyreq;
-    std_srvs::Trigger::Response dummyresp;
+    rc_common_msgs::Trigger::Request dummyreq;
+    rc_common_msgs::Trigger::Response dummyresp;
     ROS_INFO("rc_visard_driver: Autostop dynamics ...");
     if (!this->dynamicsStop(dummyreq, dummyresp))
     {  // autostop failed!
@@ -1498,13 +1500,13 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
   }
 }
 
-bool DeviceNodelet::depthAcquisitionTrigger(std_srvs::Trigger::Request& req,
-                                            std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Request& req,
+                                            rc_common_msgs::Trigger::Response& resp)
 {
   perform_depth_acquisition_trigger = true;
 
-  resp.success = true;
-  resp.message = "";
+  resp.return_code.value = ReturnCodeConstants::SUCCESS;
+  resp.return_code.message = "";
 
   return true;
 }
