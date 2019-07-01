@@ -45,6 +45,7 @@ stages:
   variables:
     PACKAGE: "rc_visard_driver"
   script:
+    - if [ -n $EXTRA_DEBS ]; then apt-get install -y $EXTRA_DEBS; fi
     - mkdir build && cd build
     - cmake ../${PACKAGE}
     - make -j 4
@@ -77,6 +78,7 @@ stages:
   variables:
     PACKAGE: "rc_visard_driver"
   script:
+    - if [ -n $EXTRA_DEBS ]; then apt-get install -y $EXTRA_DEBS; fi
     - mkdir build && cd build
     - cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ../${PACKAGE}
     - make -j 4
@@ -203,6 +205,20 @@ test:rc_visard_description:bionic:amd64:
   variables:
     PACKAGE: "rc_visard_description"
 
+test:rc_roi_manager_gui:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-kinetic-rc-pick-client"
+
+test:rc_roi_manager_gui:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-melodic-rc-pick-client"
+
 # Test against stable (is allowed to fail)
 ##########################################
 test_stable:rc_visard_driver:xenial:amd64:
@@ -271,6 +287,21 @@ package_testing:rc_visard_description:bionic:amd64:
   variables:
     PACKAGE: "rc_visard_description"
 
+package2_testing:rc_roi_manager_gui:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .package_testing
+  stage: package2
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-kinetic-rc-pick-client"
+
+package2_testing:rc_roi_manager_gui:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .package_testing
+  stage: package2
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-melodic-rc-pick-client"
 
 #package2_testing:rc_visard:xenial:amd64:
 #  <<: *amd64_xenial_job
@@ -358,6 +389,21 @@ package_stable:rc_visard_description:bionic:amd64:
   variables:
     PACKAGE: "rc_visard_description"
 
+package2_stable:rc_roi_manager_gui:xenial:amd64:
+  <<: *amd64_xenial_job
+  extends: .package_stable
+  stage: package2
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-kinetic-rc-pick-client"
+
+package2_stable:rc_roi_manager_gui:bionic:amd64:
+  <<: *amd64_bionic_job
+  extends: .package_stable
+  stage: package2
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-melodic-rc-pick-client"
 
 #package2_stable:rc_visard:xenial:amd64:
 #  <<: *amd64_xenial_job
