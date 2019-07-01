@@ -33,9 +33,12 @@
 
 #include "device_nodelet.h"
 
+#include <rc_common_msgs/ReturnCodeConstants.h>
+
 namespace rc
 {
 namespace rcd = dynamics;
+using rc_common_msgs::ReturnCodeConstants;
 
 // Anonymous namespace for local linkage
 namespace
@@ -54,10 +57,10 @@ enum class DynamicsCmd
 
 ///@return whether the service call has been accepted
 void handleDynamicsStateChangeRequest(rcd::RemoteInterface::Ptr dynIF, DynamicsCmd state,
-                                      std_srvs::Trigger::Response& resp)
+                                      rc_common_msgs::Trigger::Response& resp)
 {
-  resp.success = true;
-  resp.message = "";
+  resp.return_code.value = ReturnCodeConstants::SUCCESS;
+  resp.return_code.message = "";
 
   std::string new_state;
 
@@ -93,64 +96,64 @@ void handleDynamicsStateChangeRequest(rcd::RemoteInterface::Ptr dynIF, DynamicsC
       }
       if (new_state == rcd::RemoteInterface::State::FATAL)
       {
-        resp.success = false;
-        resp.message = "rc_dynamics module is in " + new_state + " state. Check the log files.";
+        resp.return_code.value = ReturnCodeConstants::NOT_APPLICABLE;
+        resp.return_code.message = "rc_dynamics module is in " + new_state + " state. Check the log files.";
       }
     }
     catch (std::exception& e)
     {
-      resp.success = false;
-      resp.message = std::string("Failed to change state of rcdynamics module: ") + e.what();
+      resp.return_code.value = ReturnCodeConstants::INTERNAL_ERROR;
+      resp.return_code.message = std::string("Failed to change state of rcdynamics module: ") + e.what();
     }
   }
   else
   {
-    resp.success = false;
-    resp.message = "rcdynamics remote interface not yet initialized!";
+    resp.return_code.value = ReturnCodeConstants::NOT_APPLICABLE;
+    resp.return_code.message = "rcdynamics remote interface not yet initialized!";
   }
 
-  if (!resp.success)
-    ROS_ERROR_STREAM(resp.message);
+  if (!resp.return_code.value)
+    ROS_ERROR_STREAM(resp.return_code.message);
 }
 }
 
-bool DeviceNodelet::dynamicsStart(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::dynamicsStart(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::START, resp);
   return true;
 }
 
-bool DeviceNodelet::dynamicsStartSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::dynamicsStartSlam(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::START_SLAM, resp);
   return true;
 }
 
-bool DeviceNodelet::dynamicsRestart(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::dynamicsRestart(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::RESTART, resp);
   return true;
 }
 
-bool DeviceNodelet::dynamicsRestartSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::dynamicsRestartSlam(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::RESTART_SLAM, resp);
   return true;
 }
 
-bool DeviceNodelet::dynamicsStop(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::dynamicsStop(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::STOP, resp);
   return true;
 }
 
-bool DeviceNodelet::dynamicsStopSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::dynamicsStopSlam(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::STOP_SLAM, resp);
   return true;
 }
 
-bool DeviceNodelet::dynamicsResetSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::dynamicsResetSlam(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
   handleDynamicsStateChangeRequest(dynamicsInterface, DynamicsCmd::RESET_SLAM, resp);
   return true;
@@ -192,86 +195,86 @@ bool DeviceNodelet::getSlamTrajectory(rc_visard_driver::GetTrajectory::Request& 
   return true;
 }
 
-bool DeviceNodelet::saveSlamMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::saveSlamMap(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
-  resp.success = false;
-
   if (dynamicsInterface)
   {
     try
     {
       rcd::RemoteInterface::ReturnCode rc = dynamicsInterface->saveSlamMap();
-      resp.success = (rc.value >= 0);
-      resp.message = rc.message;
+      resp.return_code.value = rc.value;
+      resp.return_code.message = rc.message;
     }
     catch (std::exception& e)
     {
-      resp.message = std::string("Failed to save SLAM map: ") + e.what();
+      resp.return_code.value = ReturnCodeConstants::INTERNAL_ERROR;
+      resp.return_code.message = std::string("Failed to save SLAM map: ") + e.what();
     }
   }
   else
   {
-    resp.message = "rcdynamics remote interface not yet initialized!";
+    resp.return_code.value = ReturnCodeConstants::NOT_APPLICABLE;
+    resp.return_code.message = "rcdynamics remote interface not yet initialized!";
   }
 
-  if (!resp.success)
-    ROS_ERROR_STREAM(resp.message);
+  if (resp.return_code.value < ReturnCodeConstants::SUCCESS)
+    ROS_ERROR_STREAM(resp.return_code.message);
 
   return true;
 }
 
-bool DeviceNodelet::loadSlamMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::loadSlamMap(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
-  resp.success = false;
-
   if (dynamicsInterface)
   {
     try
     {
       rcd::RemoteInterface::ReturnCode rc = dynamicsInterface->loadSlamMap();
-      resp.success = (rc.value >= 0);
-      resp.message = rc.message;
+      resp.return_code.value = rc.value;
+      resp.return_code.message = rc.message;
     }
     catch (std::exception& e)
     {
-      resp.message = std::string("Failed to load SLAM map: ") + e.what();
+      resp.return_code.value = ReturnCodeConstants::INTERNAL_ERROR;
+      resp.return_code.message = std::string("Failed to load SLAM map: ") + e.what();
     }
   }
   else
   {
-    resp.message = "rcdynamics remote interface not yet initialized!";
+    resp.return_code.value = ReturnCodeConstants::NOT_APPLICABLE;
+    resp.return_code.message = "rcdynamics remote interface not yet initialized!";
   }
 
-  if (!resp.success)
-    ROS_ERROR_STREAM(resp.message);
+  if (resp.return_code.value < ReturnCodeConstants::SUCCESS)
+    ROS_ERROR_STREAM(resp.return_code.message);
 
   return true;
 }
 
-bool DeviceNodelet::removeSlamMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp)
+bool DeviceNodelet::removeSlamMap(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp)
 {
-  resp.success = false;
-
   if (dynamicsInterface)
   {
     try
     {
       rcd::RemoteInterface::ReturnCode rc = dynamicsInterface->removeSlamMap();
-      resp.success = (rc.value >= 0);
-      resp.message = rc.message;
+      resp.return_code.value = rc.value;
+      resp.return_code.message = rc.message;
     }
     catch (std::exception& e)
     {
-      resp.message = std::string("Failed to remove SLAM map: ") + e.what();
+      resp.return_code.value = ReturnCodeConstants::INTERNAL_ERROR;
+      resp.return_code.message = std::string("Failed to remove SLAM map: ") + e.what();
     }
   }
   else
   {
-    resp.message = "rcdynamics remote interface not yet initialized!";
+    resp.return_code.value = ReturnCodeConstants::NOT_APPLICABLE;
+    resp.return_code.message = "rcdynamics remote interface not yet initialized!";
   }
 
-  if (!resp.success)
-    ROS_ERROR_STREAM(resp.message);
+  if (resp.return_code.value < ReturnCodeConstants::SUCCESS)
+    ROS_ERROR_STREAM(resp.return_code.message);
 
   return true;
 }

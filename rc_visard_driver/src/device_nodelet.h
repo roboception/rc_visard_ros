@@ -37,7 +37,7 @@
 #include <nodelet/nodelet.h>
 #include <dynamic_reconfigure/server.h>
 #include <rc_visard_driver/rc_visard_driverConfig.h>
-#include <std_srvs/Trigger.h>
+#include <rc_common_msgs/Trigger.h>
 
 #include <GenApi/GenApi.h>
 #include <rc_genicam_api/device.h>
@@ -65,42 +65,42 @@ public:
   virtual void onInit();
 
   /// Trigger stereo matching in mode 'SingleFrame'
-  ///@return always true, check resp.success
-  bool depthAcquisitionTrigger(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0
+  bool depthAcquisitionTrigger(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Start Stereo INS
-  ///@return always true, check resp.success for whether the dynamics service has been called
-  bool dynamicsStart(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for whether the dynamics service has been called
+  bool dynamicsStart(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Start Stereo INS+SLAM
-  ///@return always true, check resp.success for whether the dynamics service has been called
-  bool dynamicsStartSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for whether the dynamics service has been called
+  bool dynamicsStartSlam(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Restart Stereo INS
-  ///@return always true, check resp.success for whether the dynamics service has been called
-  bool dynamicsRestart(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for whether the dynamics service has been called
+  bool dynamicsRestart(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Restart Stereo INS+SLAM
-  ///@return always true, check resp.success for whether the dynamics service has been called
-  bool dynamicsRestartSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for whether the dynamics service has been called
+  bool dynamicsRestartSlam(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Stop Stereo INS(+SLAM if running)
-  ///@return always true, check resp.success for whether the dynamics service has been called
-  bool dynamicsStop(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for whether the dynamics service has been called
+  bool dynamicsStop(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Stop SLAM (keep Stereo INS running)
-  ///@return always true, check resp.success for whether the dynamics service has been called
-  bool dynamicsStopSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for whether the dynamics service has been called
+  bool dynamicsStopSlam(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Reset SLAM (keep Stereo INS running)
-  ///@return always true, check resp.success for whether the dynamics service has been called
-  bool dynamicsResetSlam(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for whether the dynamics service has been called
+  bool dynamicsResetSlam(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Get the Slam trajectory
   ///@return always true
   bool getSlamTrajectory(rc_visard_driver::GetTrajectory::Request& req,
                          rc_visard_driver::GetTrajectory::Response& resp);
   /// Save the onboard SLAM map
-  ///@return always true, check resp.success for wheter map could be saved
-  bool saveSlamMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for wheter map could be saved
+  bool saveSlamMap(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Load the onboard SLAM map
-  ///@return always true, check resp.success for wheter map could be loaded
-  bool loadSlamMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for wheter map could be loaded
+  bool loadSlamMap(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
   /// Remove the onboard SLAM map
-  ///@return always true, check resp.success for wheter map could be removed
-  bool removeSlamMap(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& resp);
+  ///@return always true, check resp.return_code.value == 0 for wheter map could be removed
+  bool removeSlamMap(rc_common_msgs::Trigger::Request& req, rc_common_msgs::Trigger::Response& resp);
 
 
 private:
