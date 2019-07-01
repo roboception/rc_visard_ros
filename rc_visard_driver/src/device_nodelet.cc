@@ -473,6 +473,12 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   cfg.camera_exp_value = rcg::getFloat(nodemap, "ExposureTime", 0, 0, true) / 1000000;
   cfg.camera_exp_max = rcg::getFloat(nodemap, "ExposureTimeAutoMax", 0, 0, true) / 1000000;
 
+  // get optional exposure region
+  cfg.camera_exp_width = rcg::getInteger(nodemap, "ExposureRegionWidth", 0, 0, false);
+  cfg.camera_exp_height = rcg::getInteger(nodemap, "ExposureRegionHeight", 0, 0, false);
+  cfg.camera_exp_offset_x = rcg::getInteger(nodemap, "ExposureRegionOffsetX", 0, 0, false);
+  cfg.camera_exp_offset_y = rcg::getInteger(nodemap, "ExposureRegionOffsetY", 0, 0, false);
+
   // get optional gain value
 
   v = rcg::getEnum(nodemap, "GainSelector", false);
@@ -624,6 +630,10 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.param("camera_exp_value", cfg.camera_exp_value, cfg.camera_exp_value);
   pnh.param("camera_gain_value", cfg.camera_gain_value, cfg.camera_gain_value);
   pnh.param("camera_exp_max", cfg.camera_exp_max, cfg.camera_exp_max);
+  pnh.param("camera_exp_width", cfg.camera_exp_width, cfg.camera_exp_width);
+  pnh.param("camera_exp_height", cfg.camera_exp_height, cfg.camera_exp_height);
+  pnh.param("camera_exp_offset_x", cfg.camera_exp_offset_x, cfg.camera_exp_offset_x);
+  pnh.param("camera_exp_offset_y", cfg.camera_exp_offset_y, cfg.camera_exp_offset_y);
   pnh.param("camera_wb_auto", cfg.camera_wb_auto, cfg.camera_wb_auto);
   pnh.param("camera_wb_ratio_red", cfg.camera_wb_ratio_red, cfg.camera_wb_ratio_red);
   pnh.param("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue, cfg.camera_wb_ratio_blue);
@@ -650,6 +660,10 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.setParam("camera_exp_value", cfg.camera_exp_value);
   pnh.setParam("camera_gain_value", cfg.camera_gain_value);
   pnh.setParam("camera_exp_max", cfg.camera_exp_max);
+  pnh.setParam("camera_exp_width", cfg.camera_exp_width);
+  pnh.setParam("camera_exp_height", cfg.camera_exp_height);
+  pnh.setParam("camera_exp_offset_x", cfg.camera_exp_offset_x);
+  pnh.setParam("camera_exp_offset_y", cfg.camera_exp_offset_y);
   pnh.setParam("camera_wb_auto", cfg.camera_wb_auto);
   pnh.setParam("camera_wb_ratio_red", cfg.camera_wb_ratio_red);
   pnh.setParam("camera_wb_ratio_blue", cfg.camera_wb_ratio_blue);
@@ -846,6 +860,30 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
       {
         lvl &= ~8;
         rcg::setFloat(nodemap, "ExposureTimeAutoMax", 1000000 * cfg.camera_exp_max, true);
+      }
+
+      if (lvl & 8388608)
+      {
+        lvl &= ~8388608;
+        rcg::setInteger(nodemap, "ExposureRegionWidth", cfg.camera_exp_width, false);
+      }
+
+      if (lvl & 16777216)
+      {
+        lvl &= ~16777216;
+        rcg::setInteger(nodemap, "ExposureRegionHeight", cfg.camera_exp_height, false);
+      }
+
+      if (lvl & 33554432)
+      {
+        lvl &= ~33554432;
+        rcg::setInteger(nodemap, "ExposureRegionOffsetX", cfg.camera_exp_offset_x, false);
+      }
+
+      if (lvl & 67108864)
+      {
+        lvl &= ~67108864;
+        rcg::setInteger(nodemap, "ExposureRegionOffsetY", cfg.camera_exp_offset_y, false);
       }
 
       if (lvl & 16384)
