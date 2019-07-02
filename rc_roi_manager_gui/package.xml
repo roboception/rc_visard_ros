@@ -28,9 +28,6 @@
 
   <depend>rc_common_msgs</depend>
   <depend>rc_pick_client</depend>
-  <depend>rc_hand_eye_calibration_client</depend>
-  <depend>rc_visard_driver</depend>
-  <depend>rviz</depend>
 
   <doc_depend>doxygen</doc_depend>
 </package>
