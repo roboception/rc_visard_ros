@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_ITEMPICK_CLIENT_CPR_HELPER_H
-#define RC_ITEMPICK_CLIENT_CPR_HELPER_H
+#ifndef RC_PICK_CLIENT_CPR_HELPER_H
+#define RC_PICK_CLIENT_CPR_HELPER_H
 
 #include <json/json.hpp>
 
@@ -62,4 +62,4 @@ class CommunicationHelper
 };
 
 }
-#endif //RC_ITEMPICK_CLIENT_CPR_HELPER_H
+#endif //RC_PICK_CLIENT_CPR_HELPER_H

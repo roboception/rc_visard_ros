@@ -30,8 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ITEMPICK_CLIENT_H
-#define ITEMPICK_CLIENT_H
+#ifndef RC_PICK_CLIENT_ITEMPICK_CLIENT_H
+#define RC_PICK_CLIENT_ITEMPICK_CLIENT_H
+
 #include "pick_client.h"
 #include <rc_pick_client/ComputeGrasps.h>
 
@@ -54,4 +55,4 @@ namespace ros_pick_client {
     };
 }
 
-#endif //ITEMPICK_CLIENT_H
+#endif // RC_PICK_CLIENT_ITEMPICK_CLIENT_H

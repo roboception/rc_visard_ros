@@ -31,8 +31,8 @@
  */
 
 
-#ifndef BOXPICK_CLIENT_H
-#define BOXPICK_CLIENT_H
+#ifndef RC_PICK_CLIENT_BOXPICK_CLIENT_H
+#define RC_PICK_CLIENT_BOXPICK_CLIENT_H
 
 #include "pick_client.h"
 #include "rc_pick_client/ComputeBoxGrasps.h"
@@ -61,4 +61,4 @@ class BoxpickClient : public PickClient
 };
 }
 
-#endif //BOXPICK_CLIENT_H
+#endif // RC_PICK_CLIENT_BOXPICK_CLIENT_H

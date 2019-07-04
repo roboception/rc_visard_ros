@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PICK_CLIENT_H
-#define PICK_CLIENT_H
+#ifndef RC_PICK_CLIENT_PICK_CLIENT_H
+#define RC_PICK_CLIENT_PICK_CLIENT_H
 
 #include <std_srvs/Trigger.h>
 
@@ -118,4 +118,4 @@ class PickClient
 };
 }
 
-#endif //PICK_CLIENT_H
+#endif // RC_PICK_CLIENT_PICK_CLIENT_H

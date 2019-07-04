@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef RC_PICK_CLIENT_UTILS_H
+#define RC_PICK_CLIENT_UTILS_H
 
 #include "json/json.hpp"
 #include <geometry_msgs/Pose.h>
@@ -91,4 +91,4 @@ void rosItemModelsToJson(const std::vector<rc_pick_client::ItemModel> &ros_item_
 void rosCompartmentToJson(const rc_pick_client::Compartment &ros_compartment, json &json_compartment);
 }
 
-#endif //UTILS_H
+#endif //RC_PICK_CLIENT_UTILS_H
