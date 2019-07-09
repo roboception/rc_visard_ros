@@ -22,6 +22,7 @@
   <exec_depend>message_runtime</exec_depend>
 
   <depend>roscpp</depend>
+  <depend>rcdiscover</depend>
   <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
   <depend>shape_msgs</depend>

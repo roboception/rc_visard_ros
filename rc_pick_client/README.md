@@ -26,7 +26,20 @@ Configuration
 
 ### Parameters
 
-* `host`: The IP address or hostname of the rc_visard that should be calibrated
+* `host`: The IP address or hostname of the rc_visard that should be used
+
+**Since version 2.7, the device ID can be used instead of the sensor's IP address:**
+
+* `device`: The ID of the device, i.e. Roboception rc_visard sensor. This can be either:
+
+  * serial number, e.g. `02912345`
+
+    IMPORTANT: preceed with a colon (`:02912345`) when passing this on the commandline or
+    setting it via rosparam (see https://github.com/ros/ros_comm/issues/1339).
+    This is not neccessary when specifying it as a string in a launch file.
+
+  * user defined name (factory default is the name of the rc_visard's model), must be unique among all
+    reachable sensors
 
 ### Dynamic reconfigure parameters
 
@@ -63,12 +76,22 @@ Launch
 
 Using command line parameters:
 
-ItemPick:
+**For the ItemPick module:**
 ~~~
-rosrun rc_pick_client rc_itempick_client_node _host:=sensor_ip
+rosrun rc_pick_client rc_itempick_client_node _host:=<sensor_ip>
+~~~
+Since version 2.7:
+~~~
+rosrun rc_pick_client rc_itempick_client_node _device:=:<serial_number>
 ~~~
 
-BoxPick:
+
+**For the BoxPick module:**
 ~~~
-rosrun rc_pick_client rc_boxpick_client_node _host:=sensor_ip
+rosrun rc_pick_client rc_boxpick_client_node _host:=<sensor_ip>
+~~~
+
+Since version 2.7:
+~~~
+rosrun rc_pick_client rc_boxpick_client_node _device:=:<serial_number>
 ~~~

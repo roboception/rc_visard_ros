@@ -3,9 +3,9 @@ ROS Hand-eye calibration client for Roboception's rc_visard
 
 This node provides ROS service calls and topics to calibrate the rc_visard to a robot (aka hand-eye calibration).
 
-It also provides the new or pre-existing calibration via /tf or /tf_static.
+It also provides the new or pre-existing calibration via `/tf` or `/tf_static`.
 The default behavior is to request the existing calibration of the rc_visard
-once on startup, broadcast it (latched) on /tf_static and only broadcast again
+once on startup, broadcast it (latched) on `/tf_static` and only broadcast again
 if the advertised ROS services `calibrate` or `get_calibration` are called.
 
 The calibration routine consists of several steps:
@@ -44,24 +44,34 @@ Configuration
 
 ### Parameters
 
-* `host`: The IP address or hostname of the rc_visard that should be calibrated
+* `host`: The IP address or hostname of the rc_visard that should be calibrated.
 * `rc_visard_frame_id`: Name of the frame on the rc_visard when calibrating. Default: "camera"
 * `end_effector_frame_id`: Name of the frame calibrated to when using a `robot_mounted` (see below) rc_visard. Default: "end_effector".
 * `base_frame_id`: Name of the frame calibrated to when using a statically (externally) mounted rc_visard (`robot_mounted == false`). Default: "base_link"
-* `calibration_request_period`: Decimal number, controls the requesting of calibration from the rc_visard. Default: 0.0.
-  * If positive: Interval in seconds for automated requests to get the latest calibration
-  * If zero: Only request once on startup (default)
+* `calibration_request_period`: Decimal number, controls the requesting of calibration from the rc_visard. Default: 0.0
+  * If positive: Interval in seconds for automated requests to get the latest calibration.
+  * If zero: Only request once on startup (default).
   * If negative, the calibration is never requested.
   * In any case, new results will be broadcast when the services `calibrate` or `get_calibration` (see further below) of this node are called.
-* `calibration_publication_period`: Decimal number, controls broadcasting of the calibration on /tf or /tf_static. Default: 0.0
+* `calibration_publication_period`: Decimal number, controls broadcasting of the calibration on `/tf` or `/tf_static`. Default: 0.0
   * If positive: Interval in seconds.
-  * If negative or zero, the calibration is broadcast on /tf_static only when changed in a manual or periodic calibration request (default)
+  * If negative or zero, the calibration is broadcast on `/tf_static` only when changed in a manual or periodic calibration request (default).
+
+**Since version 2.7, the device ID can be used instead of the sensor's IP address:**
+
+* `device`: The ID of the device, i.e. Roboception rc_visard sensor. This can be either:
+  * serial number, e.g. `02912345`.
+    IMPORTANT: preceed with a colon (`:02912345`) when passing this on the commandline or
+    setting it via rosparam (see https://github.com/ros/ros_comm/issues/1339).
+    This is not neccessary when specifying it as a string in a launch file.
+  * user defined name (factory default is the name of the rc_visard's model), must be unique among all
+    reachable sensors.
 
 ### Dynamic reconfigure parameters
 
-* `grid_width`: The width of the calibration pattern in meters
-* `grid_height`: The height of the calibration pattern in meters
-* `robot_mounted` Whether the camera is mounted on the robot or not
+* `grid_width`: The width of the calibration pattern in meters.
+* `grid_height`: The height of the calibration pattern in meters.
+* `robot_mounted` Whether the camera is mounted on the robot or not.
 
 Services
 --------
@@ -70,10 +80,10 @@ The following services are offered to follow the calibration routine:
 
 * `reset_calibration`: Deletes all previously provided poses and corresponding images. The last saved calibration result is reloaded. This service might be used to (re-)start the hand-eye calibration from scratch.
 * `set_pose`: Provides a robot pose as calibration pose to the hand-eye calibration routine.
-* `calibrate`: Calculates and returns the hand-eye calibration transformation with the robot poses configured by the `set_pose` service. Broadcast the result via /tf or /tf_static.
-* `get_calibration`: Returns the existing hand-eye calibration transformation. Broadcast the result via /tf or /tf_static.
+* `calibrate`: Calculates and returns the hand-eye calibration transformation with the robot poses configured by the `set_pose` service. Broadcasts the result via `/tf` or `/tf_static`.
+* `get_calibration`: Returns the existing hand-eye calibration transformation. Broadcasts the result via `/tf` or `/tf_static`.
 * `save_calibration`: Persistently saves the result of hand-eye calibration to the rc_visard and overwrites the existing one. The stored result can be retrieved any time by the get_calibration service.
-* `remove_calibration`: Removes the stored hand-eye calibration on the rc_visard. After this call the `get_calibration` service reports again that no hand-eye calibration is available. Periodic broadcasting via /tf will be stopped.
+* `remove_calibration`: Removes the stored hand-eye calibration on the rc_visard. After this call the `get_calibration` service reports again that no hand-eye calibration is available. Periodic broadcasting via `/tf` will be stopped.
 
 
 Launching
@@ -82,5 +92,11 @@ Launching
 Using command line parameters:
 
 ~~~bash
-rosrun rc_hand_eye_calibration_client rc_hand_eye_calibration_client_node _host:="10.0.2.44"
+rosrun rc_hand_eye_calibration_client rc_hand_eye_calibration_client_node _host:=<sensor_ip>
+~~~
+
+**Since version 2.7:**
+
+~~~bash
+rosrun rc_hand_eye_calibration_client rc_hand_eye_calibration_client_node _device:=:<serial_number>
 ~~~

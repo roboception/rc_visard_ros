@@ -25,6 +25,7 @@ add_subdirectory(opt)
 find_package(catkin REQUIRED COMPONENTS
         roscpp message_generation std_srvs geometry_msgs dynamic_reconfigure tf visualization_msgs rc_common_msgs tf2_geometry_msgs
         )
+find_package(RCDISCOVER REQUIRED)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -97,10 +98,12 @@ add_dependencies(rc_qr_node rc_tagdetect_client_gencfg)
 target_link_libraries(rc_april_node
         ${catkin_LIBRARIES}
         ${CPR_LIBRARIES}
+        rcdiscover::rcdiscover
         )
 target_link_libraries(rc_qr_node
         ${catkin_LIBRARIES}
         ${CPR_LIBRARIES}
+        rcdiscover::rcdiscover
         )
 
 ############
