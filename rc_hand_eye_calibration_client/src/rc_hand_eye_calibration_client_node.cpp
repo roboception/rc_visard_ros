@@ -53,7 +53,7 @@ std::string getHost(const std::string &device_name, const std::string &interface
 
   if (devices.empty())
   {
-    ROS_FATAL_STREAM("No device found under the name: "<< device_name);
+    ROS_FATAL_STREAM("No device found with the name '" << device_name << "'");
     return "";
   }
   else if (devices.size() > 1)
@@ -62,11 +62,9 @@ std::string getHost(const std::string &device_name, const std::string &interface
                      << "'. Please specify a unique device name.");
     return "";
   }
-  else
-  {
-    ROS_INFO_STREAM("Using device: " << devices[0][0] << " with IP address: " << devices[0][1]);
-    return devices[0][1];
-  }
+
+  ROS_INFO_STREAM("Using device '" << device_name << "' with name '" << devices[0][0] << "' and IP address " << devices[0][1]);
+  return devices[0][1];
 }
 
 int main(int argc, char **argv)
