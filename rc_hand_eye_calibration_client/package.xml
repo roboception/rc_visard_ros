@@ -19,6 +19,7 @@
   <depend>curl</depend>
 
   <depend>roscpp</depend>
+  <depend>rcdiscover</depend>
   <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
   <depend>tf2</depend>

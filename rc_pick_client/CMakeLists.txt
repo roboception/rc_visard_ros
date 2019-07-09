@@ -28,7 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
   )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(RCDISCOVER REQUIRED)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -111,10 +111,12 @@ add_dependencies(rc_boxpick_client_node rc_pick_client_gencfg)
 target_link_libraries(rc_itempick_client_node
         ${catkin_LIBRARIES}
         ${CPR_LIBRARIES}
-)
+        rcdiscover::rcdiscover
+        )
 target_link_libraries(rc_boxpick_client_node
         ${catkin_LIBRARIES}
         ${CPR_LIBRARIES}
+        rcdiscover::rcdiscover
         )
 
 #############

@@ -33,6 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+find_package(RCDISCOVER REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -155,6 +156,7 @@ add_dependencies(rc_hand_eye_calibration_client_node rc_hand_eye_calibration_cli
 target_link_libraries(rc_hand_eye_calibration_client_node
   ${catkin_LIBRARIES}
   ${CPR_LIBRARIES}
+  rcdiscover::rcdiscover
 )
 
 #############
