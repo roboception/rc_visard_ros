@@ -1,3 +1,13 @@
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package rc_pick_client
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+2.7.0 (2019-07-19)
+------------------
+* add BoxPick client `rc_boxpick_client_node`
+* add `device` parameter that can take serial number or GEV name
+  (has precedence over old `host` parameter)
+
 2.6.4 (2019-06-19)
 ------------------
 

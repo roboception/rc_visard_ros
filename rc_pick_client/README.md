@@ -26,20 +26,14 @@ Configuration
 
 ### Parameters
 
-* `host`: The IP address or hostname of the rc_visard that should be used
-
-**Since version 2.7, the device ID can be used instead of the sensor's IP address:**
-
 * `device`: The ID of the device, i.e. Roboception rc_visard sensor. This can be either:
-
-  * serial number, e.g. `02912345`
-
+  * serial number, e.g. `02912345`.
     IMPORTANT: preceed with a colon (`:02912345`) when passing this on the commandline or
     setting it via rosparam (see https://github.com/ros/ros_comm/issues/1339).
     This is not neccessary when specifying it as a string in a launch file.
-
   * user defined name (factory default is the name of the rc_visard's model), must be unique among all
-    reachable sensors
+    reachable sensors.
+* `host`: If `device` is not used: The IP address or hostname of the rc_visard
 
 ### Dynamic reconfigure parameters
 
@@ -68,6 +62,7 @@ The following services are offered by the node:
 * `compute_grasps`: Triggers the computation of grasping poses for a suction device. All images used by the node are guaranteed to be newer than the service trigger time.
 
 For the BoxPick node, an additional service is offered:
+
 * `detect_items`: Triggers the detection of rectangles.
 
 
@@ -77,21 +72,13 @@ Launch
 Using command line parameters:
 
 **For the ItemPick module:**
-~~~
-rosrun rc_pick_client rc_itempick_client_node _host:=<sensor_ip>
-~~~
-Since version 2.7:
+
 ~~~
 rosrun rc_pick_client rc_itempick_client_node _device:=:<serial_number>
 ~~~
 
-
 **For the BoxPick module:**
-~~~
-rosrun rc_pick_client rc_boxpick_client_node _host:=<sensor_ip>
-~~~
 
-Since version 2.7:
 ~~~
 rosrun rc_pick_client rc_boxpick_client_node _device:=:<serial_number>
 ~~~

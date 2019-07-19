@@ -2,6 +2,11 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2019-07-19)
+------------------
+* replaced std_srvs/Trigger with rc_common_msgs/Trigger
+* add support for setting exposure region via dynamic_reconfigure
+
 2.6.4 (2019-06-19)
 ------------------
 * fix race condition when changing exposure mode from auto to manual

@@ -26,21 +26,15 @@ Configuration
 
 ### Parameters
 
-* `host`: The IP address or hostname of the rc_visard that should be used.
-
-**Since version 2.7, the device ID can be used instead of the sensor's IP address:**
-
 * `device`: The ID of the device, i.e. Roboception rc_visard sensor. This can be either:
-
   * serial number, e.g. `02912345`.
-
     IMPORTANT: preceed with a colon (`:02912345`) when passing this on the commandline or
     setting it via rosparam (see https://github.com/ros/ros_comm/issues/1339).
     This is not neccessary when specifying it as a string in a launch file.
-
   * user defined name (factory default is the name of the rc_visard's model), must be unique among all
     reachable sensors.
-    
+* `host`: If `device` is not used: The IP address or hostname of the rc_visard
+
 ### Dynamic reconfigure parameters
 
 * `use_cached_images`: Use most recently received image pair instead of waiting for a new pair.
@@ -65,13 +59,6 @@ Launching
 ---------
 
 Using command line parameters:
-
-~~~
-rosrun rc_tagdetect_client rc_april_node _host:=<sensor_ip>
-rosrun rc_tagdetect_client rc_qr_node _host:=<sensor_ip>
-~~~
-
-**Since version 2.7:**
 
 ~~~
 rosrun rc_tagdetect_client rc_april_node _device:=:<serial_number>

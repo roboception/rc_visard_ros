@@ -150,6 +150,14 @@ These parameters can be changed during runtime via dynamic reconfigure:
 
 * `camera_gain_value`: Gain factor in decibel if exp_auto is false.
 
+* Auto exposure region: Definition of a region in the left image,
+  if the region has zero size or is outside the image,
+  then the full left and right image is used to determine the auto exposure.
+  * `camera_exp_width`: Width of auto exposure region. 0 for whole image.
+  * `camera_exp_height`: Height of auto exposure region. 0 for whole image.
+  * `camera_exp_offset_x`: First column of auto exposure region
+  * `camera_exp_offset_y`: First row of auto exposure region
+
 * `depth_acquisition_mode`: Can be either `SingleFrame` or `Continuous`. Only
   the first letter will be checked, thus giving `S` or `C` is sufficient.
 

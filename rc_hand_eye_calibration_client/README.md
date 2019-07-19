@@ -44,7 +44,14 @@ Configuration
 
 ### Parameters
 
-* `host`: The IP address or hostname of the rc_visard that should be calibrated.
+* `device`: The ID of the device, i.e. Roboception rc_visard sensor. This can be either:
+  * serial number, e.g. `02912345`.
+    IMPORTANT: preceed with a colon (`:02912345`) when passing this on the commandline or
+    setting it via rosparam (see https://github.com/ros/ros_comm/issues/1339).
+    This is not neccessary when specifying it as a string in a launch file.
+  * user defined name (factory default is the name of the rc_visard's model), must be unique among all
+    reachable sensors.
+* `host`: If `device` is not used: The IP address or hostname of the rc_visard that should be calibrated.
 * `rc_visard_frame_id`: Name of the frame on the rc_visard when calibrating. Default: "camera"
 * `end_effector_frame_id`: Name of the frame calibrated to when using a `robot_mounted` (see below) rc_visard. Default: "end_effector".
 * `base_frame_id`: Name of the frame calibrated to when using a statically (externally) mounted rc_visard (`robot_mounted == false`). Default: "base_link"
@@ -56,16 +63,6 @@ Configuration
 * `calibration_publication_period`: Decimal number, controls broadcasting of the calibration on `/tf` or `/tf_static`. Default: 0.0
   * If positive: Interval in seconds.
   * If negative or zero, the calibration is broadcast on `/tf_static` only when changed in a manual or periodic calibration request (default).
-
-**Since version 2.7, the device ID can be used instead of the sensor's IP address:**
-
-* `device`: The ID of the device, i.e. Roboception rc_visard sensor. This can be either:
-  * serial number, e.g. `02912345`.
-    IMPORTANT: preceed with a colon (`:02912345`) when passing this on the commandline or
-    setting it via rosparam (see https://github.com/ros/ros_comm/issues/1339).
-    This is not neccessary when specifying it as a string in a launch file.
-  * user defined name (factory default is the name of the rc_visard's model), must be unique among all
-    reachable sensors.
 
 ### Dynamic reconfigure parameters
 
@@ -90,12 +87,6 @@ Launching
 ---------
 
 Using command line parameters:
-
-~~~bash
-rosrun rc_hand_eye_calibration_client rc_hand_eye_calibration_client_node _host:=<sensor_ip>
-~~~
-
-**Since version 2.7:**
 
 ~~~bash
 rosrun rc_hand_eye_calibration_client rc_hand_eye_calibration_client_node _device:=:<serial_number>
