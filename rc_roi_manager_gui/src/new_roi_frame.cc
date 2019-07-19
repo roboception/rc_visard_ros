@@ -49,8 +49,7 @@ NewRoiFrame::NewRoiFrame(const wxString &title, RoiManagerFrame *manager, std::s
   manager_->Show(false);
   nh_ = std::make_shared<ros::NodeHandle>();
   client_set_roi_ = nh_->serviceClient<rc_pick_client::SetRegionOfInterest>(
-          "/" + pick_module + "/set_region_of_interest",
-          true);
+          "/" + pick_module + "/set_region_of_interest");
 
   wxPanel *panel = new wxPanel(this, -1);
   auto name_str = new wxStaticText(panel, wxID_ANY, wxT("Roi Name"));

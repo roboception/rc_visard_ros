@@ -60,10 +60,10 @@ RoiManagerFrame::RoiManagerFrame(const wxString &title)
   ROS_INFO_STREAM("Using: " << pick_module_ << " as pick module.");
   ROS_ASSERT((pick_module_ == "rc_itempick") || (pick_module_ == "rc_boxpick"));
   client_get_roi_ = nh_->serviceClient<rc_pick_client::GetRegionsOfInterest>
-          ("/" + pick_module_ + "/get_regions_of_interest", true);
+          ("/" + pick_module_ + "/get_regions_of_interest");
   client_delete_roi_ = nh_->serviceClient<rc_pick_client::DeleteRegionsOfInterest>(
-          "/" + pick_module_ + "/delete_regions_of_interest", true);
-  interactive_roi_server_ = std::make_shared<InteractiveRoiSelection>();
+          "/" + pick_module_ + "/delete_regions_of_interest");
+
   client_get_roi_.waitForExistence();
   interactive_roi_server_ = std::make_shared<InteractiveRoiSelection>();
 
