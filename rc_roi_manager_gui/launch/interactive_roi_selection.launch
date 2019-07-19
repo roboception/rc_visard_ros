@@ -1,18 +1,18 @@
 <launch>
         <arg name="device" />
-        <arg name="rc_package" />
+        <arg name="pick_module" />
         <node type="rviz" name="rviz" pkg="rviz" args="-d $(find rc_roi_manager_gui)/config/config.rviz" />
         <node type="rc_hand_eye_calibration_client_node" name="rc_hand_eye_calibration_client"
               pkg="rc_hand_eye_calibration_client" args="_device:=$(arg device) _base_frame_id:=external _calibration_publication_period:=0" />
         <node type="rc_visard_driver" name="rc_visard_driver" pkg="rc_visard_driver" args="_device:=$(arg device)" />
 
-        <group if="$(eval arg('rc_package') == 'rc_itempick')">
+        <group if="$(eval arg('pick_module') == 'rc_itempick')">
                 <node  type="rc_itempick_client_node" name="rc_itempick" pkg="rc_pick_client" args="_device:=$(arg device)" />
         </group>
-        <group if="$(eval arg('rc_package') == 'rc_boxpick')">
+        <group if="$(eval arg('pick_module') == 'rc_boxpick')">
                 <node  type="rc_boxpick_client_node" name="rc_boxpick" pkg="rc_pick_client" args="_device:=$(arg device)" />
         </group>
 
-        <node type="rc_roi_manager_gui" name="rc_roi_manager_gui" pkg="rc_roi_manager_gui" args="_pick_module:=$(arg rc_package)" >
+        <node type="rc_roi_manager_gui" name="rc_roi_manager_gui" pkg="rc_roi_manager_gui" args="_pick_module:=$(arg pick_module)" >
         </node>
 </launch>
