@@ -716,20 +716,7 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
     l &= ~(16384 | 32768 | 65536);
   }
 
-  if (dev_supports_depth_acquisition_trigger)
-  {
-    c.depth_acquisition_mode = c.depth_acquisition_mode.substr(0, 1);
-
-    if (c.depth_acquisition_mode[0] == 'S')
-    {
-      c.depth_acquisition_mode = "SingleFrame";
-    }
-    else
-    {
-      c.depth_acquisition_mode = "Continuous";
-    }
-  }
-  else
+  if (!dev_supports_depth_acquisition_trigger)
   {
     c.depth_acquisition_mode = "Continuous";
     l &= ~1048576;
@@ -926,7 +913,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         std::string val;
         for (size_t i = 0; i < list.size(); i++)
         {
-          if (list[i].compare(0, 1, cfg.depth_acquisition_mode, 0, 1) == 0)
+          if (list[i].compare(cfg.depth_acquisition_mode) == 0)
           {
             val = list[i];
           }
@@ -1405,6 +1392,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
           {
             perform_depth_acquisition_trigger = false;
             rcg::callCommand(rcgnodemap, "DepthAcquisitionTrigger", true);
+            ROS_INFO("rc_visard_driver: Depth image acquisition triggered");
           }
 
           // determine what should be streamed, according to subscriptions to
