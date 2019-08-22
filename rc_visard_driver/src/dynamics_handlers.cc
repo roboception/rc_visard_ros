@@ -112,8 +112,11 @@ void handleDynamicsStateChangeRequest(rcd::RemoteInterface::Ptr dynIF, DynamicsC
     resp.return_code.message = "rcdynamics remote interface not yet initialized!";
   }
 
-  if (!resp.return_code.value)
-    ROS_ERROR_STREAM(resp.return_code.message);
+  std::stringstream msg;
+  msg << "rc_visard_driver: dynamics state change request returned with code: "
+      << resp.return_code.value << " msg: " << resp.return_code.message;
+  ROS_INFO_STREAM_COND(resp.return_code.value > ReturnCodeConstants::SUCCESS, msg.str());
+  ROS_ERROR_STREAM_COND(resp.return_code.value < ReturnCodeConstants::SUCCESS, msg.str());
 }
 }
 
@@ -217,8 +220,11 @@ bool DeviceNodelet::saveSlamMap(rc_common_msgs::Trigger::Request& req, rc_common
     resp.return_code.message = "rcdynamics remote interface not yet initialized!";
   }
 
-  if (resp.return_code.value < ReturnCodeConstants::SUCCESS)
-    ROS_ERROR_STREAM(resp.return_code.message);
+  std::stringstream msg;
+  msg << "rc_visard_driver: save slam map request returned with code: "
+      << resp.return_code.value << " msg: " << resp.return_code.message;
+  ROS_INFO_STREAM_COND(resp.return_code.value > ReturnCodeConstants::SUCCESS, msg.str());
+  ROS_ERROR_STREAM_COND(resp.return_code.value < ReturnCodeConstants::SUCCESS, msg.str());
 
   return true;
 }
@@ -245,8 +251,11 @@ bool DeviceNodelet::loadSlamMap(rc_common_msgs::Trigger::Request& req, rc_common
     resp.return_code.message = "rcdynamics remote interface not yet initialized!";
   }
 
-  if (resp.return_code.value < ReturnCodeConstants::SUCCESS)
-    ROS_ERROR_STREAM(resp.return_code.message);
+  std::stringstream msg;
+  msg << "rc_visard_driver: load slam map request returned with code: "
+      << resp.return_code.value << " msg: " << resp.return_code.message;
+  ROS_INFO_STREAM_COND(resp.return_code.value > ReturnCodeConstants::SUCCESS, msg.str());
+  ROS_ERROR_STREAM_COND(resp.return_code.value < ReturnCodeConstants::SUCCESS, msg.str());
 
   return true;
 }
@@ -273,8 +282,11 @@ bool DeviceNodelet::removeSlamMap(rc_common_msgs::Trigger::Request& req, rc_comm
     resp.return_code.message = "rcdynamics remote interface not yet initialized!";
   }
 
-  if (resp.return_code.value < ReturnCodeConstants::SUCCESS)
-    ROS_ERROR_STREAM(resp.return_code.message);
+  std::stringstream msg;
+  msg << "rc_visard_driver: remove slam map request returned with code: "
+      << resp.return_code.value << " msg: " << resp.return_code.message;
+  ROS_INFO_STREAM_COND(resp.return_code.value > ReturnCodeConstants::SUCCESS, msg.str());
+  ROS_ERROR_STREAM_COND(resp.return_code.value < ReturnCodeConstants::SUCCESS, msg.str());
 
   return true;
 }
