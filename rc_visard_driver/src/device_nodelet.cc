@@ -128,6 +128,7 @@ DeviceNodelet::DeviceNodelet()
 {
   reconfig = 0;
   dev_supports_gain = false;
+  dev_supports_chunk_data = false;
   dev_supports_wb = false;
   dev_supports_depth_acquisition_trigger = false;
   perform_depth_acquisition_trigger = false;
@@ -639,10 +640,6 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     {
       ROS_INFO("rc_visard_driver: License for iocontrol module not available, disabling out1_mode and out2_mode.");
     }
-
-    // enabling chunk data for getting the live line status
-
-    rcg::setBoolean(nodemap, "ChunkModeActive", iocontrol_avail, false);
   }
   catch (const std::exception&)
   {
@@ -654,6 +651,15 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     iocontrol_avail = false;
   }
 
+  // enabling chunk data for getting live camera/image parameters
+  // (e.g. line status, current gain and exposure, etc.)
+
+  dev_supports_chunk_data = rcg::setBoolean(nodemap, "ChunkModeActive", true, false);
+  if (!dev_supports_chunk_data)
+  {
+    ROS_WARN("rc_visard_driver: rc_visard has an older firmware that does not support chunk data.");
+
+  }
 
   // try to get ROS parameters: if parameter is not set in parameter server, default to current sensor configuration
 
@@ -1256,7 +1262,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       std::shared_ptr<GenApi::CChunkAdapter> chunkadapter;
 
-      if (iocontrol_avail)
+      if (dev_supports_chunk_data)
       {
         chunkadapter = rcg::getChunkAdapter(rcgnodemap, rcgdev->getTLType());
       }
