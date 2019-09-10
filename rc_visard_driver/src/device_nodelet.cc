@@ -33,6 +33,7 @@
 
 #include "device_nodelet.h"
 #include "publishers/camera_info_publisher.h"
+#include "publishers/camera_params_publisher.h"
 #include "publishers/image_publisher.h"
 #include "publishers/disparity_publisher.h"
 #include "publishers/disparity_color_publisher.h"
@@ -62,6 +63,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <tf/transform_broadcaster.h>
 #include <rc_common_msgs/ReturnCodeConstants.h>
+#include <rc_common_msgs/CameraParams.h>
 
 namespace {
 
@@ -1189,7 +1191,38 @@ int enable(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap, const char* comp
 
   return 0;
 }
+
+rc_common_msgs::CameraParams extractChunkData(const std::shared_ptr<GenApi::CNodeMapRef>& rcgnodemap)
+{
+  rc_common_msgs::CameraParams cam_params;
+
+  // get list of all available IO lines and iterate over them to get their LineSource values
+  std::vector<std::string> lines;
+  rcg::getEnum(rcgnodemap, "ChunkLineSelector", lines, false);
+  for (auto&& line : lines)
+  {
+    rc_common_msgs::KeyValue line_source;
+    line_source.key = line;
+    rcg::setEnum(rcgnodemap, "ChunkLineSelector", line.c_str(), false);       // set respective selector
+    line_source.value = rcg::getEnum(rcgnodemap, "ChunkLineSource", false);   // get the actual source value
+    cam_params.line_source.push_back(line_source);
+  }
+
+  // get LineStatusAll
+  cam_params.line_status_all = rcg::getInteger(rcgnodemap, "ChunkLineStatusAll", 0, 0, false);
+
+  // get camera's exposure time and gain value
+  cam_params.gain = rcg::getFloat(rcgnodemap, "ChunkGain", 0, 0, false);
+  cam_params.exposure_time = rcg::getFloat(rcgnodemap, "ChunkExposureTime", 0, 0, false) / 1000000l;
+
+  // calculate camera's noise level
+  static float NOISE_BASE = 2.0;
+  cam_params.noise = NOISE_BASE * std::exp(cam_params.gain * std::log(10)/20);
+
+  return cam_params;
 }
+
+} //anonymous namespace
 
 void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 {
@@ -1273,10 +1306,9 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
       int disprange = config.depth_disprange;
       bool is_depth_acquisition_continuous = (config.depth_acquisition_mode[0] == 'C');
 
-      // prepare chunk adapter for getting chunk data, if iocontrol is available
+      // prepare chunk adapter for getting chunk data
 
       std::shared_ptr<GenApi::CChunkAdapter> chunkadapter;
-
       if (dev_supports_chunk_data)
       {
         chunkadapter = rcg::getChunkAdapter(rcgnodemap, rcgdev->getTLType());
@@ -1313,6 +1345,16 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
         rimage_color = std::make_shared<ImagePublisher>(it, tfPrefix, false, true, iocontrol_avail);
       }
 
+      // add camera/image params publishers if the camera supports chunkdata
+
+      std::shared_ptr<CameraParamsPublisher> lcamparams;
+      std::shared_ptr<CameraParamsPublisher> rcamparams;
+      if (dev_supports_chunk_data)
+      {
+        lcamparams = std::make_shared<CameraParamsPublisher>(nh, tfPrefix, true);
+        rcamparams = std::make_shared<CameraParamsPublisher>(nh, tfPrefix, false);
+      }
+
       // start streaming of first stream
 
       std::vector<std::shared_ptr<rcg::Stream> > stream = rcgdev->getStreams();
@@ -1340,15 +1382,18 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
                               << gev_packet_size << ")");
             }
 
-            // get out1 line status from chunk data if possible
+            // get camera/image parameters (GenICam chunk data) if possible
+            // (e.g. out1_mode, line_status_all, current gain and exposure, etc.)
 
             bool out1 = false;
-            if (iocontrol_avail && chunkadapter && buffer->getContainsChunkdata())
+            if (chunkadapter && buffer->getContainsChunkdata())
             {
               chunkadapter->AttachBuffer(reinterpret_cast<std::uint8_t*>(buffer->getGlobalBase()),
                                                                          buffer->getSizeFilled());
-              out1 = (rcg::getInteger(rcgnodemap, "ChunkLineStatusAll", 0, 0, false) & 0x1);
             }
+            rc_common_msgs::CameraParams cam_params = extractChunkData(rcgnodemap);
+            cam_params.is_color_camera = dev_supports_color;
+            out1 = (cam_params.line_status_all & 0x1);
 
             uint32_t npart=buffer->getNumberOfParts();
             for (uint32_t part=0; part<npart; part++)
@@ -1369,6 +1414,12 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
                 lcaminfo.publish(buffer, part, pixelformat);
                 rcaminfo.publish(buffer, part, pixelformat);
+
+                if (lcamparams && rcamparams)
+                {
+                  lcamparams->publish(buffer, cam_params);
+                  rcamparams->publish(buffer, cam_params);
+                }
 
                 limage.publish(buffer, part, pixelformat, out1);
                 rimage.publish(buffer, part, pixelformat, out1);
