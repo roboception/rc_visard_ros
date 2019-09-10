@@ -128,6 +128,7 @@ DeviceNodelet::DeviceNodelet()
 {
   reconfig = 0;
   dev_supports_gain = false;
+  dev_supports_color = false;
   dev_supports_chunk_data = false;
   dev_supports_wb = false;
   dev_supports_depth_acquisition_trigger = false;
@@ -537,10 +538,24 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     cfg.camera_gain_value = 0;
   }
 
+  // check if camera is color camera
+
+  std::vector<std::string> formats;
+  rcg::setEnum(rcgnodemap, "ComponentSelector", "Intensity", true);
+  rcg::getEnum(rcgnodemap, "PixelFormat", formats, true);
+  for (auto&& format : formats)
+  {
+    if (format == "YCbCr411_8")
+    {
+      dev_supports_color = true;
+      break;
+    }
+  }
+
   // get optional white balancing values (only for color camera)
 
   v = rcg::getEnum(nodemap, "BalanceWhiteAuto", false);
-  if (v.size() > 0)
+  if (dev_supports_color && v.size() > 0)
   {
     dev_supports_wb = true;
     cfg.camera_wb_auto = (v != "Off");
@@ -1292,21 +1307,10 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       std::shared_ptr<ImagePublisher> limage_color;
       std::shared_ptr<ImagePublisher> rimage_color;
-
+      if (dev_supports_color)
       {
-        std::vector<std::string> format;
-        rcg::setEnum(rcgnodemap, "ComponentSelector", "Intensity", true);
-        rcg::getEnum(rcgnodemap, "PixelFormat", format, true);
-
-        for (size_t i = 0; i < format.size(); i++)
-        {
-          if (format[i] == "YCbCr411_8")
-          {
-            limage_color = std::make_shared<ImagePublisher>(it, tfPrefix, true, true, iocontrol_avail);
-            rimage_color = std::make_shared<ImagePublisher>(it, tfPrefix, false, true, iocontrol_avail);
-            break;
-          }
-        }
+        limage_color = std::make_shared<ImagePublisher>(it, tfPrefix, true, true, iocontrol_avail);
+        rimage_color = std::make_shared<ImagePublisher>(it, tfPrefix, false, true, iocontrol_avail);
       }
 
       // start streaming of first stream
