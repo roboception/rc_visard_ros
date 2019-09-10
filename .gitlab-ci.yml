@@ -5,7 +5,8 @@ before_script:
   - curl http://apt.roboception.de/archive.key | apt-key add -
   - export DEBIAN_FRONTEND=noninteractive
   - apt-get update -yq && apt-get install -y lintian rc-genicam-api rc-dynamics-api ros-$ROS_DISTRO-rc-common-msgs rcdiscover
-  - rosdep install --from-paths . --ignore-src -r -y --skip-keys="rc_genicam_api rc_dynamics_api"
+  - if [ "$DISTRO_CODENAME" = "bionic" ]; then apt-get install -y rcdiscover-dev; fi
+  - rosdep install --from-paths . --ignore-src -r -y --skip-keys="rc_genicam_api rc_dynamics_api rcdiscover"
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
