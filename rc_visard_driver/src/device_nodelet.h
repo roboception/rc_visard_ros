@@ -54,6 +54,8 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 
+#include <tf2_ros/static_transform_broadcaster.h>
+
 namespace rc
 {
 class DeviceNodelet : public nodelet::Nodelet
@@ -106,7 +108,8 @@ public:
 private:
   static ThreadedStream::Ptr CreateDynamicsStreamOfType(rc::dynamics::RemoteInterface::Ptr rcdIface,
                                                         const std::string& stream, ros::NodeHandle& nh,
-                                                        const std::string& frame_id_prefix, bool tfEnabled);
+                                                        const std::string& frame_id_prefix, bool tfEnabled,
+                                                        bool staticImu2CamTf);
 
   void initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
                          rc_visard_driver::rc_visard_driverConfig& cfg, rcg::Device::ACCESS access);
@@ -165,6 +168,7 @@ private:
   ros::ServiceServer slamLoadMapService;
   ros::ServiceServer slamRemoveMapService;
   ros::Publisher trajPublisher;
+  tf2_ros::StaticTransformBroadcaster tfStaticBroadcaster;
   bool autostartDynamics, autostopDynamics, autostartSlam, autopublishTrajectory;
 
   /// all frame names must be prefixed when using more than one rc_visard

@@ -42,6 +42,8 @@
 #include "publishers/error_depth_publisher.h"
 #include "publishers/points2_publisher.h"
 
+#include "publishers/protobuf2ros_conversions.h"
+
 #include <rc_genicam_api/device.h>
 #include <rc_genicam_api/stream.h>
 #include <rc_genicam_api/buffer.h>
@@ -103,7 +105,8 @@ using rc_common_msgs::ReturnCodeConstants;
 
 ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(rcd::RemoteInterface::Ptr rcdIface,
                                                               const std::string& stream, ros::NodeHandle& nh,
-                                                              const std::string& frame_id_prefix, bool tfEnabled)
+                                                              const std::string& frame_id_prefix, bool tfEnabled,
+                                                              bool staticImu2CamTf)
 {
   if (stream == "pose")
   {
@@ -115,7 +118,7 @@ ThreadedStream::Ptr DeviceNodelet::CreateDynamicsStreamOfType(rcd::RemoteInterfa
   }
   if (stream == "dynamics" || stream == "dynamics_ins")
   {
-    return ThreadedStream::Ptr(new DynamicsStream(rcdIface, stream, nh, frame_id_prefix));
+    return ThreadedStream::Ptr(new DynamicsStream(rcdIface, stream, nh, frame_id_prefix, !staticImu2CamTf));
   }
 
   throw std::runtime_error(std::string("Not yet implemented! Stream type: ") + stream);
@@ -398,6 +401,34 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
           }
         }
 
+        // get and publish static transform between IMU and camera (if feature available)
+
+        bool staticImu2CamTf = false;
+        try {
+          auto pbFrame = dynamicsInterface->getCam2ImuTransform();
+
+          // first prefix all frame ids
+          pbFrame.set_name(tfPrefix + pbFrame.name());
+          pbFrame.set_parent(tfPrefix + pbFrame.parent());
+
+          // invert cam2imu and convert to tf transform
+          auto imu2cam = tf::StampedTransform(
+                            toRosTfTransform(pbFrame.pose().pose()).inverse(),
+                            toRosTime(pbFrame.pose().timestamp()),
+                            pbFrame.name(), pbFrame.parent());
+          // send it
+          geometry_msgs::TransformStamped msg;
+          tf::transformStampedTFToMsg(imu2cam, msg);
+          tfStaticBroadcaster.sendTransform(msg);
+          staticImu2CamTf = true;
+
+        } catch (rcd::RemoteInterface::NotAvailable& e)
+        {
+          ROS_WARN_STREAM("rc_visard_driver: Could not get and publish static transformation between camera and IMU "
+                          << "because feature is not avilable in that rc_visard firmware version. Please update the firmware image "
+                          << "or subscribe to the dynamics topic to have that transformation available in tf.");
+        }
+
         // add streaming thread for each available stream on rc_visard device
 
         auto availStreams = dynamicsInterface->getAvailableStreams();
@@ -407,7 +438,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
           try
           {
             auto newStream =
-                CreateDynamicsStreamOfType(dynamicsInterface, streamName, getNodeHandle(), tfPrefix, tfEnabled);
+                CreateDynamicsStreamOfType(dynamicsInterface, streamName, getNodeHandle(), tfPrefix, tfEnabled, staticImu2CamTf);
             dynamicsStreams->add(newStream);
           }
           catch (const std::exception& e)
@@ -443,6 +474,7 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
       imageThread = std::thread(&DeviceNodelet::grab, this, device, access_id);
     }
     dynamicsStreams->start_all();
+
   }
 
   if (autostopDynamics)

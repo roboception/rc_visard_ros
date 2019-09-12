@@ -247,11 +247,14 @@ void DynamicsStream::initRosPublishers()
   // create publishers
 
   _pub_odom = shared_ptr<ros::Publisher>(new ros::Publisher(_nh.advertise<nav_msgs::Odometry>(_stream, 1000)));
-  _tf_pub = shared_ptr<tf::TransformBroadcaster>(new tf::TransformBroadcaster());
   if (_publishVisualizationMarkers)
   {
     _pub_markers = shared_ptr<ros::Publisher>(new ros::Publisher(
         _nh.advertise<visualization_msgs::Marker>("dynamics_visualization_markers", 1000)));
+  }
+  if (_publishImu2CamAsTf)
+  {
+    _tf_pub = shared_ptr<tf::TransformBroadcaster>(new tf::TransformBroadcaster());
   }
 }
 
@@ -275,13 +278,14 @@ void DynamicsStream::publishToRos(shared_ptr<::google::protobuf::Message> pbMsg)
   // time stamp of this message
   ros::Time msgStamp = toRosTime(protoMsg->timestamp());
 
-  // convert cam2imu_transform to tf and publish it - TODO: Do we need it?
-  auto cam2imu = toRosTfStampedTransform(protoMsg->cam2imu_transform());
-  // from dynamics-module we get cam2imu (i.e. camera-pose in imu-frame), but we
-  //    want to have imu2cam (i.e. imu-pose in camera frame) - TODO: WHY ???
-  // overwriting cam2imu timestamp as this would be too old for normal use with tf
-  auto imu2cam = tf::StampedTransform(cam2imu.inverse(), msgStamp, cam2imu.child_frame_id_, cam2imu.frame_id_);
-  _tf_pub->sendTransform(imu2cam);
+  // if desired, invert and convert cam2imu to tf and publish it
+  if (_publishImu2CamAsTf)
+  {
+    auto cam2imu = toRosTfStampedTransform(protoMsg->cam2imu_transform());
+    // overwriting cam2imu timestamp as this would be too old for normal use with tf
+    auto imu2cam = tf::StampedTransform(cam2imu.inverse(), msgStamp, cam2imu.child_frame_id_, cam2imu.frame_id_);
+    _tf_pub->sendTransform(imu2cam);
+  }
 
   // convert pose to transform to use it for transformations
   auto imu2world_rot_only = toRosTfTransform(protoMsg->pose());
