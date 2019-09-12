@@ -116,8 +116,8 @@ class DynamicsStream : public Protobuf2RosStream
 {
 public:
   DynamicsStream(rc::dynamics::RemoteInterface::Ptr rcdIface, const std::string& stream, ros::NodeHandle& nh,
-                 const std::string& frame_id_prefix)
-    : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix), _publishVisualizationMarkers(false)
+                 const std::string& frame_id_prefix, bool publishImu2CamAsTf)
+    : Protobuf2RosStream(rcdIface, stream, nh, frame_id_prefix), _publishVisualizationMarkers(false), _publishImu2CamAsTf(publishImu2CamAsTf)
   {
     std::string pbMsgType = _rcdyn->getPbMsgTypeOfStream(_stream);
     if (pbMsgType != "Dynamics")
@@ -134,10 +134,10 @@ protected:
   virtual bool checkRosPublishersUsed() override;
   virtual void publishToRos(std::shared_ptr<::google::protobuf::Message> pbMsg) override;
 
-  std::shared_ptr<tf::TransformBroadcaster> _tf_pub;
   std::shared_ptr<ros::Publisher> _pub_odom;
   std::shared_ptr<ros::Publisher> _pub_markers;
-  bool _publishVisualizationMarkers;
+  std::shared_ptr<tf::TransformBroadcaster> _tf_pub;
+  bool _publishVisualizationMarkers, _publishImu2CamAsTf;
 };
 
 }
