@@ -127,8 +127,10 @@ private:
   dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>* reconfig;
 
   bool dev_supports_gain;
+  bool dev_supports_color;
   bool dev_supports_wb;
   bool dev_supports_depth_acquisition_trigger;
+  bool dev_supports_chunk_data;
 
   bool perform_depth_acquisition_trigger;
 

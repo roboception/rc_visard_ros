@@ -5,6 +5,7 @@ set(SRC
     protobuf2ros_stream.cc
     ThreadedStream.cc
     publishers/camera_info_publisher.cc
+    publishers/camera_params_publisher.cc
     publishers/image_publisher.cc
     publishers/disparity_publisher.cc
     publishers/disparity_color_publisher.cc

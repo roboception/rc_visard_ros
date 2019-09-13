@@ -33,6 +33,7 @@
 
 #include "device_nodelet.h"
 #include "publishers/camera_info_publisher.h"
+#include "publishers/camera_params_publisher.h"
 #include "publishers/image_publisher.h"
 #include "publishers/disparity_publisher.h"
 #include "publishers/disparity_color_publisher.h"
@@ -62,6 +63,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <tf/transform_broadcaster.h>
 #include <rc_common_msgs/ReturnCodeConstants.h>
+#include <rc_common_msgs/CameraParams.h>
 
 namespace {
 
@@ -128,6 +130,8 @@ DeviceNodelet::DeviceNodelet()
 {
   reconfig = 0;
   dev_supports_gain = false;
+  dev_supports_color = false;
+  dev_supports_chunk_data = false;
   dev_supports_wb = false;
   dev_supports_depth_acquisition_trigger = false;
   perform_depth_acquisition_trigger = false;
@@ -536,10 +540,24 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     cfg.camera_gain_value = 0;
   }
 
+  // check if camera is color camera
+
+  std::vector<std::string> formats;
+  rcg::setEnum(rcgnodemap, "ComponentSelector", "Intensity", true);
+  rcg::getEnum(rcgnodemap, "PixelFormat", formats, true);
+  for (auto&& format : formats)
+  {
+    if (format == "YCbCr411_8")
+    {
+      dev_supports_color = true;
+      break;
+    }
+  }
+
   // get optional white balancing values (only for color camera)
 
   v = rcg::getEnum(nodemap, "BalanceWhiteAuto", false);
-  if (v.size() > 0)
+  if (dev_supports_color && v.size() > 0)
   {
     dev_supports_wb = true;
     cfg.camera_wb_auto = (v != "Off");
@@ -639,10 +657,6 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     {
       ROS_INFO("rc_visard_driver: License for iocontrol module not available, disabling out1_mode and out2_mode.");
     }
-
-    // enabling chunk data for getting the live line status
-
-    rcg::setBoolean(nodemap, "ChunkModeActive", iocontrol_avail, false);
   }
   catch (const std::exception&)
   {
@@ -654,6 +668,15 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     iocontrol_avail = false;
   }
 
+  // enabling chunk data for getting live camera/image parameters
+  // (e.g. line status, current gain and exposure, etc.)
+
+  dev_supports_chunk_data = rcg::setBoolean(nodemap, "ChunkModeActive", true, false);
+  if (!dev_supports_chunk_data)
+  {
+    ROS_WARN("rc_visard_driver: rc_visard has an older firmware that does not support chunk data.");
+
+  }
 
   // try to get ROS parameters: if parameter is not set in parameter server, default to current sensor configuration
 
@@ -1168,7 +1191,38 @@ int enable(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap, const char* comp
 
   return 0;
 }
+
+rc_common_msgs::CameraParams extractChunkData(const std::shared_ptr<GenApi::CNodeMapRef>& rcgnodemap)
+{
+  rc_common_msgs::CameraParams cam_params;
+
+  // get list of all available IO lines and iterate over them to get their LineSource values
+  std::vector<std::string> lines;
+  rcg::getEnum(rcgnodemap, "ChunkLineSelector", lines, false);
+  for (auto&& line : lines)
+  {
+    rc_common_msgs::KeyValue line_source;
+    line_source.key = line;
+    rcg::setEnum(rcgnodemap, "ChunkLineSelector", line.c_str(), false);       // set respective selector
+    line_source.value = rcg::getEnum(rcgnodemap, "ChunkLineSource", false);   // get the actual source value
+    cam_params.line_source.push_back(line_source);
+  }
+
+  // get LineStatusAll
+  cam_params.line_status_all = rcg::getInteger(rcgnodemap, "ChunkLineStatusAll", 0, 0, false);
+
+  // get camera's exposure time and gain value
+  cam_params.gain = rcg::getFloat(rcgnodemap, "ChunkGain", 0, 0, false);
+  cam_params.exposure_time = rcg::getFloat(rcgnodemap, "ChunkExposureTime", 0, 0, false) / 1000000l;
+
+  // calculate camera's noise level
+  static float NOISE_BASE = 2.0;
+  cam_params.noise = NOISE_BASE * std::exp(cam_params.gain * std::log(10)/20);
+
+  return cam_params;
 }
+
+} //anonymous namespace
 
 void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 {
@@ -1252,11 +1306,10 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
       int disprange = config.depth_disprange;
       bool is_depth_acquisition_continuous = (config.depth_acquisition_mode[0] == 'C');
 
-      // prepare chunk adapter for getting chunk data, if iocontrol is available
+      // prepare chunk adapter for getting chunk data
 
       std::shared_ptr<GenApi::CChunkAdapter> chunkadapter;
-
-      if (iocontrol_avail)
+      if (dev_supports_chunk_data)
       {
         chunkadapter = rcg::getChunkAdapter(rcgnodemap, rcgdev->getTLType());
       }
@@ -1286,21 +1339,20 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       std::shared_ptr<ImagePublisher> limage_color;
       std::shared_ptr<ImagePublisher> rimage_color;
-
+      if (dev_supports_color)
       {
-        std::vector<std::string> format;
-        rcg::setEnum(rcgnodemap, "ComponentSelector", "Intensity", true);
-        rcg::getEnum(rcgnodemap, "PixelFormat", format, true);
+        limage_color = std::make_shared<ImagePublisher>(it, tfPrefix, true, true, iocontrol_avail);
+        rimage_color = std::make_shared<ImagePublisher>(it, tfPrefix, false, true, iocontrol_avail);
+      }
 
-        for (size_t i = 0; i < format.size(); i++)
-        {
-          if (format[i] == "YCbCr411_8")
-          {
-            limage_color = std::make_shared<ImagePublisher>(it, tfPrefix, true, true, iocontrol_avail);
-            rimage_color = std::make_shared<ImagePublisher>(it, tfPrefix, false, true, iocontrol_avail);
-            break;
-          }
-        }
+      // add camera/image params publishers if the camera supports chunkdata
+
+      std::shared_ptr<CameraParamsPublisher> lcamparams;
+      std::shared_ptr<CameraParamsPublisher> rcamparams;
+      if (dev_supports_chunk_data)
+      {
+        lcamparams = std::make_shared<CameraParamsPublisher>(nh, tfPrefix, true);
+        rcamparams = std::make_shared<CameraParamsPublisher>(nh, tfPrefix, false);
       }
 
       // start streaming of first stream
@@ -1330,15 +1382,18 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
                               << gev_packet_size << ")");
             }
 
-            // get out1 line status from chunk data if possible
+            // get camera/image parameters (GenICam chunk data) if possible
+            // (e.g. out1_mode, line_status_all, current gain and exposure, etc.)
 
             bool out1 = false;
-            if (iocontrol_avail && chunkadapter && buffer->getContainsChunkdata())
+            if (chunkadapter && buffer->getContainsChunkdata())
             {
               chunkadapter->AttachBuffer(reinterpret_cast<std::uint8_t*>(buffer->getGlobalBase()),
                                                                          buffer->getSizeFilled());
-              out1 = (rcg::getInteger(rcgnodemap, "ChunkLineStatusAll", 0, 0, false) & 0x1);
             }
+            rc_common_msgs::CameraParams cam_params = extractChunkData(rcgnodemap);
+            cam_params.is_color_camera = dev_supports_color;
+            out1 = (cam_params.line_status_all & 0x1);
 
             uint32_t npart=buffer->getNumberOfParts();
             for (uint32_t part=0; part<npart; part++)
@@ -1359,6 +1414,12 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
                 lcaminfo.publish(buffer, part, pixelformat);
                 rcaminfo.publish(buffer, part, pixelformat);
+
+                if (lcamparams && rcamparams)
+                {
+                  lcamparams->publish(buffer, cam_params);
+                  rcamparams->publish(buffer, cam_params);
+                }
 
                 limage.publish(buffer, part, pixelformat, out1);
                 rimage.publish(buffer, part, pixelformat, out1);
