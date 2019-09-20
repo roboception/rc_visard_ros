@@ -182,7 +182,7 @@ private:
   /// diagnostics publishing
   diagnostic_updater::Updater updater;
   std::string dev_serialno, dev_macaddr, dev_ipaddr, dev_version, gev_userid, gev_packet_size;
-  unsigned int totalIncompleteBuffers, totalImageReceiveTimeouts, totalConnectionLosses;
+  unsigned int totalCompleteBuffers, totalIncompleteBuffers, totalImageReceiveTimeouts, totalConnectionLosses;
 };
 }
 

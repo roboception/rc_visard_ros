@@ -146,6 +146,7 @@ DeviceNodelet::DeviceNodelet()
   recoveryRequested = true;
   cntConsecutiveRecoveryFails = -1;  // first time not giving any warnings
   atLeastOnceSuccessfullyStarted = false;
+  totalCompleteBuffers = 0;
   totalIncompleteBuffers = 0;
   totalConnectionLosses = 0;
   totalImageReceiveTimeouts = 0;
@@ -1375,6 +1376,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
           if (buffer != 0 && !buffer->getIsIncomplete())
           {
+            totalCompleteBuffers++;
             if (gev_packet_size.size() == 0)
             {
               gev_packet_size = rcg::getString(rcgnodemap, "GevSCPSPacketSize", true, true);
@@ -1634,6 +1636,7 @@ bool DeviceNodelet::depthAcquisitionTrigger(rc_common_msgs::Trigger::Request& re
 void DeviceNodelet::produce_connection_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
   stat.add("connection_loss_total", totalConnectionLosses);
+  stat.add("complete_buffers_total", totalCompleteBuffers);
   stat.add("incomplete_buffers_total", totalIncompleteBuffers);
   stat.add("image_receive_timeouts_total", totalImageReceiveTimeouts);
   stat.add("current_reconnect_trial", cntConsecutiveRecoveryFails);
