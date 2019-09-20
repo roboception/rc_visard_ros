@@ -1,11 +1,10 @@
 before_script:
   - export DISTRO_CODENAME=`lsb_release -cs` && echo Using distro $DISTRO_CODENAME
+  - export DEBIAN_FRONTEND=noninteractive
   - echo "deb http://apt.roboception.de/stable $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-stable.list
   - if [ "$TESTING_DEBS" = "true" ]; then echo "deb http://apt.roboception.de/testing $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-testing.list ; fi
   - curl http://apt.roboception.de/archive.key | apt-key add -
-  - export DEBIAN_FRONTEND=noninteractive
-  - apt-get update -yq && apt-get install -y lintian rc-genicam-api rc-dynamics-api ros-$ROS_DISTRO-rc-common-msgs rcdiscover
-  - if [ "$DISTRO_CODENAME" = "bionic" ]; then apt-get install -y rcdiscover-dev; fi
+  - apt-get update -yq && apt-get install -y lintian rc-genicam-api rc-dynamics-api ros-$ROS_DISTRO-rc-common-msgs ros-$ROS_DISTRO-rcdiscover
   - rosdep install --from-paths . --ignore-src -r -y --skip-keys="rc_genicam_api rc_dynamics_api rcdiscover"
 
 variables:
