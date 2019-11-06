@@ -979,6 +979,11 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         {
           rcg::setEnum(nodemap, "DepthAcquisitionMode", val.c_str(), true);
         }
+        else
+        {
+          ROS_WARN_STREAM("DepthAcquisitionMode " << cfg.depth_acquisition_mode << " not supported by rc_visard");
+        }
+
       }
 
       if (lvl & 16)
@@ -1542,7 +1547,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             firstTime = false;
           }
 
-          // check if dynamic configuration hast changed
+          // check if dynamic configuration has changed
 
           if (level != 0)
           {
