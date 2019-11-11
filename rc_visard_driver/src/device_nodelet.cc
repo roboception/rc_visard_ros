@@ -98,6 +98,31 @@ namespace {
     }
     return device_ids;
   }
+
+  int getDownscaleFromQuality(const std::string &quality)
+  {
+    char q='H';
+    if (quality.size() > 0)
+    {
+      q=quality[0];
+    }
+
+    switch (q)
+    {
+      case 'F':
+        return 1;
+
+      case 'M':
+        return 4;
+
+      case 'L':
+        return 6;
+
+      case 'H':
+      default:
+        return 2;
+    }
+  }
 }
 
 namespace rc
@@ -1309,7 +1334,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       initConfiguration(rcgnodemap, config, access);
 
-      int disprange = config.depth_disprange;
+      int disprange = config.depth_disprange/getDownscaleFromQuality(config.depth_quality)*2;
       bool is_depth_acquisition_continuous = (config.depth_acquisition_mode[0] == 'C');
 
       // prepare chunk adapter for getting chunk data
@@ -1561,7 +1586,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
             setConfiguration(rcgnodemap, cfg, lvl, iocontrol_avail);
 
-            disprange = cfg.depth_disprange;
+            disprange = cfg.depth_disprange/getDownscaleFromQuality(cfg.depth_quality)*2;
 
             // if in alternate mode, then make publishers aware of it
 
