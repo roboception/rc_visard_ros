@@ -1588,23 +1588,6 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
             disprange = cfg.depth_disprange/getDownscaleFromQuality(cfg.depth_quality)*2;
 
-            // if in alternate mode, then make publishers aware of it
-
-            if (lvl & 262144)
-            {
-              bool alternate = (cfg.out1_mode == "ExposureAlternateActive");
-
-              limage.setOut1Alternate(alternate);
-              rimage.setOut1Alternate(alternate);
-              points2.setOut1Alternate(alternate);
-
-              if (limage_color && rimage_color)
-              {
-                limage_color->setOut1Alternate(alternate);
-                rimage_color->setOut1Alternate(alternate);
-              }
-            }
-
             // if depth acquisition changed to continuous mode, reset last
             // grabbing time to avoid triggering timout if only disparity,
             // confidence and/or error components are enabled
@@ -1618,6 +1601,30 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
                 tlastimage = ros::SteadyTime::now();
               }
             }
+          }
+
+          // get and publish possibly updated dynamic reconfigure value for out1
+          // (which is the only GEV parameter which could have changed outside this code,
+          //  i.e. on the rc_visard by the stereomatching module)
+          rcg::setEnum(rcgnodemap, "LineSelector", "Out1", true);
+          std::string out1_mode_on_sensor = rcg::getString(rcgnodemap, "LineSource", true);
+          mtx.lock();
+          if (out1_mode_on_sensor != config.out1_mode)
+          {
+            config.out1_mode = out1_mode_on_sensor;
+            reconfig->updateConfig(config);
+          }
+          mtx.unlock();
+
+          // if in alternate mode, then make publishers aware of it
+          bool alternate = (out1_mode_on_sensor == "ExposureAlternateActive");
+          limage.setOut1Alternate(alternate);
+          rimage.setOut1Alternate(alternate);
+          points2.setOut1Alternate(alternate);
+          if (limage_color && rimage_color)
+          {
+            limage_color->setOut1Alternate(alternate);
+            rimage_color->setOut1Alternate(alternate);
           }
         }
 
