@@ -1426,7 +1426,27 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
               // get current out1 mode
               rcg::setEnum(rcgnodemap, "ChunkLineSelector", "Out1", false);
-              out1_mode_on_sensor = rcg::getEnum(rcgnodemap, "ChunkLineSource", false);
+              std::string v = rcg::getEnum(rcgnodemap, "ChunkLineSource", false);
+
+              if (v.size() > 0)
+              {
+                out1_mode_on_sensor = v;
+              }
+            }
+
+            // if in alternate mode, then make publishers aware of it before
+            // publishing
+
+            bool alternate = (out1_mode_on_sensor == "ExposureAlternateActive");
+
+            limage.setOut1Alternate(alternate);
+            rimage.setOut1Alternate(alternate);
+            points2.setOut1Alternate(alternate);
+
+            if (limage_color && rimage_color)
+            {
+              limage_color->setOut1Alternate(alternate);
+              rimage_color->setOut1Alternate(alternate);
             }
 
             rc_common_msgs::CameraParams cam_params = extractChunkData(rcgnodemap);
@@ -1632,17 +1652,6 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             reconfig->updateConfig(config);
           }
           mtx.unlock();
-
-          // if in alternate mode, then make publishers aware of it
-          bool alternate = (out1_mode_on_sensor == "ExposureAlternateActive");
-          limage.setOut1Alternate(alternate);
-          rimage.setOut1Alternate(alternate);
-          points2.setOut1Alternate(alternate);
-          if (limage_color && rimage_color)
-          {
-            limage_color->setOut1Alternate(alternate);
-            rimage_color->setOut1Alternate(alternate);
-          }
         }
 
         stream[0]->stopStreaming();
