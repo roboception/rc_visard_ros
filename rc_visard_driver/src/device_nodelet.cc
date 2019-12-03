@@ -1399,6 +1399,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
         // enter grabbing loop
         ros::SteadyTime tlastimage = ros::SteadyTime::now();
+        std::string out1_mode_on_sensor;
 
         while (!stopImageThread)
         {
@@ -1422,7 +1423,12 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             {
               chunkadapter->AttachBuffer(reinterpret_cast<std::uint8_t*>(buffer->getGlobalBase()),
                                                                          buffer->getSizeFilled());
+
+              // get current out1 mode
+              rcg::setEnum(rcgnodemap, "ChunkLineSelector", "Out1", false);
+              out1_mode_on_sensor = rcg::getEnum(rcgnodemap, "ChunkLineSource", false);
             }
+
             rc_common_msgs::CameraParams cam_params = extractChunkData(rcgnodemap);
             cam_params.is_color_camera = dev_supports_color;
             out1 = (cam_params.line_status_all & 0x1);
@@ -1509,6 +1515,12 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
               tlastimage = ros::SteadyTime::now();
             }
+
+            // get out1 mode from sensor (this is also used to check if the
+            // connection is still valid)
+
+            rcg::setEnum(rcgnodemap, "LineSelector", "Out1", true);
+            out1_mode_on_sensor = rcg::getString(rcgnodemap, "LineSource", true, true);
           }
 
           // trigger depth
@@ -1603,12 +1615,17 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             }
           }
 
-          // get and publish possibly updated dynamic reconfigure value for out1
+          // update out1 mode, if it is different to current settings on sensor
           // (which is the only GEV parameter which could have changed outside this code,
           //  i.e. on the rc_visard by the stereomatching module)
-          rcg::setEnum(rcgnodemap, "LineSelector", "Out1", true);
-          std::string out1_mode_on_sensor = rcg::getString(rcgnodemap, "LineSource", true);
+
           mtx.lock();
+          if (out1_mode_on_sensor.size() == 0)
+          {
+            // use current settings if the value on the sensor cannot be determined
+            out1_mode_on_sensor = config.out1_mode;
+          }
+
           if (out1_mode_on_sensor != config.out1_mode)
           {
             config.out1_mode = out1_mode_on_sensor;
