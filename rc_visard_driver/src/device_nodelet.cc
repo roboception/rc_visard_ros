@@ -1497,6 +1497,14 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
                 error_depth.publish(buffer, part, pixelformat);
 
                 points2.publish(buffer, part, pixelformat, out1);
+
+                // use out1_mode for updating dynamic parameters (below) only
+                // from buffers with intensity images
+
+                if (pixelformat != Mono8 && pixelformat != YCbCr411_8)
+                {
+                  out1_mode_on_sensor = "";
+                }
               }
             }
 
