@@ -31,48 +31,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "camera_params_publisher.h"
+#ifndef RC_CAMERAPARAMPUBLISHER_H
+#define RC_CAMERAPARAMPUBLISHER_H
 
-#include <rc_genicam_api/pixel_formats.h>
+#include "genicam2ros_publisher.h"
+
+#include <ros/ros.h>
+#include <rc_common_msgs/CameraParam.h>
 
 namespace rc
 {
-CameraParamsPublisher::CameraParamsPublisher(ros::NodeHandle& nh,
-                    const std::string& frame_id_prefix, bool left)
-  : frame_id(frame_id_prefix + "camera")
+class CameraParamPublisher
 {
-  // advertise topic
+public:
+  CameraParamPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, bool left);
 
-  if (left)
-  {
-    pub = nh.advertise<rc_common_msgs::CameraParams>("left/camera_params", 1);
-  }
-  else
-  {
-    pub = nh.advertise<rc_common_msgs::CameraParams>("right/camera_params", 1);
-  }
+  bool used();
+
+  void publish(const rcg::Buffer* buffer, const rc_common_msgs::CameraParam& params,
+    uint64_t pixelformat);
+
+private:
+  CameraParamPublisher(const CameraParamPublisher&);             // forbidden
+  CameraParamPublisher& operator=(const CameraParamPublisher&);  // forbidden
+
+  std::string frame_id;
+  // rc_common_msgs::CameraParam params;
+  ros::Publisher pub;
+};
 }
 
-bool CameraParamsPublisher::used()
-{
-  return pub.getNumSubscribers() > 0;
-}
-
-void CameraParamsPublisher::publish(const rcg::Buffer* buffer, const rc_common_msgs::CameraParams& p)
-{
-  if (pub.getNumSubscribers() > 0)
-  {
-    const uint64_t freq = 1000000000ul;
-    uint64_t time = buffer->getTimestampNS();
-
-    // params.header.seq++;
-    auto params = p;
-    params.header.frame_id = frame_id;
-    params.header.stamp.sec = time / freq;
-    params.header.stamp.nsec = time - freq * params.header.stamp.sec;
-
-    pub.publish(params);
-  }
-}
-
-}
+#endif

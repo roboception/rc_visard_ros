@@ -33,7 +33,7 @@
 
 #include "device_nodelet.h"
 #include "publishers/camera_info_publisher.h"
-#include "publishers/camera_params_publisher.h"
+#include "publishers/camera_param_publisher.h"
 #include "publishers/image_publisher.h"
 #include "publishers/disparity_publisher.h"
 #include "publishers/disparity_color_publisher.h"
@@ -63,7 +63,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <tf/transform_broadcaster.h>
 #include <rc_common_msgs/ReturnCodeConstants.h>
-#include <rc_common_msgs/CameraParams.h>
+#include <rc_common_msgs/CameraParam.h>
 
 namespace {
 
@@ -1223,9 +1223,9 @@ int enable(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap, const char* comp
   return 0;
 }
 
-rc_common_msgs::CameraParams extractChunkData(const std::shared_ptr<GenApi::CNodeMapRef>& rcgnodemap)
+rc_common_msgs::CameraParam extractChunkData(const std::shared_ptr<GenApi::CNodeMapRef>& rcgnodemap)
 {
-  rc_common_msgs::CameraParams cam_params;
+  rc_common_msgs::CameraParam cam_param;
 
   // get list of all available IO lines and iterate over them to get their LineSource values
   std::vector<std::string> lines;
@@ -1236,21 +1236,21 @@ rc_common_msgs::CameraParams extractChunkData(const std::shared_ptr<GenApi::CNod
     line_source.key = line;
     rcg::setEnum(rcgnodemap, "ChunkLineSelector", line.c_str(), false);       // set respective selector
     line_source.value = rcg::getEnum(rcgnodemap, "ChunkLineSource", false);   // get the actual source value
-    cam_params.line_source.push_back(line_source);
+    cam_param.line_source.push_back(line_source);
   }
 
   // get LineStatusAll
-  cam_params.line_status_all = rcg::getInteger(rcgnodemap, "ChunkLineStatusAll", 0, 0, false);
+  cam_param.line_status_all = rcg::getInteger(rcgnodemap, "ChunkLineStatusAll", 0, 0, false);
 
   // get camera's exposure time and gain value
-  cam_params.gain = rcg::getFloat(rcgnodemap, "ChunkGain", 0, 0, false);
-  cam_params.exposure_time = rcg::getFloat(rcgnodemap, "ChunkExposureTime", 0, 0, false) / 1000000l;
+  cam_param.gain = rcg::getFloat(rcgnodemap, "ChunkGain", 0, 0, false);
+  cam_param.exposure_time = rcg::getFloat(rcgnodemap, "ChunkExposureTime", 0, 0, false) / 1000000l;
 
   // calculate camera's noise level
   static float NOISE_BASE = 2.0;
-  cam_params.noise = NOISE_BASE * std::exp(cam_params.gain * std::log(10)/20);
+  cam_param.noise = NOISE_BASE * std::exp(cam_param.gain * std::log(10)/20);
 
-  return cam_params;
+  return cam_param;
 }
 
 } //anonymous namespace
@@ -1378,12 +1378,12 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       // add camera/image params publishers if the camera supports chunkdata
 
-      std::shared_ptr<CameraParamsPublisher> lcamparams;
-      std::shared_ptr<CameraParamsPublisher> rcamparams;
+      std::shared_ptr<CameraParamPublisher> lcamparams;
+      std::shared_ptr<CameraParamPublisher> rcamparams;
       if (dev_supports_chunk_data)
       {
-        lcamparams = std::make_shared<CameraParamsPublisher>(nh, tfPrefix, true);
-        rcamparams = std::make_shared<CameraParamsPublisher>(nh, tfPrefix, false);
+        lcamparams = std::make_shared<CameraParamPublisher>(nh, tfPrefix, true);
+        rcamparams = std::make_shared<CameraParamPublisher>(nh, tfPrefix, false);
       }
 
       // start streaming of first stream
@@ -1449,9 +1449,9 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
               rimage_color->setOut1Alternate(alternate);
             }
 
-            rc_common_msgs::CameraParams cam_params = extractChunkData(rcgnodemap);
-            cam_params.is_color_camera = dev_supports_color;
-            out1 = (cam_params.line_status_all & 0x1);
+            rc_common_msgs::CameraParam cam_param = extractChunkData(rcgnodemap);
+            cam_param.is_color_camera = dev_supports_color;
+            out1 = (cam_param.line_status_all & 0x1);
 
             uint32_t npart=buffer->getNumberOfParts();
             for (uint32_t part=0; part<npart; part++)
@@ -1475,8 +1475,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
                 if (lcamparams && rcamparams)
                 {
-                  lcamparams->publish(buffer, cam_params);
-                  rcamparams->publish(buffer, cam_params);
+                  lcamparams->publish(buffer, cam_param, pixelformat);
+                  rcamparams->publish(buffer, cam_param, pixelformat);
                 }
 
                 limage.publish(buffer, part, pixelformat, out1);
@@ -1582,7 +1582,10 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
                                rimage.used() || (rimage_color && rimage_color->used()));
 
           changed += enable(rcgnodemap, "Intensity", cintensity,
-                            !cintensitycombined && (lcaminfo.used() || rcaminfo.used() || limage.used() ||
+                            !cintensitycombined && (lcaminfo.used() || rcaminfo.used() ||
+                                                    (lcamparams && lcamparams->used()) ||
+                                                    (rcamparams && rcamparams->used()) ||
+                                                    limage.used() ||
                                                     (limage_color && limage_color->used()) || points2.used()));
 
           changed += enable(rcgnodemap, "Disparity", cdisparity,

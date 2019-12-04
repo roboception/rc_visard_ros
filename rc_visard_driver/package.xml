@@ -23,7 +23,7 @@
   <depend>curl</depend>
   <depend version_gte="2.0.0">rc_genicam_api</depend>
   <depend version_gte="0.10.0">rc_dynamics_api</depend>
-  <depend version_gte="0.3.0">rc_common_msgs</depend>
+  <depend version_gte="0.4.0">rc_common_msgs</depend>
 
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
