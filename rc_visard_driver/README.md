@@ -243,6 +243,8 @@ to the corresponding topic.
 
 * /stereo/left/camera_info (sensor_msgs::CameraInfo)
 * /stereo/right/camera_info (sensor_msgs::CameraInfo)
+* /stereo/left/camera_param (rc_common_msgs::CameraParam)
+* /stereo/right/camera_param (rc_common_msgs::CameraParam)
 * /stereo/left/image_rect (sensor_msgs::Image, MONO8)
 * /stereo/right/image_rect (sensor_msgs::Image, MONO8)
 * /stereo/disparity (stereo_msgs::DisparityImage)
@@ -252,6 +254,10 @@ to the corresponding topic.
 * /stereo/error_disparity (sensor_msgs::Image, TYPE_32FC1)
 * /stereo/error_depth (sensor_msgs::Image, TYPE_32FC1)
 * /stereo/points2 (sensor_msgs::PointCloud2)
+
+The proprietary CameraParam messages are sent for every image and contain
+information like the exposure time, gain and values of digital inputs and
+outputs at the time of image capture.
 
 For color sensors, the following topics are additionally available:
 
