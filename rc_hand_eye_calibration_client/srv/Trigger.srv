@@ -1,0 +1,10 @@
+# Description: Trigger action
+#like std_srvs/Trigger, with additional status code (to be used for translations of the message)
+---
+bool success
+#0: Success
+#1: Saving calibration failed
+#2: Calibration result is not available
+#3: Reset successful
+int32 status
+string message

@@ -4,8 +4,7 @@
 #include <rc_hand_eye_calibration_client/SetCalibrationPose.h>
 #include <rc_hand_eye_calibration_client/Calibration.h>
 #include <rc_hand_eye_calibration_client/hand_eye_calibrationConfig.h>
-
-#include <std_srvs/Trigger.h>
+#include <rc_hand_eye_calibration_client/Trigger.h>
 
 #include <ros/ros.h>
 #include <dynamic_reconfigure/server.h>
@@ -43,16 +42,16 @@ class CalibrationWrapper
     void requestCalibration(const ros::SteadyTimerEvent&);
 
     ///store hand eye calibration on sensor
-    bool saveSrv(std_srvs::TriggerRequest &request,
-                 std_srvs::TriggerResponse &response);
+    bool saveSrv(rc_hand_eye_calibration_client::TriggerRequest &request,
+                 rc_hand_eye_calibration_client::TriggerResponse &response);
 
     ///Delete all stored data, e.g., to start over.
-    bool resetSrv(std_srvs::TriggerRequest &request,
-                  std_srvs::TriggerResponse &response);
+    bool resetSrv(rc_hand_eye_calibration_client::TriggerRequest &request,
+                  rc_hand_eye_calibration_client::TriggerResponse &response);
 
     ///Remove calibration so sensor reports as uncalibrated
-    bool removeSrv(std_srvs::TriggerRequest &request,
-                  std_srvs::TriggerResponse &response);
+    bool removeSrv(rc_hand_eye_calibration_client::TriggerRequest &request,
+                  rc_hand_eye_calibration_client::TriggerResponse &response);
 
     ///Save given pose and the pose of the grid indexed by the given request.slot.
     ///If slot exists, it is overwritten.
@@ -82,7 +81,7 @@ class CalibrationWrapper
     void updateCalibrationCache(const rc_hand_eye_calibration_client::CalibrationResponse& resp);
 
     //ROS Stuff
-    ros::NodeHandle nh_; 
+    ros::NodeHandle nh_;
     ros::ServiceServer srv_set_slot_;
     ros::ServiceServer srv_save_;
     ros::ServiceServer srv_calibrate_;

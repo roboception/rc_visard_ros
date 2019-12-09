@@ -77,6 +77,7 @@ add_service_files(
   FILES
   Calibration.srv
   SetCalibrationPose.srv
+  Trigger.srv
 )
 
 ## Generate actions in the 'action' folder

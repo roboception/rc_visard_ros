@@ -78,8 +78,8 @@ void CalibrationWrapper::initTimers()
   }
 }
 
-bool CalibrationWrapper::saveSrv(std_srvs::TriggerRequest &,
-                                 std_srvs::TriggerResponse &response)
+bool CalibrationWrapper::saveSrv(rc_hand_eye_calibration_client::TriggerRequest &,
+                                 rc_hand_eye_calibration_client::TriggerResponse &response)
 {
   cpr::Url url = cpr::Url{ servicesUrl_ + "save_calibration"};
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
@@ -87,13 +87,14 @@ bool CalibrationWrapper::saveSrv(std_srvs::TriggerRequest &,
 
   auto json_resp = json::parse(rest_resp.text)["response"];
   response.success = (bool) json_resp["success"];
+  response.status = json_resp["status"];
   response.message = json_resp["message"];
   return true;
 }
 
 
-bool CalibrationWrapper::resetSrv(std_srvs::TriggerRequest &,
-                                  std_srvs::TriggerResponse &response)
+bool CalibrationWrapper::resetSrv(rc_hand_eye_calibration_client::TriggerRequest &,
+                                  rc_hand_eye_calibration_client::TriggerResponse &response)
 {
   cpr::Url url = cpr::Url{ servicesUrl_ + "reset_calibration"};
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
@@ -101,13 +102,14 @@ bool CalibrationWrapper::resetSrv(std_srvs::TriggerRequest &,
 
   auto json_resp = json::parse(rest_resp.text)["response"];
   response.success = (bool) json_resp["success"];
+  response.status = json_resp["status"];
   response.message = json_resp["message"];
   return true;
 }
 
 
-bool CalibrationWrapper::removeSrv(std_srvs::TriggerRequest &,
-                                   std_srvs::TriggerResponse &response)
+bool CalibrationWrapper::removeSrv(rc_hand_eye_calibration_client::TriggerRequest &,
+                                   rc_hand_eye_calibration_client::TriggerResponse &response)
 {
   cpr::Url url = cpr::Url{ servicesUrl_ + "remove_calibration"};
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeoutCurl_ });
@@ -115,6 +117,7 @@ bool CalibrationWrapper::removeSrv(std_srvs::TriggerRequest &,
 
   auto json_resp = json::parse(rest_resp.text)["response"];
   response.success = (bool) json_resp["success"];
+  response.status = json_resp["status"];
   response.message = json_resp["message"];
 
   if (response.success)
