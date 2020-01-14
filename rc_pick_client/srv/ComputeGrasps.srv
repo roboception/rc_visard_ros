@@ -1,11 +1,6 @@
 # Description: Triggers the computation of grasp poses for the given items and suction surface.
 
-# A valid pose_frame (either camera or external) is required in the request.
-# It can be provided either with the pose_frame field, as pose_frame of the selected region of interest
-# or as pose_frame of the selected load carrier.
-# If more than one pose_frame is provided, they must to be consistent.
-
-# Optional. Pose frame for output poses.
+# Required. Pose frame for output poses (valid values are camera and external)
 string pose_frame
 
 # Optional
@@ -28,6 +23,9 @@ float64 suction_surface_width
 
 # Required only if reference frame = external and sensor is robot-mounted
 geometry_msgs/Pose robot_pose
+
+# Optional. Enables collision checking of grasps with load carrier
+CollisionDetection collision_detection
 
 ---
 

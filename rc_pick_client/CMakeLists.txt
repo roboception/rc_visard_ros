@@ -34,14 +34,11 @@ find_package(RCDISCOVER REQUIRED)
 ## Declare ROS messages, services and actions ##
 ################################################
 
-file(GLOB_RECURSE MSG_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/msg" "msg/*.msg")
-file(GLOB_RECURSE SRV_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/srv" "srv/*.srv")
-
 ## Generate messages in the 'msg' folder
-add_message_files(FILES ${MSG_FILES})
+add_message_files(FILES Box.msg BoxItem.msg BoxModel.msg CollisionDetection.msg Compartment.msg Item.msg ItemModel.msg LoadCarrier.msg RangeBox.msg RangeRectangle.msg Rectangle.msg RegionOfInterest.msg SuctionGrasp.msg)
 
 # Generate services in the 'srv' folder
-add_service_files(FILES ${SRV_FILES})
+add_service_files(FILES ComputeBoxGrasps.srv ComputeGrasps.srv DeleteLoadCarriers.srv DeleteRegionsOfInterest.srv DetectBoxItems.srv DetectLoadCarriers.srv GetLoadCarriers.srv GetRegionsOfInterest.srv SetLoadCarrier.srv SetRegionOfInterest.srv)
 
 # Generate added messages and services with any dependencies listed here
 generate_messages(

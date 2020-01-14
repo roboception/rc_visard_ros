@@ -60,6 +60,14 @@ namespace ros_pick_client
         js_args["args"]["load_carrier_id"] = request.load_carrier_id;
         utils::rosCompartmentToJson(request.load_carrier_compartment, js_args["args"]["load_carrier_compartment"]);
       }
+      if (request.collision_detection.gripper_id != "") {
+        js_args["args"]["collision_detection"]["gripper_id"] = request.collision_detection.gripper_id;
+        if (request.collision_detection.pre_grasp_offset.x != 0 || request.collision_detection.pre_grasp_offset.y != 0 || request.collision_detection.pre_grasp_offset.z != 0 ) {
+          js_args["args"]["collision_detection"]["pre_grasp_offset"]["x"] = request.collision_detection.pre_grasp_offset.x;
+          js_args["args"]["collision_detection"]["pre_grasp_offset"]["y"] = request.collision_detection.pre_grasp_offset.y;
+          js_args["args"]["collision_detection"]["pre_grasp_offset"]["z"] = request.collision_detection.pre_grasp_offset.z;
+        }
+      }
       if (!request.item_models.empty()) utils::rosItemModelsToJson(request.item_models, js_args["args"]["item_models"]);
 
       //communicating with rc_visard

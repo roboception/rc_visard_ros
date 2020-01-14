@@ -29,6 +29,9 @@ float64 suction_surface_width
 # Required only if reference frame = external and sensor is robot-mounted
 geometry_msgs/Pose robot_pose
 
+# Optional. Enables collision checking of grasps with load carrier
+CollisionDetection collision_detection
+
 ---
 
 time timestamp
