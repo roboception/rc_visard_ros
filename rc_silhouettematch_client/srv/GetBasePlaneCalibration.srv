@@ -1,0 +1,13 @@
+# Description: Returns the configured base-plane calibration.
+
+# Required. Pose frame for output poses (valid values are camera and external)
+string pose_frame
+
+# Required only if sensor is robot-mounted
+geometry_msgs/Pose robot_pose
+
+---
+
+EstimatedPlane plane
+
+rc_common_msgs/ReturnCode return_code
