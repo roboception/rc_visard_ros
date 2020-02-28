@@ -532,6 +532,18 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   std::string v = rcg::getEnum(nodemap, "ExposureAuto", true);
   cfg.camera_exp_auto = (v != "Off");
 
+  if (cfg.camera_exp_auto)
+  {
+    if (v == "Continuous")
+    {
+      cfg.camera_exp_auto_mode = "Normal";
+    }
+    else
+    {
+      cfg.camera_exp_auto_mode = v;
+    }
+  }
+
   cfg.camera_exp_value = rcg::getFloat(nodemap, "ExposureTime", 0, 0, true) / 1000000;
   cfg.camera_exp_max = rcg::getFloat(nodemap, "ExposureTimeAutoMax", 0, 0, true) / 1000000;
 
@@ -708,6 +720,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
   pnh.param("camera_fps", cfg.camera_fps, cfg.camera_fps);
   pnh.param("camera_exp_auto", cfg.camera_exp_auto, cfg.camera_exp_auto);
+  pnh.param("camera_exp_auto_mode", cfg.camera_exp_auto_mode, cfg.camera_exp_auto_mode);
   pnh.param("camera_exp_value", cfg.camera_exp_value, cfg.camera_exp_value);
   pnh.param("camera_gain_value", cfg.camera_gain_value, cfg.camera_gain_value);
   pnh.param("camera_exp_max", cfg.camera_exp_max, cfg.camera_exp_max);
@@ -738,6 +751,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
   pnh.setParam("camera_fps", cfg.camera_fps);
   pnh.setParam("camera_exp_auto", cfg.camera_exp_auto);
+  pnh.setParam("camera_exp_auto_mode", cfg.camera_exp_auto_mode);
   pnh.setParam("camera_exp_value", cfg.camera_exp_value);
   pnh.setParam("camera_gain_value", cfg.camera_gain_value);
   pnh.setParam("camera_exp_max", cfg.camera_exp_max);
@@ -858,7 +872,14 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
     {
       if (c.camera_exp_auto)
       {
-        rcg::setEnum(rcgnodemap, "ExposureAuto", "Continuous", true);
+        std::string mode = c.camera_exp_auto_mode;
+        if (mode == "Normal") mode = "Continuous";
+
+        if (!rcg::setEnum(rcgnodemap, "ExposureAuto", mode.c_str(), false))
+        {
+          c.camera_exp_auto_mode = "Normal";
+          rcg::setEnum(rcgnodemap, "ExposureAuto", "Continuous", true);
+        }
       }
       else
       {
