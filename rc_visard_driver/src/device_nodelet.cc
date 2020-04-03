@@ -1269,7 +1269,14 @@ rc_common_msgs::CameraParam extractChunkData(const std::shared_ptr<GenApi::CNode
 
   // calculate camera's noise level
   static float NOISE_BASE = 2.0;
-  cam_param.noise = NOISE_BASE * std::exp(cam_param.gain * std::log(10)/20);
+
+  rc_common_msgs::KeyValue kv;
+
+  kv.key="noise";
+  kv.value=std::to_string(static_cast<float>(NOISE_BASE * std::exp(cam_param.gain * std::log(10)/20)));
+
+  cam_param.extra_data.clear();
+  cam_param.extra_data.push_back(kv);
 
   return cam_param;
 }
