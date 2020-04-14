@@ -13,6 +13,9 @@ geometry_msgs/Pose robot_pose
 # MANUAL
 string plane_estimation_method
 
+# Options for STEREO calibration
+CalibrateStereoOptions stereo
+
 # Optional
 string region_of_interest_2d_id
 

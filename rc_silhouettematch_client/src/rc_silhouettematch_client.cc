@@ -101,6 +101,10 @@ nlohmann::json requestToJson(const CalibrateBasePlane::Request& req)
   args["pose_frame"] = req.pose_frame;
   args["region_of_interest_2d_id"] = req.region_of_interest_2d_id;
   args["plane_estimation_method"] = req.plane_estimation_method;
+  if (req.plane_estimation_method == "STEREO")
+  {
+    args["stereo"]= { {"plane_preference", req.stereo.plane_preference} };
+  }
   args["offset"] = req.offset;
   args["plane"] = req.plane;
   args["robot_pose"] = req.robot_pose;
