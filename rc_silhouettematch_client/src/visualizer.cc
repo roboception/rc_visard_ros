@@ -32,6 +32,8 @@
 
 #include "visualizer.h"
 
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 namespace rc_silhouettematch_client
 {
 static std::string make_tf_prefix(const ros::NodeHandle& nh)
@@ -62,13 +64,66 @@ static std::string make_tf_prefix(const ros::NodeHandle& nh)
 
 Visualizer::Visualizer(ros::NodeHandle& nh) : tf_prefix_(make_tf_prefix(nh))
 {
+  marker_pub_ = nh.advertise<visualization_msgs::MarkerArray>("silhouettematch_markers", 10);
 }
 
-Visualizer::~Visualizer() = default;
-
-void Visualizer::visBasePlane(const EstimatedPlane& plane)
+Visualizer::~Visualizer()
 {
-  // XXX TODO
+  try
+  {
+    deleteMarkers();
+  }
+  catch (const std::exception &ex)
+  {
+    ROS_FATAL("Exception during destruction of Visualization: %s", ex.what());
+  }
+  catch (...)
+  {
+    ROS_FATAL("Exception during destruction of Visualization");
+  }
+}
+
+void Visualizer::deleteMarkers()
+{
+  for (auto &i : markers_.markers)
+  {
+    i.action = visualization_msgs::Marker::DELETE;
+  }
+  marker_pub_.publish(markers_);
+  markers_.markers.clear();
+}
+
+void Visualizer::visBasePlane(const EstimatedPlane& plane, const ros::Time timestamp)
+{
+  deleteMarkers();
+  // visualize base plane as flat disk
+  visualization_msgs::Marker marker;
+  marker.header.stamp = timestamp;
+  marker.header.frame_id = tf_prefix_ + plane.pose_frame;
+  marker.ns = tf_prefix_ + "base_plane";
+  marker.id = 0;
+  marker.lifetime = ros::Duration();
+  marker.type = visualization_msgs::Marker::CYLINDER;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.scale.x = 1.0;
+  marker.scale.y = 1.0;
+  marker.scale.z = 0.001;
+  marker.pose.position.x = - plane.normal.x * plane.distance;
+  marker.pose.position.y = - plane.normal.y * plane.distance;
+  marker.pose.position.z = - plane.normal.z * plane.distance;
+  // quaternion yielding double the desired rotation (if normal is normalized):
+  // q.w = dot(zaxis, normal), q.xyz = cross(zaxis, normal)
+  // add quaternion with zero rotation (xyz=0, w=1) to get half the rotation from above
+  // and normalize again
+  tf2::Quaternion q(-plane.normal.y, plane.normal.x, 0, plane.normal.z + 1);
+  q.normalize();
+  tf2::convert(q, marker.pose.orientation);
+  marker.color.a = 0.5;
+  marker.color.r = 0.0;
+  marker.color.g = 1.0;
+  marker.color.b = 0.0;
+  markers_.markers.push_back(marker);
+  marker_pub_.publish(markers_);
 }
 
 inline geometry_msgs::Transform toRosTf(const geometry_msgs::Pose& pose)

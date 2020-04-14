@@ -34,7 +34,7 @@
 #define RC_SILHOUETTEMATCH_CLIENT_VISUALIZER_H
 
 #include <ros/ros.h>
-
+#include <visualization_msgs/MarkerArray.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 #include <rc_silhouettematch_client/Instance.h>
@@ -48,12 +48,16 @@ public:
   Visualizer(ros::NodeHandle& nh);
   ~Visualizer();
 
-  void visBasePlane(const EstimatedPlane& plane);
+  void visBasePlane(const EstimatedPlane& plane, const ros::Time timestamp);
 
   void visInstances(const std::vector<Instance>& instances);
 
+  void deleteMarkers();
+
 private:
   std::string tf_prefix_;
+  ros::Publisher marker_pub_;
+  visualization_msgs::MarkerArray markers_;
   tf2_ros::TransformBroadcaster tfb_;
 };
 

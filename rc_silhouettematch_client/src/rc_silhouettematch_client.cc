@@ -233,7 +233,7 @@ bool SilhouetteMatchClient::calibrateBasePlane(
   bool success = callService("calibrate_base_plane", req, res);
   if (success && res.return_code.value >= 0 && visualizer_)
   {
-    visualizer_->visBasePlane(res.plane);
+    visualizer_->visBasePlane(res.plane, res.timestamp);
   }
   return success;
 }
