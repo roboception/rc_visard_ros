@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rc_silhouettematch_client</name>
+  <version>2.7.0</version>
+  <description>The ros client for roboception silhouette match module</description>
+
+  <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/rc_silhouettematch_client</url>
+  <url type="repository">https://github.com/roboception/rc_visard_ros</url>
+  <url type="bugtracker">https://github.com/roboception/rc_visard_ros/issues</url>
+
+  <author email="elena.gambaro@roboception.de">Elena Gambaro</author>
+
+  <!-- system dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>curl</depend>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+  <depend>roscpp</depend>
+  <depend>rcdiscover</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rc_common_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>dynamic_reconfigure</depend>
+
+  <doc_depend>doxygen</doc_depend>
+</package>

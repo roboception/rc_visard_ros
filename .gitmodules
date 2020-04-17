@@ -7,4 +7,6 @@
 [submodule "rc_tagdetect_client/opt/cpr"]
 	path = rc_tagdetect_client/opt/cpr
 	url = https://github.com/whoshuu/cpr.git
-
+[submodule "rc_silhouettematch_client/opt/cpr"]
+	path = rc_silhouettematch_client/opt/cpr
+	url = https://github.com/whoshuu/cpr.git

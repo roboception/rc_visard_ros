@@ -1,0 +1,24 @@
+# Description: Triggers detection of an object.
+
+# Required. Object that is to be detected
+ObjectToDetect object_to_detect
+
+# Optional. Shift in meters that will be applied to the calibrated base-plane
+float64 offset
+
+# Required. Pose frame for output poses (valid values are camera and external)
+string pose_frame
+
+# Required only if reference frame = external and sensor is robot-mounted
+geometry_msgs/Pose robot_pose
+
+---
+
+time timestamp
+
+string object_id
+
+# List of detected instances of the object
+Instance[] instances
+
+rc_common_msgs/ReturnCode return_code

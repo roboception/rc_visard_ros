@@ -1,0 +1,34 @@
+# Description: Triggers base-plane calibration.
+
+# Required. Pose frame for output poses (valid values are camera and external)
+string pose_frame
+
+# Required only if reference frame = external and sensor is robot-mounted
+geometry_msgs/Pose robot_pose
+
+# Required. Method to use for base-plane estimation
+# Valid values are:
+# STEREO
+# APRILTAG
+# MANUAL
+string plane_estimation_method
+
+# Options for STEREO calibration
+CalibrateStereoOptions stereo
+
+# Optional
+string region_of_interest_2d_id
+
+# Optional. Shift in meters that will be applied to the estimated plane
+float64 offset
+
+# Reqired only if plane_estimation_method = MANUAL
+Plane plane
+
+---
+
+time timestamp
+
+EstimatedPlane plane
+
+rc_common_msgs/ReturnCode return_code
