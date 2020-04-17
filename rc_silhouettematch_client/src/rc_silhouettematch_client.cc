@@ -68,129 +68,6 @@ SilhouetteMatchClient::SilhouetteMatchClient(const std::string& host,
 
 SilhouetteMatchClient::~SilhouetteMatchClient() = default;
 
-nlohmann::json requestToJson(const DetectObject::Request& req)
-{
-  nlohmann::json json_req;
-  const auto& obj = req.object_to_detect;
-  auto& args = json_req["args"];
-  args["object_to_detect"] = { { "object_id", obj.object_id },
-                               { "region_of_interest_2d_id",
-                                 obj.region_of_interest_2d_id } };
-  args["offset"] = req.offset;
-  args["pose_frame"] = req.pose_frame;
-  args["robot_pose"] = req.robot_pose;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      DetectObject::Response& res)
-{
-  res.timestamp = json_res["timestamp"];
-  res.return_code = json_res["return_code"];
-  res.object_id = json_res["object_id"];
-  for (const auto& instance : json_res["instances"])
-  {
-    res.instances.emplace_back(instance);
-  }
-}
-
-nlohmann::json requestToJson(const CalibrateBasePlane::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["pose_frame"] = req.pose_frame;
-  args["region_of_interest_2d_id"] = req.region_of_interest_2d_id;
-  args["plane_estimation_method"] = req.plane_estimation_method;
-  if (req.plane_estimation_method == "STEREO")
-  {
-    args["stereo"]= { {"plane_preference", req.stereo.plane_preference} };
-  }
-  args["offset"] = req.offset;
-  args["plane"] = req.plane;
-  args["robot_pose"] = req.robot_pose;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      CalibrateBasePlane::Response& res)
-{
-  res.timestamp = json_res["timestamp"];
-  res.return_code = json_res["return_code"];
-  res.plane = json_res["plane"];
-}
-
-nlohmann::json requestToJson(const GetBasePlaneCalibration::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["pose_frame"] = req.pose_frame;
-  args["robot_pose"] = req.robot_pose;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      GetBasePlaneCalibration::Response& res)
-{
-  res.return_code = json_res["return_code"];
-  res.plane = json_res["plane"];
-}
-
-nlohmann::json requestToJson(const DeleteBasePlaneCalibration::Request& req)
-{
-  return {};
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      DeleteBasePlaneCalibration::Response& res)
-{
-  res.return_code = json_res["return_code"];
-}
-
-nlohmann::json requestToJson(const SetRegionOfInterest::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["region_of_interest_2d"] = req.region_of_interest_2d;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      SetRegionOfInterest::Response& res)
-{
-  res.return_code = json_res["return_code"];
-}
-
-nlohmann::json requestToJson(const GetRegionsOfInterest::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["region_of_interest_2d_ids"] = req.region_of_interest_2d_ids;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      GetRegionsOfInterest::Response& res)
-{
-  res.return_code = json_res["return_code"];
-  for (const auto& roi : json_res["regions_of_interest"])
-  {
-    res.regions_of_interest.emplace_back(roi);
-  }
-}
-
-nlohmann::json requestToJson(const DeleteRegionsOfInterest::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["region_of_interest_2d_ids"] = req.region_of_interest_2d_ids;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      DeleteRegionsOfInterest::Response& res)
-{
-  res.return_code = json_res["return_code"];
-}
 
 template <typename Request, typename Response>
 bool SilhouetteMatchClient::callService(const std::string& name,
@@ -198,9 +75,9 @@ bool SilhouetteMatchClient::callService(const std::string& name,
 {
   try
   {
-    auto j_req = requestToJson(req);
+    nlohmann::json j_req = req;
     const auto j_res = rc_visard_comm_if_->servicePutRequest(name, j_req);
-    responseFromJson(j_res, res);
+    res = j_res;
     return true;
   }
   catch (const NotAvailableInThisVersionException& ex)
