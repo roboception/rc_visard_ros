@@ -82,13 +82,16 @@ bool SilhouetteMatchClient::callService(const std::string& name,
   }
   catch (const NotAvailableInThisVersionException& ex)
   {
-    // XXX TODO: this should return true and set return_code to error
     ROS_ERROR("This rc_visard firmware does not support \"%s\"", ex.what());
+    res.return_code.value = -8; // NOT_APPLICABLE
+    res.return_code.message = "Not available in this firmware version";
     return false;
   }
   catch (const std::exception& ex)
   {
     ROS_ERROR("%s", ex.what());
+    res.return_code.value = -2; // INTERNAL_ERROR
+    res.return_code.message = ex.what();
     return false;
   }
 }
@@ -101,7 +104,7 @@ bool SilhouetteMatchClient::detectObject(DetectObject::Request& req,
   {
     visualizer_->visInstances(res.instances);
   }
-  return success;
+  return true;
 }
 
 bool SilhouetteMatchClient::calibrateBasePlane(
@@ -112,39 +115,44 @@ bool SilhouetteMatchClient::calibrateBasePlane(
   {
     visualizer_->visBasePlane(res.plane, res.timestamp);
   }
-  return success;
+  return true;
 }
 
 bool SilhouetteMatchClient::getBasePlaneCalib(
     GetBasePlaneCalibration::Request& req,
     GetBasePlaneCalibration::Response& res)
 {
-  return callService("get_base_plane_calibration", req, res);
+  callService("get_base_plane_calibration", req, res);
+  return true;
 }
 
 bool SilhouetteMatchClient::deleteBasePlaneCalib(
     DeleteBasePlaneCalibration::Request& req,
     DeleteBasePlaneCalibration::Response& res)
 {
-  return callService("delete_base_plane_calibration", req, res);
+  callService("delete_base_plane_calibration", req, res);
+  return true;
 }
 
 bool SilhouetteMatchClient::setROI(SetRegionOfInterest::Request& req,
                                    SetRegionOfInterest::Response& res)
 {
-  return callService("set_region_of_interest_2d", req, res);
+  callService("set_region_of_interest_2d", req, res);
+  return true;
 }
 
 bool SilhouetteMatchClient::getROIs(GetRegionsOfInterest::Request& req,
                                     GetRegionsOfInterest::Response& res)
 {
-  return callService("get_regions_of_interest_2d", req, res);
+  callService("get_regions_of_interest_2d", req, res);
+  return true;
 }
 
 bool SilhouetteMatchClient::deleteROIs(DeleteRegionsOfInterest::Request& req,
                                        DeleteRegionsOfInterest::Response& res)
 {
-  return callService("delete_regions_of_interest_2d", req, res);
+  callService("delete_regions_of_interest_2d", req, res);
+  return true;
 }
 
 void SilhouetteMatchClient::initParameters()
