@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2019 Roboception GmbH
+ * Copyright (c) 2020 Roboception GmbH
  *
- * Author: Monika Florek-Jasinska
+ * Author: Elena Gambaro
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,38 +30,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_TAGDETECT_CLIENT_CPR_HELPER_H
-#define RC_TAGDETECT_CLIENT_CPR_HELPER_H
+#ifndef RC_TAGDETECT_JSON_CONVERSIONS_H
+#define RC_TAGDETECT_JSON_CONVERSIONS_H
 
-#include <string>
-#include <json/json.hpp>
+#include "json_conversions_common.h"
 
-#include "exceptions.h"
+#include <rc_tagdetect_client/Tag.h>
+#include <rc_tagdetect_client/DetectedTags.h>
 
-using json = nlohmann::json;
+#include <rc_tagdetect_client/DetectTags.h>
+#include <rc_tagdetect_client/StartContinuousDetection.h>
 
 namespace rc_tagdetect_client
 {
-class CommunicationHelper
+
+inline void to_json(nlohmann::json& j, const Tag& p)
 {
-  public:
-    CommunicationHelper(const std::string &host, const std::string &node_name,
-                        int timeout);
-
-    json servicePutRequest(const std::string &service_name);
-
-    json servicePutRequest(const std::string &service_name, const json &js_args);
-
-    json getParameters();
-
-    std::tuple<size_t, size_t, size_t> getImageVersion();
-
-    json setParameters(const json &js_params);
-
-  private:
-    const std::string host_, services_url_, params_url_, version_url_;
-    const int timeout_curl_; // ms
-};
-
+  j["id"] = p.id;
+  j["size"] = p.size;
 }
-#endif //RC_TAGDETECT_CLIENT_CPR_HELPER_H
+
+inline void from_json(const nlohmann::json& j, Tag& p)
+{
+  j.at("id").get_to(p.id);
+  j.at("size").get_to(p.size);
+}
+
+inline void from_json(const nlohmann::json& j, DetectedTag& p)
+{
+  j.at("timestamp").get_to(p.header.stamp);
+  j.at("pose_frame").get_to(p.header.frame_id);
+  j.at("tag").get_to(p.tag);
+  j.at("instance_id").get_to(p.instance_id);
+  j.at("pose").get_to(p.pose.pose);
+  p.pose.header.stamp = p.header.stamp;
+  p.pose.header.frame_id = p.header.frame_id;
+}
+
+inline void to_json(nlohmann::json& j, const DetectTagsRequest& p)
+{
+  j["tags"] = p.tags;
+}
+
+inline void from_json(const nlohmann::json& j, DetectTagsResponse& p)
+{
+  j.at("tags").get_to(p.tags);
+  j.at("timestamp").get_to(p.timestamp);
+  j.at("return_code").get_to(p.return_code);
+}
+
+}  // namespace rc_tagdetect_client
+
+#endif  // RC_TAGDETECT_JSON_CONVERSIONS_H

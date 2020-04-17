@@ -32,6 +32,7 @@
 
 #include "ros_tagdetect_client.h"
 #include "exceptions.h"
+#include "json_conversions.h"
 
 using std::string;
 
@@ -80,84 +81,6 @@ RosTagdetectClient::~RosTagdetectClient()
   }
 }
 
-
-RosTagdetectClient::Result RosTagdetectClient::detect(
-        const std::vector<rc_tagdetect_client::Tag> &tags)
-{
-  json request;
-  auto &args = request["args"];
-  auto &req_tags = args["tags"];
-  req_tags = json::array();
-  for (const auto &t : tags)
-  {
-    if (image_version_ <= std::make_tuple(1ul, 2ul, 1ul))
-    {
-      req_tags.push_back({{"id", t.id}});
-      if (t.size > 0)
-      {
-        throw NotAvailableInThisVersionException("size");
-      }
-    }
-    else
-    {
-      req_tags.push_back({{"id",   t.id},
-                          {"size", t.size}});
-    }
-  }
-
-  const auto j = rc_visard_communication_->servicePutRequest("detect", request);
-
-  try
-  {
-    Result result;
-    rc_common_msgs::ReturnCode &status = std::get<1>(result);
-    status.message = j.at("return_code").at("message").get<std::string>();
-    status.value = j.at("return_code").at("value").get<int>();
-
-    rc_tagdetect_client::DetectedTags &result_tags = std::get<0>(result);
-    result_tags.timestamp.sec = j.at("timestamp").at("sec").get<int>();
-    result_tags.timestamp.nsec = j.at("timestamp").at("nsec").get<int>();
-
-    for (const auto &t : j.at("tags"))
-    {
-      result_tags.tags.emplace_back();
-      auto &result_tag = result_tags.tags.back();
-
-      result_tag.instance_id = t.at("instance_id").get<std::string>();
-
-      result_tag.tag.id = t.at("id").get<std::string>();
-      result_tag.tag.size = t.at("size").get<double>();
-
-      result_tag.header.frame_id = t.at("pose_frame").get<std::string>();
-      result_tag.pose.header.frame_id = result_tag.header.frame_id;
-
-      const auto &pose_ts = t.at("timestamp");
-      result_tag.header.stamp.sec = pose_ts.at("sec").get<int>();
-      result_tag.header.stamp.nsec = pose_ts.at("nsec").get<int>();
-      result_tag.pose.header.stamp.sec = result_tag.header.stamp.sec;
-      result_tag.pose.header.stamp.nsec = result_tag.header.stamp.nsec;
-
-      const auto &pose = t.at("pose");
-      const auto &position = pose.at("position");
-      result_tag.pose.pose.position.x = position.at("x").get<double>();
-      result_tag.pose.pose.position.y = position.at("y").get<double>();
-      result_tag.pose.pose.position.z = position.at("z").get<double>();
-
-      const auto &orientation = pose.at("orientation");
-      result_tag.pose.pose.orientation.x = orientation.at("x").get<double>();
-      result_tag.pose.pose.orientation.y = orientation.at("y").get<double>();
-      result_tag.pose.pose.orientation.z = orientation.at("z").get<double>();
-      result_tag.pose.pose.orientation.w = orientation.at("w").get<double>();
-    }
-
-    return result;
-  }
-  catch (const std::exception &ex)
-  {
-    throw MiscException(std::string("Could not parse response: ") + ex.what());
-  }
-}
-
 void RosTagdetectClient::startTagDetect()
 {
   rc_visard_communication_->servicePutRequest("start");
@@ -168,36 +91,57 @@ void RosTagdetectClient::stopTagDetect()
   rc_visard_communication_->servicePutRequest("stop");
 }
 
+template <typename Request, typename Response>
+bool RosTagdetectClient::callService(const std::string& name,
+                                     const Request& req, Response& res)
+{
+  try
+  {
+    json j_req = req;
+    const auto j_res = rc_visard_communication_->servicePutRequest(name, j_req);
+    res = j_res;
+    return true;
+  }
+  catch (const NotAvailableInThisVersionException& ex)
+  {
+    ROS_ERROR("This rc_visard firmware does not support \"%s\"", ex.what());
+    res.return_code.value = -8; // NOT_APPLICABLE
+    res.return_code.message = "Not available in this firmware version";
+    return false;
+  }
+  catch (const std::exception& ex)
+  {
+    ROS_ERROR("%s", ex.what());
+    res.return_code.value = -2; // INTERNAL_ERROR
+    res.return_code.message = ex.what();
+    return false;
+  }
+}
+
+bool RosTagdetectClient::detect(const std::vector<rc_tagdetect_client::Tag> &tags, DetectTagsResponse &res)
+{
+  DetectTagsRequest req;
+  req.tags = tags;
+  bool success = callService("detect", req, res);
+  if (success && res.return_code.value >= 0 && visualizer_)
+  {
+    visualizer_->publishTags(res.tags);
+  }
+  detections_pub.publish(res);
+  return success;
+}
 
 bool RosTagdetectClient::detectService(DetectTagsRequest &req, DetectTagsResponse &res)
 {
   if (continuous_mode_thread_.joinable())
   {
     ROS_ERROR("Cannot execute detect when continuous mode is enabled.");
-    return false;
-  }
-
-  try
-  {
-    auto result = detect(req.tags);
-    res.tags = std::move(std::get<0>(result).tags);
-    res.timestamp = std::move(std::get<0>(result).timestamp);
-    res.return_code = std::move(std::get<1>(result));
-
-    if (visualizer_) visualizer_->publishTags(res.tags);
-
+    res.return_code.value = -8; // NOT_APPLICABLE
+    res.return_code.message = "Cannot execute detect when continuous mode is enabled.";
     return true;
   }
-  catch (const NotAvailableInThisVersionException &ex)
-  {
-    ROS_ERROR("This rc_visard firmware does not support \"%s\"", ex.what());
-    return false;
-  }
-  catch (const std::exception &ex)
-  {
-    ROS_ERROR("%s", ex.what());
-    return false;
-  }
+
+  return detect(req.tags, res);
 }
 
 bool RosTagdetectClient::stopContinousDetection(std_srvs::TriggerRequest &request,
@@ -235,43 +179,11 @@ bool RosTagdetectClient::startContinousDetection(StartContinuousDetectionRequest
               {
                 const auto start_time = std::chrono::steady_clock::now();
 
-                rc_tagdetect_client::DetectedTags res;
-
-                try
+                rc_tagdetect_client::DetectTagsResponse res;
+                if (!detect(request.tags, res))
                 {
-                  auto result = detect(request.tags);
-
-                  res.tags = std::move(std::get<0>(result).tags);
-                  res.timestamp = std::move(std::get<0>(result).timestamp);
-                  res.return_code = std::move(std::get<1>(result));
-
-                  if (res.return_code.value < 0)
-                  {
-                    ROS_ERROR("TagDetect responded with error [%d]: %s",
-                              res.return_code.value,
-                              res.return_code.message.c_str());
-                  }
-                  else if (res.return_code.value > 0)
-                  {
-                    ROS_WARN("TagDetect responded with message [%d]: %s",
-                             res.return_code.value,
-                             res.return_code.message.c_str());
-                  }
-                }
-                catch (const NotAvailableInThisVersionException &ex)
-                {
-                  ROS_ERROR("This rc_visard firmware does not support \"%s\"", ex.what());
                   break;
                 }
-                catch (const std::exception &ex)
-                {
-                  ROS_ERROR("%s", ex.what());
-                  break;
-                }
-
-                detections_pub.publish(res);
-
-                if (visualizer_) visualizer_->publishTags(res.tags);
 
                 while (!stop_continuous_mode_thread_ &&
                        std::chrono::duration_cast<std::chrono::duration<double>>(
@@ -302,39 +214,43 @@ void RosTagdetectClient::advertiseServicesAndTopics()
 
 }
 
+void paramsToCfg(const json& params, TagDetectConfig& cfg)
+{
+  for (const auto& param : params)
+  {
+    const auto& name = param["name"];
+    if (name == "quality")
+    {
+      cfg.quality = param["value"];
+    }
+    else if (name == "detect_inverted_tags")
+    {
+      //TODO is it working with all versions?
+      cfg.detect_inverted_tags = param["value"];
+    }
+    else if (name == "forget_after_n_detections")
+    {
+      cfg.forget_after_n_detections = param["value"];
+    }
+    else if (name == "max_corner_distance")
+    {
+      cfg.max_corner_distance = param["value"];
+    }
+    else if (name == "use_cached_images")
+    {
+      cfg.use_cached_images = param["value"];
+    }
+  }
+}
+
 void RosTagdetectClient::initConfiguration()
 {
   rc_tagdetect_client::TagDetectConfig cfg;
 
   // first get the current values from sensor
-  auto json_resp = rc_visard_communication_->getParameters();
+  const auto j_params = rc_visard_communication_->getParameters();
 
-  for (auto &param : json_resp)
-  {
-    string name = param["name"];
-    if (param["name"] == "quality")
-    {
-      cfg.quality = param["value"];
-    }
-    else if (param["name"] == "detect_inverted_tags")
-    {
-      //TODO is it working with all versions?
-      cfg.detect_inverted_tags = param["value"];
-    }
-    else if (param["name"] == "forget_after_n_detections")
-    {
-      cfg.forget_after_n_detections = param["value"];
-    }
-    else if (param["name"] == "max_corner_distance")
-    {
-      cfg.max_corner_distance = param["value"];
-    }
-    else if (param["name"] == "use_cached_images")
-    {
-      cfg.use_cached_images = param["value"];
-    }
-
-  }
+  paramsToCfg(j_params, cfg);
 
   // second, try to get ROS parameters:
   // if parameter is not set in parameter server, we default to current sensor configuration
@@ -391,7 +307,10 @@ void RosTagdetectClient::dynamicReconfigureCallback(rc_tagdetect_client::TagDete
   {
     visualizer_.reset();
   }
-  rc_visard_communication_->setParameters(js_params);
+
+  json j_params_new = rc_visard_communication_->setParameters(js_params);
+  // set config with new params so they are updated if needed
+  paramsToCfg(j_params_new, config);
 }
 
 }
