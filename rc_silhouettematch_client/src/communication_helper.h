@@ -56,7 +56,7 @@ public:
 
   std::tuple<size_t, size_t, size_t> getImageVersion();
 
-  void setParameters(const json& js_params);
+  json setParameters(const json& js_params);
 
 private:
   const std::string host_, services_url_, params_url_, version_url_;

@@ -118,7 +118,7 @@ json CommunicationHelper::getParameters()
   return json::parse(rest_resp.text);
 }
 
-void CommunicationHelper::setParameters(const json& js_params)
+json CommunicationHelper::setParameters(const json& js_params)
 {
   auto rest_resp = cpr::Put(params_url_, cpr::Timeout{ timeout_curl_ },
                             cpr::Body{ js_params.dump() },
@@ -126,6 +126,7 @@ void CommunicationHelper::setParameters(const json& js_params)
                                                            "json" } });
 
   handleCPRResponse(rest_resp);
+  return json::parse(rest_resp.text);
 }
 
 std::tuple<size_t, size_t, size_t> CommunicationHelper::getImageVersion()

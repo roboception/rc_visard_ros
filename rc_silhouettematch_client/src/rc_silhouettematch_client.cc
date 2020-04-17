@@ -35,6 +35,8 @@
 #include "communication_helper.h"
 #include "visualizer.h"
 
+using json = nlohmann::json;
+
 namespace rc_silhouettematch_client
 {
 SilhouetteMatchClient::SilhouetteMatchClient(const std::string& host,
@@ -75,7 +77,7 @@ bool SilhouetteMatchClient::callService(const std::string& name,
 {
   try
   {
-    nlohmann::json j_req = req;
+    json j_req = req;
     const auto j_res = rc_visard_comm_if_->servicePutRequest(name, j_req);
     res = j_res;
     return true;
@@ -155,13 +157,9 @@ bool SilhouetteMatchClient::deleteROIs(DeleteRegionsOfInterest::Request& req,
   return true;
 }
 
-void SilhouetteMatchClient::initParameters()
+void paramsToCfg(const json& params, SilhouetteMatchConfig& cfg)
 {
-  // first get the current values from sensor
-  const auto j_params = rc_visard_comm_if_->getParameters();
-  SilhouetteMatchConfig cfg;
-
-  for (const auto& param : j_params)
+  for (const auto& param : params)
   {
     const auto& name = param["name"];
     if (name == "max_number_of_detected_objects")
@@ -175,6 +173,15 @@ void SilhouetteMatchClient::initParameters()
     else if (name == "quality")
       cfg.quality = param["value"];
   }
+}
+
+void SilhouetteMatchClient::initParameters()
+{
+  // first get the current values from sensor
+  const auto j_params = rc_visard_comm_if_->getParameters();
+  SilhouetteMatchConfig cfg;
+
+  paramsToCfg(j_params, cfg);
 
   // second, try to get ROS parameters:
   // if param is not set in parameter server, default to current sensor value
@@ -195,19 +202,19 @@ void SilhouetteMatchClient::initParameters()
 void SilhouetteMatchClient::updateParameters(SilhouetteMatchConfig& config,
                                              uint32_t)
 {
-  nlohmann::json j_params;
+  json j_params;
   j_params.emplace_back(
-      nlohmann::json{ { "name", "max_number_of_detected_objects" },
+      json{ { "name", "max_number_of_detected_objects" },
                       { "value", config.max_number_of_detected_objects } });
-  j_params.emplace_back(nlohmann::json{ { "name", "edge_sensitivity" },
+  j_params.emplace_back(json{ { "name", "edge_sensitivity" },
                                         { "value", config.edge_sensitivity } });
   j_params.emplace_back(
-      nlohmann::json{ { "name", "match_max_distance" },
+      json{ { "name", "match_max_distance" },
                       { "value", config.match_max_distance } });
-  j_params.emplace_back(nlohmann::json{ { "name", "match_percentile" },
+  j_params.emplace_back(json{ { "name", "match_percentile" },
                                         { "value", config.match_percentile } });
   j_params.emplace_back(
-      nlohmann::json{ { "name", "quality" }, { "value", config.quality } });
+      json{ { "name", "quality" }, { "value", config.quality } });
 
   if (config.publish_vis)
   {
@@ -219,8 +226,9 @@ void SilhouetteMatchClient::updateParameters(SilhouetteMatchConfig& config,
     visualizer_.reset();
   }
 
-  // XXX TODO set parameters back in config?
-  rc_visard_comm_if_->setParameters(j_params);
+  json j_params_new = rc_visard_comm_if_->setParameters(j_params);
+  // set config with new params so they are updated if needed
+  paramsToCfg(j_params_new, config);
 }
 
 }  // namespace rc_silhouettematch_client
