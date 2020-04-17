@@ -33,14 +33,7 @@
 #ifndef RC_SILHOUETTEMATCH_CLIENT_JSON_CONVERSIONS_H
 #define RC_SILHOUETTEMATCH_CLIENT_JSON_CONVERSIONS_H
 
-#include <ros/ros.h>
-
-#include <geometry_msgs/Point.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/Quaternion.h>
-#include <geometry_msgs/Vector3.h>
-
-#include <rc_common_msgs/ReturnCode.h>
+#include "json_conversions_common.h"
 
 #include <rc_silhouettematch_client/Instance.h>
 #include <rc_silhouettematch_client/Plane.h>
@@ -58,80 +51,6 @@
 
 
 #include <json/json.hpp>
-
-namespace geometry_msgs
-{
-
-inline void to_json(nlohmann::json& j, const geometry_msgs::Point& p)
-{
-  j = nlohmann::json{ {"x", p.x}, {"y", p.y}, {"z", p.z} };
-}
-
-inline void from_json(const nlohmann::json& j, geometry_msgs::Point& p)
-{
-  j.at("x").get_to(p.x);
-  j.at("y").get_to(p.y);
-  j.at("z").get_to(p.z);
-}
-
-inline void to_json(nlohmann::json& j, const geometry_msgs::Vector3& p)
-{
-  j = nlohmann::json{ {"x", p.x}, {"y", p.y}, {"z", p.z} };
-}
-
-inline void from_json(const nlohmann::json& j, geometry_msgs::Vector3& p)
-{
-  j.at("x").get_to(p.x);
-  j.at("y").get_to(p.y);
-  j.at("z").get_to(p.z);
-}
-
-inline void to_json(nlohmann::json& j, const geometry_msgs::Quaternion& p)
-{
-  j = nlohmann::json{ {"x", p.x}, {"y", p.y}, {"z", p.z}, {"w", p.w} };
-}
-
-inline void from_json(const nlohmann::json& j, geometry_msgs::Quaternion& p)
-{
-  j.at("x").get_to(p.x);
-  j.at("y").get_to(p.y);
-  j.at("z").get_to(p.z);
-  j.at("w").get_to(p.w);
-}
-
-inline void to_json(nlohmann::json& j, const geometry_msgs::Pose& p)
-{
-  j["position"] = p.position;
-  j["orientation"] = p.orientation;
-}
-
-inline void from_json(const nlohmann::json& j, geometry_msgs::Pose& p)
-{
-  j.at("position").get_to(p.position);
-  j.at("orientation").get_to(p.orientation);
-}
-
-}  // namespace geometry_msgs
-
-namespace rc_common_msgs
-{
-inline void from_json(const nlohmann::json& j, ReturnCode& p)
-{
-  j.at("value").get_to(p.value);
-  j.at("message").get_to(p.message);
-}
-
-}  // namespace rc_common_msgs
-
-namespace ros
-{
-inline void from_json(const nlohmann::json& j, ros::Time& p)
-{
-  j.at("sec").get_to(p.sec);
-  j.at("nsec").get_to(p.nsec);
-}
-
-}  // namespace ros
 
 namespace rc_silhouettematch_client
 {
