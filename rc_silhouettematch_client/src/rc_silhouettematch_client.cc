@@ -35,6 +35,8 @@
 #include "communication_helper.h"
 #include "visualizer.h"
 
+using json = nlohmann::json;
+
 namespace rc_silhouettematch_client
 {
 SilhouetteMatchClient::SilhouetteMatchClient(const std::string& host,
@@ -68,129 +70,6 @@ SilhouetteMatchClient::SilhouetteMatchClient(const std::string& host,
 
 SilhouetteMatchClient::~SilhouetteMatchClient() = default;
 
-nlohmann::json requestToJson(const DetectObject::Request& req)
-{
-  nlohmann::json json_req;
-  const auto& obj = req.object_to_detect;
-  auto& args = json_req["args"];
-  args["object_to_detect"] = { { "object_id", obj.object_id },
-                               { "region_of_interest_2d_id",
-                                 obj.region_of_interest_2d_id } };
-  args["offset"] = req.offset;
-  args["pose_frame"] = req.pose_frame;
-  args["robot_pose"] = req.robot_pose;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      DetectObject::Response& res)
-{
-  res.timestamp = json_res["timestamp"];
-  res.return_code = json_res["return_code"];
-  res.object_id = json_res["object_id"];
-  for (const auto& instance : json_res["instances"])
-  {
-    res.instances.emplace_back(instance);
-  }
-}
-
-nlohmann::json requestToJson(const CalibrateBasePlane::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["pose_frame"] = req.pose_frame;
-  args["region_of_interest_2d_id"] = req.region_of_interest_2d_id;
-  args["plane_estimation_method"] = req.plane_estimation_method;
-  if (req.plane_estimation_method == "STEREO")
-  {
-    args["stereo"]= { {"plane_preference", req.stereo.plane_preference} };
-  }
-  args["offset"] = req.offset;
-  args["plane"] = req.plane;
-  args["robot_pose"] = req.robot_pose;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      CalibrateBasePlane::Response& res)
-{
-  res.timestamp = json_res["timestamp"];
-  res.return_code = json_res["return_code"];
-  res.plane = json_res["plane"];
-}
-
-nlohmann::json requestToJson(const GetBasePlaneCalibration::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["pose_frame"] = req.pose_frame;
-  args["robot_pose"] = req.robot_pose;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      GetBasePlaneCalibration::Response& res)
-{
-  res.return_code = json_res["return_code"];
-  res.plane = json_res["plane"];
-}
-
-nlohmann::json requestToJson(const DeleteBasePlaneCalibration::Request& req)
-{
-  return {};
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      DeleteBasePlaneCalibration::Response& res)
-{
-  res.return_code = json_res["return_code"];
-}
-
-nlohmann::json requestToJson(const SetRegionOfInterest::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["region_of_interest_2d"] = req.region_of_interest_2d;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      SetRegionOfInterest::Response& res)
-{
-  res.return_code = json_res["return_code"];
-}
-
-nlohmann::json requestToJson(const GetRegionsOfInterest::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["region_of_interest_2d_ids"] = req.region_of_interest_2d_ids;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      GetRegionsOfInterest::Response& res)
-{
-  res.return_code = json_res["return_code"];
-  for (const auto& roi : json_res["regions_of_interest"])
-  {
-    res.regions_of_interest.emplace_back(roi);
-  }
-}
-
-nlohmann::json requestToJson(const DeleteRegionsOfInterest::Request& req)
-{
-  nlohmann::json json_req;
-  auto& args = json_req["args"];
-  args["region_of_interest_2d_ids"] = req.region_of_interest_2d_ids;
-  return json_req;
-}
-
-void responseFromJson(const nlohmann::json& json_res,
-                      DeleteRegionsOfInterest::Response& res)
-{
-  res.return_code = json_res["return_code"];
-}
 
 template <typename Request, typename Response>
 bool SilhouetteMatchClient::callService(const std::string& name,
@@ -198,20 +77,23 @@ bool SilhouetteMatchClient::callService(const std::string& name,
 {
   try
   {
-    auto j_req = requestToJson(req);
+    json j_req = req;
     const auto j_res = rc_visard_comm_if_->servicePutRequest(name, j_req);
-    responseFromJson(j_res, res);
+    res = j_res;
     return true;
   }
   catch (const NotAvailableInThisVersionException& ex)
   {
-    // XXX TODO: this should return true and set return_code to error
     ROS_ERROR("This rc_visard firmware does not support \"%s\"", ex.what());
+    res.return_code.value = -8; // NOT_APPLICABLE
+    res.return_code.message = "Not available in this firmware version";
     return false;
   }
   catch (const std::exception& ex)
   {
     ROS_ERROR("%s", ex.what());
+    res.return_code.value = -2; // INTERNAL_ERROR
+    res.return_code.message = ex.what();
     return false;
   }
 }
@@ -224,7 +106,7 @@ bool SilhouetteMatchClient::detectObject(DetectObject::Request& req,
   {
     visualizer_->visInstances(res.instances);
   }
-  return success;
+  return true;
 }
 
 bool SilhouetteMatchClient::calibrateBasePlane(
@@ -235,48 +117,49 @@ bool SilhouetteMatchClient::calibrateBasePlane(
   {
     visualizer_->visBasePlane(res.plane, res.timestamp);
   }
-  return success;
+  return true;
 }
 
 bool SilhouetteMatchClient::getBasePlaneCalib(
     GetBasePlaneCalibration::Request& req,
     GetBasePlaneCalibration::Response& res)
 {
-  return callService("get_base_plane_calibration", req, res);
+  callService("get_base_plane_calibration", req, res);
+  return true;
 }
 
 bool SilhouetteMatchClient::deleteBasePlaneCalib(
     DeleteBasePlaneCalibration::Request& req,
     DeleteBasePlaneCalibration::Response& res)
 {
-  return callService("delete_base_plane_calibration", req, res);
+  callService("delete_base_plane_calibration", req, res);
+  return true;
 }
 
 bool SilhouetteMatchClient::setROI(SetRegionOfInterest::Request& req,
                                    SetRegionOfInterest::Response& res)
 {
-  return callService("set_region_of_interest_2d", req, res);
+  callService("set_region_of_interest_2d", req, res);
+  return true;
 }
 
 bool SilhouetteMatchClient::getROIs(GetRegionsOfInterest::Request& req,
                                     GetRegionsOfInterest::Response& res)
 {
-  return callService("get_regions_of_interest_2d", req, res);
+  callService("get_regions_of_interest_2d", req, res);
+  return true;
 }
 
 bool SilhouetteMatchClient::deleteROIs(DeleteRegionsOfInterest::Request& req,
                                        DeleteRegionsOfInterest::Response& res)
 {
-  return callService("delete_regions_of_interest_2d", req, res);
+  callService("delete_regions_of_interest_2d", req, res);
+  return true;
 }
 
-void SilhouetteMatchClient::initParameters()
+void paramsToCfg(const json& params, SilhouetteMatchConfig& cfg)
 {
-  // first get the current values from sensor
-  const auto j_params = rc_visard_comm_if_->getParameters();
-  SilhouetteMatchConfig cfg;
-
-  for (const auto& param : j_params)
+  for (const auto& param : params)
   {
     const auto& name = param["name"];
     if (name == "max_number_of_detected_objects")
@@ -290,6 +173,15 @@ void SilhouetteMatchClient::initParameters()
     else if (name == "quality")
       cfg.quality = param["value"];
   }
+}
+
+void SilhouetteMatchClient::initParameters()
+{
+  // first get the current values from sensor
+  const auto j_params = rc_visard_comm_if_->getParameters();
+  SilhouetteMatchConfig cfg;
+
+  paramsToCfg(j_params, cfg);
 
   // second, try to get ROS parameters:
   // if param is not set in parameter server, default to current sensor value
@@ -310,19 +202,19 @@ void SilhouetteMatchClient::initParameters()
 void SilhouetteMatchClient::updateParameters(SilhouetteMatchConfig& config,
                                              uint32_t)
 {
-  nlohmann::json j_params;
+  json j_params;
   j_params.emplace_back(
-      nlohmann::json{ { "name", "max_number_of_detected_objects" },
+      json{ { "name", "max_number_of_detected_objects" },
                       { "value", config.max_number_of_detected_objects } });
-  j_params.emplace_back(nlohmann::json{ { "name", "edge_sensitivity" },
+  j_params.emplace_back(json{ { "name", "edge_sensitivity" },
                                         { "value", config.edge_sensitivity } });
   j_params.emplace_back(
-      nlohmann::json{ { "name", "match_max_distance" },
+      json{ { "name", "match_max_distance" },
                       { "value", config.match_max_distance } });
-  j_params.emplace_back(nlohmann::json{ { "name", "match_percentile" },
+  j_params.emplace_back(json{ { "name", "match_percentile" },
                                         { "value", config.match_percentile } });
   j_params.emplace_back(
-      nlohmann::json{ { "name", "quality" }, { "value", config.quality } });
+      json{ { "name", "quality" }, { "value", config.quality } });
 
   if (config.publish_vis)
   {
@@ -334,8 +226,9 @@ void SilhouetteMatchClient::updateParameters(SilhouetteMatchConfig& config,
     visualizer_.reset();
   }
 
-  // XXX TODO set parameters back in config?
-  rc_visard_comm_if_->setParameters(j_params);
+  json j_params_new = rc_visard_comm_if_->setParameters(j_params);
+  // set config with new params so they are updated if needed
+  paramsToCfg(j_params_new, config);
 }
 
 }  // namespace rc_silhouettematch_client

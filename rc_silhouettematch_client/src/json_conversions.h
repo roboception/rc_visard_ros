@@ -33,96 +33,47 @@
 #ifndef RC_SILHOUETTEMATCH_CLIENT_JSON_CONVERSIONS_H
 #define RC_SILHOUETTEMATCH_CLIENT_JSON_CONVERSIONS_H
 
-#include <ros/ros.h>
+#include "json_conversions_common.h"
 
-#include <geometry_msgs/Pose.h>
-#include <rc_common_msgs/ReturnCode.h>
 #include <rc_silhouettematch_client/Instance.h>
 #include <rc_silhouettematch_client/Plane.h>
 #include <rc_silhouettematch_client/EstimatedPlane.h>
 #include <rc_silhouettematch_client/RegionOfInterest.h>
+#include <rc_silhouettematch_client/ObjectToDetect.h>
+
+#include <rc_silhouettematch_client/CalibrateBasePlane.h>
+#include <rc_silhouettematch_client/GetBasePlaneCalibration.h>
+#include <rc_silhouettematch_client/DeleteBasePlaneCalibration.h>
+#include <rc_silhouettematch_client/SetRegionOfInterest.h>
+#include <rc_silhouettematch_client/GetRegionsOfInterest.h>
+#include <rc_silhouettematch_client/DeleteRegionsOfInterest.h>
+#include <rc_silhouettematch_client/DetectObject.h>
+
 
 #include <json/json.hpp>
-
-namespace geometry_msgs
-{
-inline void to_json(nlohmann::json& j, const geometry_msgs::Pose& p)
-{
-  nlohmann::json j_rot, j_pos;
-  j_pos["x"] = p.position.x;
-  j_pos["y"] = p.position.y;
-  j_pos["z"] = p.position.z;
-  j_rot["x"] = p.orientation.x;
-  j_rot["y"] = p.orientation.y;
-  j_rot["z"] = p.orientation.z;
-  j_rot["w"] = p.orientation.w;
-  j["position"] = j_pos;
-  j["orientation"] = j_rot;
-}
-
-inline void from_json(const nlohmann::json& j, geometry_msgs::Pose& p)
-{
-  const auto& j_pos = j["position"];
-  const auto& j_rot = j["orientation"];
-  p.position.x = j_pos["x"];
-  p.position.y = j_pos["y"];
-  p.position.z = j_pos["z"];
-  p.orientation.x = j_rot["x"];
-  p.orientation.y = j_rot["y"];
-  p.orientation.z = j_rot["z"];
-  p.orientation.w = j_rot["w"];
-}
-
-}  // namespace geometry_msgs
-
-namespace rc_common_msgs
-{
-inline void from_json(const nlohmann::json& j, ReturnCode& p)
-{
-  p.value = j.at("value");
-  p.message = j.at("message");
-}
-
-}  // namespace rc_common_msgs
-
-namespace ros
-{
-inline void from_json(const nlohmann::json& j, ros::Time& p)
-{
-  p.sec = j.at("sec");
-  p.nsec = j.at("nsec");
-}
-
-}  // namespace ros
 
 namespace rc_silhouettematch_client
 {
 inline void from_json(const nlohmann::json& j, Instance& p)
 {
-  p.timestamp = j.at("timestamp");
-  p.id = j.at("id");
-  p.object_id = j.at("object_id");
-  p.pose_frame = j.at("pose_frame");
-  p.pose = j.at("pose");
+  j.at("timestamp").get_to(p.timestamp);
+  j.at("id").get_to(p.id);
+  j.at("object_id").get_to(p.object_id);
+  j.at("pose_frame").get_to(p.pose_frame);
+  j.at("pose").get_to(p.pose);
 }
 
 inline void to_json(nlohmann::json& j, const Plane& p)
 {
   j["distance"] = p.distance;
-  auto& j_normal = j["normal"];
-  j_normal["x"] = p.normal.x;
-  j_normal["y"] = p.normal.y;
-  j_normal["z"] = p.normal.z;
+  j["normal"] = p.normal;
 }
 
 inline void from_json(const nlohmann::json& j, EstimatedPlane& p)
 {
-  p.pose_frame = j.at("pose_frame");
-  p.distance = j.at("distance");
-  const auto& j_normal = j.at("normal");
-  p.normal.x = j_normal.at("x");
-  p.normal.y = j_normal.at("y");
-  p.normal.z = j_normal.at("z");
+  j.at("pose_frame").get_to(p.pose_frame);
+  j.at("distance").get_to(p.distance);
+  j.at("normal").get_to(p.normal);
 }
 
 inline void to_json(nlohmann::json& j, const RegionOfInterest& p)
@@ -136,11 +87,116 @@ inline void to_json(nlohmann::json& j, const RegionOfInterest& p)
 
 inline void from_json(const nlohmann::json& j, RegionOfInterest& p)
 {
-  p.id = j.at("id");
-  p.offset_x = j.at("offset_x");
-  p.offset_y = j.at("offset_y");
-  p.width = j.at("width");
-  p.height = j.at("height");
+  j.at("id").get_to(p.id);
+  j.at("offset_x").get_to(p.offset_x);
+  j.at("offset_y").get_to(p.offset_y);
+  j.at("width").get_to(p.width);
+  j.at("height").get_to(p.height);
+}
+
+inline void to_json(nlohmann::json& j, const ObjectToDetect& p)
+{
+  j["object_id"] = p.object_id;
+  j["region_of_interest_2d_id"] = p.region_of_interest_2d_id;
+}
+
+inline void from_json(const nlohmann::json& j, ObjectToDetect& p)
+{
+  j.at("object_id").get_to(p.object_id);
+  j.at("region_of_interest_2d_id").get_to(p.region_of_interest_2d_id);
+}
+
+inline void to_json(nlohmann::json& j, const DetectObject::Request& p)
+{
+  j["object_to_detect"] = p.object_to_detect;
+  j["offset"] = p.offset;
+  j["pose_frame"] = p.pose_frame;
+  j["robot_pose"] = p.robot_pose;
+}
+
+inline void from_json(const nlohmann::json& j, DetectObject::Response& p)
+{
+  j.at("timestamp").get_to(p.timestamp);
+  j.at("return_code").get_to(p.return_code);
+  j.at("object_id").get_to(p.object_id);
+  j.at("instances").get_to(p.instances);
+}
+
+inline void to_json(nlohmann::json& j, const CalibrateBasePlane::Request& p)
+{
+  j["pose_frame"] = p.pose_frame;
+  j["robot_pose"] = p.robot_pose;
+  j["plane_estimation_method"] = p.plane_estimation_method;
+  j["region_of_interest_2d_id"] = p.region_of_interest_2d_id;
+  j["offset"] = p.offset;
+  if (p.plane_estimation_method == "STEREO")
+  {
+    j["stereo"] = { {"plane_preference", p.stereo.plane_preference} };
+  }
+  else
+  {
+    j["plane"] = p.plane;
+  }
+}
+
+inline void from_json(const nlohmann::json& j, CalibrateBasePlane::Response& p)
+{
+  j.at("timestamp").get_to(p.timestamp);
+  j.at("return_code").get_to(p.return_code);
+  j.at("plane").get_to(p.plane);
+}
+
+inline void to_json(nlohmann::json& j, const GetBasePlaneCalibration::Request& p)
+{
+  j["pose_frame"] = p.pose_frame;
+  j["robot_pose"] = p.robot_pose;
+}
+
+inline void from_json(const nlohmann::json& j, GetBasePlaneCalibration::Response& p)
+{
+  j.at("return_code").get_to(p.return_code);
+  j.at("plane").get_to(p.plane);
+}
+
+inline void to_json(nlohmann::json& j, const DeleteBasePlaneCalibration::Request& p)
+{
+  j = {};
+}
+
+inline void from_json(const nlohmann::json& j, DeleteBasePlaneCalibration::Response& p)
+{
+  j.at("return_code").get_to(p.return_code);
+}
+
+inline void to_json(nlohmann::json& j, const SetRegionOfInterest::Request& p)
+{
+  j["region_of_interest_2d"] = p.region_of_interest_2d;
+}
+
+inline void from_json(const nlohmann::json& j, SetRegionOfInterest::Response& p)
+{
+  j.at("return_code").get_to(p.return_code);
+}
+
+inline void to_json(nlohmann::json& j, const GetRegionsOfInterest::Request& p)
+{
+  j["region_of_interest_2d_ids"] = p.region_of_interest_2d_ids;
+}
+
+inline void from_json(const nlohmann::json& j, GetRegionsOfInterest::Response& p)
+{
+  j.at("regions_of_interest").get_to(p.regions_of_interest);
+  j.at("return_code").get_to(p.return_code);
+}
+
+inline void to_json(nlohmann::json& j, const DeleteRegionsOfInterest::Request& p)
+{
+  j["region_of_interest_2d_ids"] = p.region_of_interest_2d_ids;
+}
+
+inline void from_json(const nlohmann::json& j, DeleteRegionsOfInterest::Response& p)
+{
+  j.at("return_code").get_to(p.return_code);
 }
 
 }  // namespace rc_silhouettematch_client
