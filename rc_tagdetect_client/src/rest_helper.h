@@ -30,22 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_TAGDETECT_CLIENT_CPR_HELPER_H
-#define RC_TAGDETECT_CLIENT_CPR_HELPER_H
+#ifndef rc_rest_api_HELPER_H
+#define rc_rest_api_HELPER_H
 
 #include <string>
 #include <json/json.hpp>
 
-#include "exceptions.h"
+#include "rest_exceptions.h"
 
 using json = nlohmann::json;
 
-namespace rc_tagdetect_client
+namespace rc_rest_api
 {
-class CommunicationHelper
+class RestHelper
 {
   public:
-    CommunicationHelper(const std::string &host, const std::string &node_name,
+    RestHelper(const std::string &host, const std::string &node_name,
                         int timeout);
 
     json servicePutRequest(const std::string &service_name);
@@ -64,4 +64,4 @@ class CommunicationHelper
 };
 
 }
-#endif //RC_TAGDETECT_CLIENT_CPR_HELPER_H
+#endif //rc_rest_api_HELPER_H

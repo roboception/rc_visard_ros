@@ -47,9 +47,8 @@
 #include <rc_tagdetect_client/TagDetectConfig.h>
 #include <rc_common_msgs/ReturnCode.h>
 
-#include "communication_helper.h"
+#include "rest_helper.h"
 #include "visualization.h"
-#include "exceptions.h"
 
 namespace rc_tagdetect_client
 {
@@ -108,7 +107,7 @@ class RosTagdetectClient
     std::atomic_bool stop_continuous_mode_thread_;
 
     std::unique_ptr<dynamic_reconfigure::Server<rc_tagdetect_client::TagDetectConfig>> server_;
-    std::unique_ptr<rc_tagdetect_client::CommunicationHelper> rc_visard_communication_;
+    std::unique_ptr<rc_rest_api::RestHelper> rest_helper_;
     std::unique_ptr<rc_tagdetect_client::Visualization> visualizer_;
 
     std::tuple<size_t, size_t, size_t> image_version_;

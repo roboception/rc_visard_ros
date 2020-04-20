@@ -84,11 +84,11 @@ include_directories(
 
 set(common_pick_src
         src/rc_pick_client_node.cpp
-        src/itempick_client.cc
-        src/boxpick_client.cc
-        src/communication_helper.cpp
+        src/itempick_client.cpp
+        src/boxpick_client.cpp
+        src/rest_helper.cpp
         src/visualization.cpp
-        src/pick_client.cc
+        src/pick_client.cpp
         )
 
 add_executable(rc_itempick_client_node ${common_pick_src})

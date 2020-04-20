@@ -46,9 +46,10 @@
 #include <dynamic_reconfigure/server.h>
 #include <rc_silhouettematch_client/SilhouetteMatchConfig.h>
 
+#include "rest_helper.h"
+
 namespace rc_silhouettematch_client
 {
-class CommunicationHelper;
 class Visualizer;
 
 class SilhouetteMatchClient
@@ -90,7 +91,7 @@ private:
   ros::NodeHandle nh_;
   std::vector<ros::ServiceServer> srvs_;
 
-  std::unique_ptr<CommunicationHelper> rc_visard_comm_if_;
+  std::unique_ptr<rc_rest_api::RestHelper> rest_helper_;
   std::unique_ptr<dynamic_reconfigure::Server<SilhouetteMatchConfig>>
       dyn_reconf_;
   std::unique_ptr<Visualizer> visualizer_;

@@ -81,10 +81,10 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(rc_silhouettematch_client
-  src/visualizer.cc
-  src/communication_helper.cc
-  src/rc_silhouettematch_client.cc
-  src/rc_silhouettematch_client_node.cc
+  src/visualizer.cpp
+  src/rest_helper.cpp
+  src/rc_silhouettematch_client.cpp
+  src/rc_silhouettematch_client_node.cpp
 )
 
 ## Add cmake target dependencies of the executable/library

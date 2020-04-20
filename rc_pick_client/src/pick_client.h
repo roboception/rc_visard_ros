@@ -50,7 +50,7 @@
 #include "json/json.hpp"
 #include "json_conversions.h"
 
-#include "communication_helper.h"
+#include "rest_helper.h"
 #include "visualization.h"
 
 using json = nlohmann::json;
@@ -70,7 +70,7 @@ class PickClient
     ros::NodeHandle nh_;
     std::unique_ptr<dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>> server_;
 
-    rc_itempick_cpr::CommunicationHelper rc_visard_communication_;
+    rc_rest_api::RestHelper rest_helper_;
 
     pick_visualization::Visualization visualizer_;
 
@@ -92,7 +92,7 @@ class PickClient
       try
       {
         json j_req = req;
-        const auto j_res = rc_visard_communication_.servicePutRequest(name, j_req);
+        const auto j_res = rest_helper_.servicePutRequest(name, j_req);
         res = j_res;
         return true;
       }

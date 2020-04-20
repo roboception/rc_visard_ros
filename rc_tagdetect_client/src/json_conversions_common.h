@@ -48,73 +48,79 @@
 namespace geometry_msgs
 {
 
-inline void to_json(nlohmann::json& j, const geometry_msgs::Point& p)
+inline void to_json(nlohmann::json& j, const geometry_msgs::Point& r)
 {
-  j = nlohmann::json{ {"x", p.x}, {"y", p.y}, {"z", p.z} };
+  j = nlohmann::json{ {"x", r.x}, {"y", r.y}, {"z", r.z} };
 }
 
-inline void from_json(const nlohmann::json& j, geometry_msgs::Point& p)
+inline void from_json(const nlohmann::json& j, geometry_msgs::Point& r)
 {
-  j.at("x").get_to(p.x);
-  j.at("y").get_to(p.y);
-  j.at("z").get_to(p.z);
+  j.at("x").get_to(r.x);
+  j.at("y").get_to(r.y);
+  j.at("z").get_to(r.z);
 }
 
-inline void to_json(nlohmann::json& j, const geometry_msgs::Vector3& p)
+inline void to_json(nlohmann::json& j, const geometry_msgs::Vector3& r)
 {
-  j = nlohmann::json{ {"x", p.x}, {"y", p.y}, {"z", p.z} };
+  j = nlohmann::json{ {"x", r.x}, {"y", r.y}, {"z", r.z} };
 }
 
-inline void from_json(const nlohmann::json& j, geometry_msgs::Vector3& p)
+inline void from_json(const nlohmann::json& j, geometry_msgs::Vector3& r)
 {
-  j.at("x").get_to(p.x);
-  j.at("y").get_to(p.y);
-  j.at("z").get_to(p.z);
+  j.at("x").get_to(r.x);
+  j.at("y").get_to(r.y);
+  j.at("z").get_to(r.z);
 }
 
-inline void to_json(nlohmann::json& j, const geometry_msgs::Quaternion& p)
+inline void to_json(nlohmann::json& j, const geometry_msgs::Quaternion& r)
 {
-  j = nlohmann::json{ {"x", p.x}, {"y", p.y}, {"z", p.z}, {"w", p.w} };
+  j = nlohmann::json{ {"x", r.x}, {"y", r.y}, {"z", r.z}, {"w", r.w} };
 }
 
-inline void from_json(const nlohmann::json& j, geometry_msgs::Quaternion& p)
+inline void from_json(const nlohmann::json& j, geometry_msgs::Quaternion& r)
 {
-  j.at("x").get_to(p.x);
-  j.at("y").get_to(p.y);
-  j.at("z").get_to(p.z);
-  j.at("w").get_to(p.w);
+  j.at("x").get_to(r.x);
+  j.at("y").get_to(r.y);
+  j.at("z").get_to(r.z);
+  j.at("w").get_to(r.w);
 }
 
-inline void to_json(nlohmann::json& j, const geometry_msgs::Pose& p)
+inline void to_json(nlohmann::json& j, const geometry_msgs::Pose& r)
 {
-  j["position"] = p.position;
-  j["orientation"] = p.orientation;
+  j["position"] = r.position;
+  j["orientation"] = r.orientation;
 }
 
-inline void from_json(const nlohmann::json& j, geometry_msgs::Pose& p)
+inline void from_json(const nlohmann::json& j, geometry_msgs::Pose& r)
 {
-  j.at("position").get_to(p.position);
-  j.at("orientation").get_to(p.orientation);
+  j.at("position").get_to(r.position);
+  j.at("orientation").get_to(r.orientation);
 }
 
 }  // namespace geometry_msgs
 
 namespace rc_common_msgs
 {
-inline void from_json(const nlohmann::json& j, ReturnCode& p)
+inline void from_json(const nlohmann::json& j, ReturnCode& r)
 {
-  j.at("value").get_to(p.value);
-  j.at("message").get_to(p.message);
+  j.at("value").get_to(r.value);
+  j.at("message").get_to(r.message);
 }
 
 }  // namespace rc_common_msgs
 
 namespace ros
 {
-inline void from_json(const nlohmann::json& j, ros::Time& p)
+inline void to_json(nlohmann::json& j, const ros::Time& r)
 {
-  j.at("sec").get_to(p.sec);
-  j.at("nsec").get_to(p.nsec);
+  j["sec"] = r.sec;
+  j["nsec"] = r.nsec;
+}
+
+inline void from_json(const nlohmann::json& j, ros::Time& r)
+{
+  j.at("sec").get_to(r.sec);
+  j.at("nsec").get_to(r.nsec);
 }
 
 }  // namespace ros

@@ -30,23 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "boxpick_client.h"
-
-using namespace std;
+#include "itempick_client.h"
 
 namespace ros_pick_client
 {
 
-BoxpickClient::BoxpickClient(const string &host, const ros::NodeHandle &nh) : PickClient(host, "rc_boxpick", nh)
+ItempickClient::ItempickClient(const std::string &host, const ros::NodeHandle &nh): PickClient(host, "rc_itempick", nh)
 {
-  srv_compute_grasps_ = nh_.advertiseService("compute_grasps", &BoxpickClient::computeGraspsSrv, this);
-  srv_detect_items_ = nh_.advertiseService("detect_items", &BoxpickClient::detectItemsSrv, this);
-  server_->setCallback(boost::bind(&BoxpickClient::dynamicReconfigureCallback, this, _1, _2));
+  srv_compute_grasps_ = nh_.advertiseService("compute_grasps", &ItempickClient::computeGraspsSrv, this);
+  server_->setCallback(boost::bind(&ItempickClient::dynamicReconfigureCallback, this, _1, _2));
 
 }
 
-bool BoxpickClient::computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest &request,
-                                     rc_pick_client::ComputeBoxGraspsResponse &response)
+bool ItempickClient::computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &request,
+                                      rc_pick_client::ComputeGraspsResponse &response)
 {
   callService("compute_grasps", request, response);
   visualizer_.visualizeGrasps(response.grasps);
@@ -54,19 +51,18 @@ bool BoxpickClient::computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest &re
   return true;
 }
 
-bool BoxpickClient::detectItemsSrv(rc_pick_client::DetectBoxItemsRequest &request,
-                                   rc_pick_client::DetectBoxItemsResponse &response)
-{
-  callService("detect_items", request, response);
-  visualizer_.visualizeDetectedBoxes(response.items);
-  visualizer_.visualizeLoadCarriers(response.load_carriers);
-  return true;
-}
-
-void BoxpickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t)
+void ItempickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t)
 {
   json js_params = createSharedParameters(config);
-  json j_params_new = rc_visard_communication_.setParameters(js_params);
+  json js_param;
+  js_param["name"] = "cluster_max_dimension";
+  js_param["value"] = config.cluster_max_dimension;
+  js_params.push_back(js_param);
+  js_param["name"] = "clustering_patch_size";
+  js_param["value"] = config.clustering_patch_size;
+  js_params.push_back(js_param);
+
+  json j_params_new = rest_helper_.setParameters(js_params);
   // set config with new params so they are updated if needed
   paramsToCfg(j_params_new, config);
 }

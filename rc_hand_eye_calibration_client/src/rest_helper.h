@@ -30,52 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_SILHOUETTEMATCH_CLIENT_EXCEPTIONS_H
-#define RC_SILHOUETTEMATCH_CLIENT_EXCEPTIONS_H
+#ifndef rc_rest_api_HELPER_H
+#define rc_rest_api_HELPER_H
 
-#include <stdexcept>
+#include <string>
+#include <json/json.hpp>
 
-namespace rc_silhouettematch_client
+#include "rest_exceptions.h"
+
+using json = nlohmann::json;
+
+namespace rc_rest_api
 {
-class SilhouetteMatchException : public std::runtime_error
+class RestHelper
 {
-public:
-  explicit SilhouetteMatchException(const std::string& msg)
-    : std::runtime_error(msg)
-  {
-  }
-  virtual ~SilhouetteMatchException() = default;
+  public:
+    RestHelper(const std::string &host, const std::string &node_name,
+                        int timeout);
+
+    json servicePutRequest(const std::string &service_name);
+
+    json servicePutRequest(const std::string &service_name, const json &js_args);
+
+    json getParameters();
+
+    std::tuple<size_t, size_t, size_t> getImageVersion();
+
+    json setParameters(const json &js_params);
+
+  private:
+    const std::string host_, services_url_, params_url_, version_url_;
+    const int timeout_curl_; // ms
 };
 
-class NotAvailableInThisVersionException : public SilhouetteMatchException
-{
-public:
-  explicit NotAvailableInThisVersionException(const std::string& msg)
-    : SilhouetteMatchException(msg)
-  {
-  }
-  virtual ~NotAvailableInThisVersionException() = default;
-};
-
-class MiscException : public SilhouetteMatchException
-{
-public:
-  explicit MiscException(const std::string& msg)
-    : SilhouetteMatchException(msg)
-  {
-  }
-  virtual ~MiscException() = default;
-};
-
-class RequestException : public SilhouetteMatchException
-{
-public:
-  RequestException(const std::string& msg) : SilhouetteMatchException(msg)
-  {
-  }
-  virtual ~RequestException() = default;
-};
-
-}  // namespace rc_silhouettematch_client
-
-#endif  // RC_SILHOUETTEMATCH_CLIENT_EXCEPTIONS_H
+}
+#endif //rc_rest_api_HELPER_H

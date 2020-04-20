@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019 Roboception GmbH
  *
- * Author: Carlos Xavier Garcia Briones, Monika Florek-Jasinska
+ * Author: Monika Florek-Jasinska
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,43 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "itempick_client.h"
+#ifndef rc_rest_api_HELPER_H
+#define rc_rest_api_HELPER_H
 
-using namespace std;
+#include <string>
+#include <json/json.hpp>
 
-namespace ros_pick_client
+#include "rest_exceptions.h"
+
+using json = nlohmann::json;
+
+namespace rc_rest_api
 {
-
-ItempickClient::ItempickClient(const std::string &host, const ros::NodeHandle &nh): PickClient(host, "rc_itempick", nh)
+class RestHelper
 {
-  srv_compute_grasps_ = nh_.advertiseService("compute_grasps", &ItempickClient::computeGraspsSrv, this);
-  server_->setCallback(boost::bind(&ItempickClient::dynamicReconfigureCallback, this, _1, _2));
+  public:
+    RestHelper(const std::string &host, const std::string &node_name,
+                        int timeout);
+
+    json servicePutRequest(const std::string &service_name);
+
+    json servicePutRequest(const std::string &service_name, const json &js_args);
+
+    json getParameters();
+
+    std::tuple<size_t, size_t, size_t> getImageVersion();
+
+    json setParameters(const json &js_params);
+
+  private:
+    const std::string host_, services_url_, params_url_, version_url_;
+    const int timeout_curl_; // ms
+};
 
 }
-
-bool ItempickClient::computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &request,
-                                      rc_pick_client::ComputeGraspsResponse &response)
-{
-  callService("compute_grasps", request, response);
-  visualizer_.visualizeGrasps(response.grasps);
-  visualizer_.visualizeLoadCarriers(response.load_carriers);
-  return true;
-}
-
-void ItempickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t)
-{
-  json js_params = createSharedParameters(config);
-  json js_param;
-  js_param["name"] = "cluster_max_dimension";
-  js_param["value"] = config.cluster_max_dimension;
-  js_params.push_back(js_param);
-  js_param["name"] = "clustering_patch_size";
-  js_param["value"] = config.clustering_patch_size;
-  js_params.push_back(js_param);
-
-  json j_params_new = rc_visard_communication_.setParameters(js_params);
-  // set config with new params so they are updated if needed
-  paramsToCfg(j_params_new, config);
-}
-
-}
+#endif //rc_rest_api_HELPER_H

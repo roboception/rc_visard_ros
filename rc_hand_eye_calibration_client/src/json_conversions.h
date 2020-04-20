@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2019 Roboception GmbH
+ * Copyright (c) 2020 Roboception GmbH
  *
- * Author: Monika Florek-Jasinska
+ * Author: Elena Gambaro
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,44 +30,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PROJECT_EXCEPTIONS_H
-#define PROJECT_EXCEPTIONS_H
+#ifndef RC_HAND_EYE_CALIB_JSON_CONVERSIONS_H
+#define RC_HAND_EYE_CALIB_JSON_CONVERSIONS_H
 
-namespace rc_tagdetect_client
+#include "json_conversions_common.h"
+
+#include <rc_hand_eye_calibration_client/SetCalibrationPose.h>
+#include <rc_hand_eye_calibration_client/Calibration.h>
+#include <rc_hand_eye_calibration_client/Trigger.h>
+
+namespace rc_hand_eye_calibration_client
 {
 
-class TagDetectClientException : public std::runtime_error
+inline void to_json(nlohmann::json& j, const TriggerRequest& r)
 {
-  public:
-    explicit TagDetectClientException(const std::string &msg) :
-        std::runtime_error(msg) {}
-    virtual ~TagDetectClientException() = default;
-};
-
-class NotAvailableInThisVersionException : public TagDetectClientException
-{
-  public:
-    explicit NotAvailableInThisVersionException(const std::string &msg) :
-        TagDetectClientException(msg) {}
-    virtual ~NotAvailableInThisVersionException() = default;
-};
-
-class MiscException : public TagDetectClientException
-{
-  public:
-    explicit MiscException(const std::string &msg) :
-        TagDetectClientException(msg) {}
-    virtual ~MiscException() = default;
-};
-
-class RequestException : public TagDetectClientException
-{
-  public:
-    RequestException(const std::string &msg) :
-        TagDetectClientException(msg) {}
-    virtual ~RequestException() = default;
-};
-
+  j = {};
 }
 
-#endif //PROJECT_EXCEPTIONS_H
+inline void from_json(const nlohmann::json& j, TriggerResponse& r)
+{
+  j.at("success").get_to(r.success);
+  j.at("status").get_to(r.status);
+  j.at("message").get_to(r.message);
+}
+
+inline void to_json(nlohmann::json& j, const SetCalibrationPoseRequest& r)
+{
+  j["slot"] = r.slot;
+  j["pose"] = r.pose;
+}
+
+inline void from_json(const nlohmann::json& j, SetCalibrationPoseResponse& r)
+{
+  j.at("success").get_to(r.success);
+  j.at("status").get_to(r.status);
+  j.at("message").get_to(r.message);
+}
+
+inline void to_json(nlohmann::json& j, const CalibrationRequest& r)
+{
+  j = {};
+}
+
+inline void from_json(const nlohmann::json& j, CalibrationResponse& r)
+{
+  j.at("success").get_to(r.success);
+  j.at("status").get_to(r.status);
+  j.at("message").get_to(r.message);
+  j.at("pose").get_to(r.pose);
+  j.at("error").get_to(r.error);
+  j.at("robot_mounted").get_to(r.robot_mounted);
+}
+
+
+}  // namespace rc_tagdetect_client
+
+#endif  // RC_HAND_EYE_CALIB_JSON_CONVERSIONS_H

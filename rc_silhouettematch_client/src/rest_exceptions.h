@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2020 Roboception GmbH
+ * Copyright (c) 2019 Roboception GmbH
  *
- * Author: Elena Gambaro
+ * Author: Monika Florek-Jasinska
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,55 +30,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_TAGDETECT_JSON_CONVERSIONS_H
-#define RC_TAGDETECT_JSON_CONVERSIONS_H
+#ifndef rc_rest_api_EXCEPTIONS_H
+#define rc_rest_api_EXCEPTIONS_H
 
-#include "json_conversions_common.h"
-
-#include <rc_tagdetect_client/Tag.h>
-#include <rc_tagdetect_client/DetectedTags.h>
-
-#include <rc_tagdetect_client/DetectTags.h>
-#include <rc_tagdetect_client/StartContinuousDetection.h>
-
-namespace rc_tagdetect_client
+namespace rc_rest_api
 {
 
-inline void to_json(nlohmann::json& j, const Tag& r)
+class RestClientException : public std::runtime_error
 {
-  j["id"] = r.id;
-  j["size"] = r.size;
+  public:
+    explicit RestClientException(const std::string &msg) :
+        std::runtime_error(msg) {}
+    virtual ~RestClientException() = default;
+};
+
+class NotAvailableInThisVersionException : public RestClientException
+{
+  public:
+    explicit NotAvailableInThisVersionException(const std::string &msg) :
+        RestClientException(msg) {}
+    virtual ~NotAvailableInThisVersionException() = default;
+};
+
+class MiscException : public RestClientException
+{
+  public:
+    explicit MiscException(const std::string &msg) :
+        RestClientException(msg) {}
+    virtual ~MiscException() = default;
+};
+
+class RequestException : public RestClientException
+{
+  public:
+    RequestException(const std::string &msg) :
+        RestClientException(msg) {}
+    virtual ~RequestException() = default;
+};
+
 }
 
-inline void from_json(const nlohmann::json& j, Tag& r)
-{
-  j.at("id").get_to(r.id);
-  j.at("size").get_to(r.size);
-}
-
-inline void from_json(const nlohmann::json& j, DetectedTag& r)
-{
-  j.at("timestamp").get_to(r.header.stamp);
-  j.at("pose_frame").get_to(r.header.frame_id);
-  j.at("tag").get_to(r.tag);
-  j.at("instance_id").get_to(r.instance_id);
-  j.at("pose").get_to(r.pose.pose);
-  r.pose.header.stamp = r.header.stamp;
-  r.pose.header.frame_id = r.header.frame_id;
-}
-
-inline void to_json(nlohmann::json& j, const DetectTagsRequest& r)
-{
-  j["tags"] = r.tags;
-}
-
-inline void from_json(const nlohmann::json& j, DetectTagsResponse& r)
-{
-  j.at("tags").get_to(r.tags);
-  j.at("timestamp").get_to(r.timestamp);
-  j.at("return_code").get_to(r.return_code);
-}
-
-}  // namespace rc_tagdetect_client
-
-#endif  // RC_TAGDETECT_JSON_CONVERSIONS_H
+#endif //rc_rest_api_EXCEPTIONS_H

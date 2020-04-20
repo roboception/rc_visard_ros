@@ -32,13 +32,13 @@
 
 #include "pick_client.h"
 
-using namespace std;
+using std::string;
 
 namespace ros_pick_client
 {
 
 PickClient::PickClient(const string &host, const string &node_name, const ros::NodeHandle &nh)
-        : nh_(nh), rc_visard_communication_(host, node_name, 10000), visualizer_(nh)
+        : nh_(nh), rest_helper_(host, node_name, 10000), visualizer_(nh)
 {
   initConfiguration();
   advertiseServices();
@@ -63,12 +63,12 @@ PickClient::~PickClient()
 
 void PickClient::startPick()
 {
-  rc_visard_communication_.servicePutRequest("start");
+  rest_helper_.servicePutRequest("start");
 }
 
 void PickClient::stopPick()
 {
-  rc_visard_communication_.servicePutRequest("stop");
+  rest_helper_.servicePutRequest("stop");
 }
 
 bool PickClient::setLoadCarrier(rc_pick_client::SetLoadCarrierRequest &request,
@@ -174,7 +174,7 @@ void PickClient::initConfiguration()
   rc_pick_client::pickModuleConfig cfg;
 
   // first get the current values from sensor
-  const auto j_params = rc_visard_communication_.getParameters();
+  const auto j_params = rest_helper_.getParameters();
 
   paramsToCfg(j_params, cfg);
 
@@ -200,7 +200,7 @@ void PickClient::initConfiguration()
 
   // instantiate dynamic reconfigure server that will initially read those values
   using RCFSRV = dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>;
-  server_ = unique_ptr<RCFSRV>(new dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>(nh_));
+  server_ = std::unique_ptr<RCFSRV>(new dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>(nh_));
 }
 
 json PickClient::createSharedParameters(rc_pick_client::pickModuleConfig &config)

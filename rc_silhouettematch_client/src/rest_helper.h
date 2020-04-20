@@ -30,21 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_PICK_CLIENT_CPR_HELPER_H
-#define RC_PICK_CLIENT_CPR_HELPER_H
-
-#include <json/json.hpp>
+#ifndef rc_rest_api_HELPER_H
+#define rc_rest_api_HELPER_H
 
 #include <string>
+#include <json/json.hpp>
+
+#include "rest_exceptions.h"
 
 using json = nlohmann::json;
 
-namespace rc_itempick_cpr
+namespace rc_rest_api
 {
-class CommunicationHelper
+class RestHelper
 {
   public:
-    CommunicationHelper(const std::string &host, const std::string &node_name,
+    RestHelper(const std::string &host, const std::string &node_name,
                         int timeout);
 
     json servicePutRequest(const std::string &service_name);
@@ -53,13 +54,14 @@ class CommunicationHelper
 
     json getParameters();
 
-    json setParameters(const json& js_params);
+    std::tuple<size_t, size_t, size_t> getImageVersion();
+
+    json setParameters(const json &js_params);
 
   private:
-    // REST stuff
-    const std::string host_, services_url_, params_url_;
+    const std::string host_, services_url_, params_url_, version_url_;
     const int timeout_curl_; // ms
 };
 
 }
-#endif //RC_PICK_CLIENT_CPR_HELPER_H
+#endif //rc_rest_api_HELPER_H

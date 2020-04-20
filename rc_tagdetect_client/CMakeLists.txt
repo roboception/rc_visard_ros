@@ -80,10 +80,10 @@ include_directories(
 
 
 ## Declare a cpp executable
-add_executable(rc_april_node src/rc_tagdetect_client_node.cpp src/ros_tagdetect_client.cpp src/communication_helper.cpp src/visualization.cpp)
+add_executable(rc_april_node src/rc_tagdetect_client_node.cpp src/ros_tagdetect_client.cpp src/rest_helper.cpp src/visualization.cpp)
 target_compile_definitions(rc_april_node PRIVATE -DDETECTION_TAG_TYPE="rc_april_tag_detect")
 
-add_executable(rc_qr_node src/rc_tagdetect_client_node.cpp src/ros_tagdetect_client.cpp src/communication_helper.cpp src/visualization.cpp)
+add_executable(rc_qr_node src/rc_tagdetect_client_node.cpp src/ros_tagdetect_client.cpp src/rest_helper.cpp src/visualization.cpp)
 target_compile_definitions(rc_qr_node PRIVATE -DDETECTION_TAG_TYPE="rc_qr_code_detect")
 
 ## Add cmake target dependencies of the executable/library

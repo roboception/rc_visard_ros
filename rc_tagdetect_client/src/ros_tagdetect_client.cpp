@@ -31,7 +31,6 @@
  */
 
 #include "ros_tagdetect_client.h"
-#include "exceptions.h"
 #include "json_conversions.h"
 
 using std::string;
@@ -46,14 +45,13 @@ RosTagdetectClient::RosTagdetectClient(const std::string &host, const ros::NodeH
 {
   if (detection_type == "rc_april_tag_detect" || detection_type == "rc_qr_code_detect")
   {
-    rc_visard_communication_.reset(
-            new CommunicationHelper(host, detection_type, 10000));
+    rest_helper_.reset(new rc_rest_api::RestHelper(host, detection_type, 10000));
   }
   else
   {
     throw std::runtime_error("Acceptable detection types are \"rc_april_tag_detect\" and \"rc_qr_code_detect\"");
   }
-  image_version_ = rc_visard_communication_->getImageVersion();
+  image_version_ = rest_helper_->getImageVersion();
   initConfiguration();
   advertiseServicesAndTopics();
   startTagDetect();
@@ -83,12 +81,12 @@ RosTagdetectClient::~RosTagdetectClient()
 
 void RosTagdetectClient::startTagDetect()
 {
-  rc_visard_communication_->servicePutRequest("start");
+  rest_helper_->servicePutRequest("start");
 }
 
 void RosTagdetectClient::stopTagDetect()
 {
-  rc_visard_communication_->servicePutRequest("stop");
+  rest_helper_->servicePutRequest("stop");
 }
 
 template <typename Request, typename Response>
@@ -98,11 +96,11 @@ bool RosTagdetectClient::callService(const std::string& name,
   try
   {
     json j_req = req;
-    const auto j_res = rc_visard_communication_->servicePutRequest(name, j_req);
+    const auto j_res = rest_helper_->servicePutRequest(name, j_req);
     res = j_res;
     return true;
   }
-  catch (const NotAvailableInThisVersionException& ex)
+  catch (const rc_rest_api::NotAvailableInThisVersionException& ex)
   {
     ROS_ERROR("This rc_visard firmware does not support \"%s\"", ex.what());
     res.return_code.value = -8; // NOT_APPLICABLE
@@ -248,7 +246,7 @@ void RosTagdetectClient::initConfiguration()
   rc_tagdetect_client::TagDetectConfig cfg;
 
   // first get the current values from sensor
-  const auto j_params = rc_visard_communication_->getParameters();
+  const auto j_params = rest_helper_->getParameters();
 
   paramsToCfg(j_params, cfg);
 
@@ -308,7 +306,7 @@ void RosTagdetectClient::dynamicReconfigureCallback(rc_tagdetect_client::TagDete
     visualizer_.reset();
   }
 
-  json j_params_new = rc_visard_communication_->setParameters(js_params);
+  json j_params_new = rest_helper_->setParameters(js_params);
   // set config with new params so they are updated if needed
   paramsToCfg(j_params_new, config);
 }

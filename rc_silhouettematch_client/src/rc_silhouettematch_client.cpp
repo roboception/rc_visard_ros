@@ -32,7 +32,6 @@
 
 #include "rc_silhouettematch_client.h"
 #include "json_conversions.h"
-#include "communication_helper.h"
 #include "visualizer.h"
 
 using json = nlohmann::json;
@@ -42,8 +41,8 @@ namespace rc_silhouettematch_client
 SilhouetteMatchClient::SilhouetteMatchClient(const std::string& host,
                                              ros::NodeHandle& nh)
   : nh_(nh)
-  , rc_visard_comm_if_(
-        new CommunicationHelper(host, "rc_silhouettematch", 10000))
+  , rest_helper_(
+        new rc_rest_api::RestHelper(host, "rc_silhouettematch", 10000))
   , dyn_reconf_(new dynamic_reconfigure::Server<SilhouetteMatchConfig>(nh))
 {
   srvs_.emplace_back(nh.advertiseService(
@@ -78,11 +77,11 @@ bool SilhouetteMatchClient::callService(const std::string& name,
   try
   {
     json j_req = req;
-    const auto j_res = rc_visard_comm_if_->servicePutRequest(name, j_req);
+    const auto j_res = rest_helper_->servicePutRequest(name, j_req);
     res = j_res;
     return true;
   }
-  catch (const NotAvailableInThisVersionException& ex)
+  catch (const rc_rest_api::NotAvailableInThisVersionException& ex)
   {
     ROS_ERROR("This rc_visard firmware does not support \"%s\"", ex.what());
     res.return_code.value = -8; // NOT_APPLICABLE
@@ -178,7 +177,7 @@ void paramsToCfg(const json& params, SilhouetteMatchConfig& cfg)
 void SilhouetteMatchClient::initParameters()
 {
   // first get the current values from sensor
-  const auto j_params = rc_visard_comm_if_->getParameters();
+  const auto j_params = rest_helper_->getParameters();
   SilhouetteMatchConfig cfg;
 
   paramsToCfg(j_params, cfg);
@@ -226,7 +225,7 @@ void SilhouetteMatchClient::updateParameters(SilhouetteMatchConfig& config,
     visualizer_.reset();
   }
 
-  json j_params_new = rc_visard_comm_if_->setParameters(j_params);
+  json j_params_new = rest_helper_->setParameters(j_params);
   // set config with new params so they are updated if needed
   paramsToCfg(j_params_new, config);
 }
