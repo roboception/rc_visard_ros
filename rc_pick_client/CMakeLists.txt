@@ -89,7 +89,6 @@ set(common_pick_src
         src/communication_helper.cpp
         src/visualization.cpp
         src/pick_client.cc
-        src/utils.cpp
         )
 
 add_executable(rc_itempick_client_node ${common_pick_src})

@@ -32,6 +32,8 @@
 
 #include "pick_client.h"
 
+using namespace std;
+
 namespace ros_pick_client
 {
 
@@ -69,149 +71,56 @@ void PickClient::stopPick()
   rc_visard_communication_.servicePutRequest("stop");
 }
 
-bool PickClient::detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest &request,
-                                       rc_pick_client::DetectLoadCarriersResponse &response)
+bool PickClient::setLoadCarrier(rc_pick_client::SetLoadCarrierRequest &request,
+                                rc_pick_client::SetLoadCarrierResponse &response)
 {
-  //parsing arguments
-  json js_args;
-  js_args["args"]["pose_frame"] = request.pose_frame;
-  if (request.pose_frame == "external")
-  {
-    utils::rosPoseToJson(request.robot_pose, js_args["args"]["robot_pose"]);
-  }
-  js_args["args"]["region_of_interest_id"] = request.region_of_interest_id;
-  for (auto lc_id : request.load_carrier_ids)
-  {
-    js_args["args"]["load_carrier_ids"].push_back(lc_id);
-  }
+  callService("set_load_carrier", request, response);
+  return true;
+}
 
-  //communicating with rc_visard
-  auto json_resp = rc_visard_communication_.servicePutRequest("detect_load_carriers", js_args);
-  utils::parseReturnCode(response.return_code, json_resp["return_code"]);
-  utils::jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"], json_resp["timestamp"]);
-  utils::jsonTimestampToRos(response.timestamp, json_resp["timestamp"]);
-  visualizer_.visualizeLoadCarriers(response.load_carriers);
-
+bool PickClient::getLoadCarriers(rc_pick_client::GetLoadCarriersRequest &request,
+                                 rc_pick_client::GetLoadCarriersResponse &response)
+{
+  callService("get_load_carriers", request, response);
   return true;
 }
 
 bool PickClient::deleteLoadCarriersSrv(rc_pick_client::DeleteLoadCarriersRequest &request,
                                        rc_pick_client::DeleteLoadCarriersResponse &response)
 {
-  //parsing arguments
-  json json_args;
-  for (auto single_lc : request.load_carrier_ids)
-  {
-    json_args["args"]["load_carrier_ids"].push_back(single_lc);
-  }
-
-  //communicating with rc_visard
-  auto json_resp = rc_visard_communication_.servicePutRequest("delete_load_carriers", json_args);
-  utils::parseReturnCode(response.return_code, json_resp["return_code"]);
-
+  callService("delete_load_carriers", request, response);
   return true;
 }
 
-bool PickClient::deleteROISrv(rc_pick_client::DeleteRegionsOfInterestRequest &request,
-                              rc_pick_client::DeleteRegionsOfInterestResponse &response)
+bool PickClient::detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest &request,
+                                       rc_pick_client::DetectLoadCarriersResponse &response)
 {
-  //parsing arguments
-  json json_args;
-  for (auto single_roi : request.region_of_interest_ids)
-  {
-    json_args["args"]["region_of_interest_ids"].push_back(single_roi);
-  }
+  callService("detect_load_carriers", request, response);
+  visualizer_.visualizeLoadCarriers(response.load_carriers);
+  return true;
+}
 
-  //communicating with rc_visard
-  auto json_resp = rc_visard_communication_.servicePutRequest("delete_regions_of_interest", json_args);
-  utils::parseReturnCode(response.return_code, json_resp["return_code"]);
-
+bool PickClient::setROI(rc_pick_client::SetRegionOfInterestRequest &request,
+                        rc_pick_client::SetRegionOfInterestResponse &response)
+{
+  callService("set_region_of_interest", request, response);
   return true;
 }
 
 bool PickClient::getROIs(rc_pick_client::GetRegionsOfInterestRequest &request,
                          rc_pick_client::GetRegionsOfInterestResponse &response)
 {
-  //parsing arguments
-  json json_args;
-  for (auto single_roi : request.region_of_interest_ids)
-  {
-    if (single_roi != "") json_args["args"]["region_of_interest_ids"].push_back(single_roi);
-  }
-
-  //communicating with rc_visard
-  json json_resp = rc_visard_communication_.servicePutRequest("get_regions_of_interest", json_args);
-  utils::jsonROIsToRos(response.regions_of_interest, json_resp["regions_of_interest"]);
-  utils::parseReturnCode(response.return_code, json_resp["return_code"]);
+  callService("get_regions_of_interest", request, response);
   return true;
 }
 
-
-bool PickClient::getLoadCarriers(rc_pick_client::GetLoadCarriersRequest &request,
-                                 rc_pick_client::GetLoadCarriersResponse &response)
+bool PickClient::deleteROISrv(rc_pick_client::DeleteRegionsOfInterestRequest &request,
+                              rc_pick_client::DeleteRegionsOfInterestResponse &response)
 {
-  //parsing arguments
-  json json_args;
-  for (auto single_lc : request.load_carrier_ids)
-  {
-    if (single_lc != "") json_args["args"]["load_carrier_ids"].push_back(single_lc);
-  }
-
-  //communicating with rc_visard
-  json json_resp = rc_visard_communication_.servicePutRequest("get_load_carriers", json_args);
-  utils::jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"]);
-  utils::parseReturnCode(response.return_code, json_resp["return_code"]);
+  callService("delete_regions_of_interest", request, response);
   return true;
 }
 
-bool PickClient::setLoadCarrier(rc_pick_client::SetLoadCarrierRequest &request,
-                                rc_pick_client::SetLoadCarrierResponse &response)
-{
-  //parsing arguments
-  json json_args;
-  json_args["id"] = request.load_carrier.id;
-  json_args["rim_thickness"]["x"] = request.load_carrier.rim_thickness.x;
-  json_args["rim_thickness"]["y"] = request.load_carrier.rim_thickness.y;
-  utils::rosBoxToJson(request.load_carrier.inner_dimensions, json_args["inner_dimensions"]);
-  utils::rosBoxToJson(request.load_carrier.outer_dimensions, json_args["outer_dimensions"]);
-  json json_args_lc;
-  json_args_lc["args"]["load_carrier"] = json_args;
-
-  //communicating with rc_visard
-  json json_resp = rc_visard_communication_.servicePutRequest("set_load_carrier", json_args_lc);
-  utils::parseReturnCode(response.return_code, json_resp["return_code"]);
-  return true;
-}
-
-bool PickClient::setROIs(rc_pick_client::SetRegionOfInterestRequest &request,
-                         rc_pick_client::SetRegionOfInterestResponse &response)
-{
-  //parsing arguments
-  json json_args;
-  json_args["id"] = request.region_of_interest.id;
-  if (request.region_of_interest.pose.header.frame_id == "camera")
-  {
-    json_args["pose_frame"] = "camera";
-  }
-  else if (request.region_of_interest.pose.header.frame_id == "external")
-  {
-    json_args["pose_frame"] = "external";
-  }
-  else
-  {
-    throw runtime_error("frame_id of a region of interest has to be of type \"camera\" or \"external\"");
-  }
-  utils::rosSolidPrimitiveToJson(request.region_of_interest.primitive, json_args);
-  utils::rosPoseToJson(request.region_of_interest.pose.pose, json_args["pose"]);
-  json json_args_roi;
-  json_args_roi["args"]["region_of_interest"] = json_args;
-  utils::rosPoseToJson(request.robot_pose, json_args_roi["args"]["robot_pose"]);
-
-  //communicating with rc_visard
-  json json_resp = rc_visard_communication_.servicePutRequest("set_region_of_interest", json_args_roi);
-  utils::parseReturnCode(response.return_code, json_resp["return_code"]);
-  return true;
-}
 
 void PickClient::advertiseServices()
 {
@@ -221,7 +130,43 @@ void PickClient::advertiseServices()
   srv_set_lc_ = nh_.advertiseService("set_load_carrier", &PickClient::setLoadCarrier, this);
   srv_delete_rois_ = nh_.advertiseService("delete_regions_of_interest", &PickClient::deleteROISrv, this);
   srv_get_rois_ = nh_.advertiseService("get_regions_of_interest", &PickClient::getROIs, this);
-  srv_set_roi_ = nh_.advertiseService("set_region_of_interest", &PickClient::setROIs, this);
+  srv_set_roi_ = nh_.advertiseService("set_region_of_interest", &PickClient::setROI, this);
+}
+
+void paramsToCfg(const json& params, rc_pick_client::pickModuleConfig& cfg)
+{
+  for (const auto& param : params)
+  {
+    const auto& name = param["name"];
+    if (name == "cluster_max_curvature")
+    {
+      cfg.cluster_max_curvature = param["value"];
+    }
+    else if (name == "cluster_max_dimension")
+    {
+      cfg.cluster_max_dimension = param["value"];
+    }
+    else if (name == "clustering_discontinuity_factor")
+    {
+      cfg.clustering_discontinuity_factor = param["value"];
+    }
+    else if (name == "clustering_max_surface_rmse")
+    {
+      cfg.clustering_max_surface_rmse = param["value"];
+    }
+    else if (name == "clustering_patch_size")
+    {
+      cfg.clustering_patch_size = param["value"];
+    }
+    else if (name == "load_carrier_crop_distance")
+    {
+      cfg.load_carrier_crop_distance = param["value"];
+    }
+    else if (name == "load_carrier_model_tolerance")
+    {
+      cfg.load_carrier_model_tolerance = param["value"];
+    }
+  }
 }
 
 void PickClient::initConfiguration()
@@ -229,40 +174,9 @@ void PickClient::initConfiguration()
   rc_pick_client::pickModuleConfig cfg;
 
   // first get the current values from sensor
-  auto json_resp = rc_visard_communication_.getParameters();
+  const auto j_params = rc_visard_communication_.getParameters();
 
-  for (auto &param : json_resp)
-  {
-    string name = param["name"];
-    if (param["name"] == "cluster_max_curvature")
-    {
-      cfg.cluster_max_curvature = param["value"];
-    }
-    else if (param["name"] == "cluster_max_dimension")
-    {
-      cfg.cluster_max_dimension = param["value"];
-    }
-    else if (param["name"] == "clustering_discontinuity_factor")
-    {
-      cfg.clustering_discontinuity_factor = param["value"];
-    }
-    else if (param["name"] == "clustering_max_surface_rmse")
-    {
-      cfg.clustering_max_surface_rmse = param["value"];
-    }
-    else if (param["name"] == "clustering_patch_size")
-    {
-      cfg.clustering_patch_size = param["value"];
-    }
-    else if (param["name"] == "load_carrier_crop_distance")
-    {
-      cfg.load_carrier_crop_distance = param["value"];
-    }
-    else if (param["name"] == "load_carrier_model_tolerance")
-    {
-      cfg.load_carrier_model_tolerance = param["value"];
-    }
-  }
+  paramsToCfg(j_params, cfg);
 
   // second, try to get ROS parameters:
   // if parameter is not set in parameter server, we default to current sensor configuration
@@ -291,7 +205,7 @@ void PickClient::initConfiguration()
 
 json PickClient::createSharedParameters(rc_pick_client::pickModuleConfig &config)
 {
-// fill json request from dynamic reconfigure request
+  // fill json request from dynamic reconfigure request
   json js_params, js_param;
   js_param["name"] = "cluster_max_curvature";
   js_param["value"] = config.cluster_max_curvature;

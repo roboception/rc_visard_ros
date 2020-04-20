@@ -53,7 +53,7 @@ class CommunicationHelper
 
     json getParameters();
 
-    void setParameters(const json& js_params);
+    json setParameters(const json& js_params);
 
   private:
     // REST stuff

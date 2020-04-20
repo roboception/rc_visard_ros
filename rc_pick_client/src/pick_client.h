@@ -48,7 +48,7 @@
 #include <rc_pick_client/SetRegionOfInterest.h>
 #include <rc_pick_client/pickModuleConfig.h>
 #include "json/json.hpp"
-#include "utils.h"
+#include "json_conversions.h"
 
 #include "communication_helper.h"
 #include "visualization.h"
@@ -84,6 +84,26 @@ class PickClient
 
     json createSharedParameters(rc_pick_client::pickModuleConfig &config);
 
+    template <typename Request, typename Response>
+    bool callService(const std::string& name,
+                     const Request& req, Response& res)
+    {
+      try
+      {
+        json j_req = req;
+        const auto j_res = rc_visard_communication_.servicePutRequest(name, j_req);
+        res = j_res;
+        return true;
+      }
+      catch (const std::exception& ex)
+      {
+        ROS_ERROR("%s", ex.what());
+        res.return_code.value = -2; // INTERNAL_ERROR
+        res.return_code.message = ex.what();
+        return false;
+      }
+    }
+
     bool detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest &request,
                                rc_pick_client::DetectLoadCarriersResponse &response);
 
@@ -102,8 +122,8 @@ class PickClient
     bool getROIs(rc_pick_client::GetRegionsOfInterestRequest &request,
                  rc_pick_client::GetRegionsOfInterestResponse &response);
 
-    bool setROIs(rc_pick_client::SetRegionOfInterestRequest &request,
-                 rc_pick_client::SetRegionOfInterestResponse &response);
+    bool setROI(rc_pick_client::SetRegionOfInterestRequest &request,
+                rc_pick_client::SetRegionOfInterestResponse &response);
 
     void startPick();
 

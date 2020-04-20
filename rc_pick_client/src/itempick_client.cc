@@ -32,68 +32,39 @@
 
 #include "itempick_client.h"
 
+using namespace std;
+
 namespace ros_pick_client
 {
 
-    ItempickClient::ItempickClient(const std::string &host, const ros::NodeHandle &nh): PickClient(host, "rc_itempick", nh)
-    {
-      srv_compute_grasps_ = nh_.advertiseService("compute_grasps", &ItempickClient::computeGraspsSrv, this);
-      server_->setCallback(boost::bind(&ItempickClient::dynamicReconfigureCallback, this, _1, _2));
+ItempickClient::ItempickClient(const std::string &host, const ros::NodeHandle &nh): PickClient(host, "rc_itempick", nh)
+{
+  srv_compute_grasps_ = nh_.advertiseService("compute_grasps", &ItempickClient::computeGraspsSrv, this);
+  server_->setCallback(boost::bind(&ItempickClient::dynamicReconfigureCallback, this, _1, _2));
 
-    }
+}
 
-    bool ItempickClient::computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &request,
-                                          rc_pick_client::ComputeGraspsResponse &response)
-    {
-      //parsing arguments
-      json js_args;
-      js_args["args"]["suction_surface_length"] = request.suction_surface_length;
-      js_args["args"]["suction_surface_width"] = request.suction_surface_width;
-      js_args["args"]["pose_frame"] = request.pose_frame;
-      if (request.pose_frame == "external")
-      {
-        utils::rosPoseToJson(request.robot_pose, js_args["args"]["robot_pose"]);
-      }
-      js_args["args"]["region_of_interest_id"] = request.region_of_interest_id;
-      if (request.load_carrier_id != "")
-      {
-        js_args["args"]["load_carrier_id"] = request.load_carrier_id;
-        utils::rosCompartmentToJson(request.load_carrier_compartment, js_args["args"]["load_carrier_compartment"]);
-      }
-      if (request.collision_detection.gripper_id != "") {
-        js_args["args"]["collision_detection"]["gripper_id"] = request.collision_detection.gripper_id;
-        if (request.collision_detection.pre_grasp_offset.x != 0 || request.collision_detection.pre_grasp_offset.y != 0 || request.collision_detection.pre_grasp_offset.z != 0 ) {
-          js_args["args"]["collision_detection"]["pre_grasp_offset"]["x"] = request.collision_detection.pre_grasp_offset.x;
-          js_args["args"]["collision_detection"]["pre_grasp_offset"]["y"] = request.collision_detection.pre_grasp_offset.y;
-          js_args["args"]["collision_detection"]["pre_grasp_offset"]["z"] = request.collision_detection.pre_grasp_offset.z;
-        }
-      }
-      if (!request.item_models.empty()) utils::rosItemModelsToJson(request.item_models, js_args["args"]["item_models"]);
+bool ItempickClient::computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &request,
+                                      rc_pick_client::ComputeGraspsResponse &response)
+{
+  callService("compute_grasps", request, response);
+  visualizer_.visualizeGrasps(response.grasps);
+  visualizer_.visualizeLoadCarriers(response.load_carriers);
+  return true;
+}
 
-      //communicating with rc_visard
-      auto json_resp = rc_visard_communication_.servicePutRequest("compute_grasps", js_args);
-      utils::parseReturnCode(response.return_code, json_resp["return_code"]);
-      utils::jsonGraspToRos(response.grasps, json_resp["grasps"]);
-      utils::jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"], json_resp["timestamp"]);
-      utils::jsonTimestampToRos(response.timestamp, json_resp["timestamp"]);
-      visualizer_.visualizeGrasps(response.grasps);
-      visualizer_.visualizeLoadCarriers(response.load_carriers);
+void ItempickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t)
+{
+  json js_params = createSharedParameters(config);
+  json js_param;
+  js_param["name"] = "cluster_max_dimension";
+  js_param["value"] = config.cluster_max_dimension;
+  js_params.push_back(js_param);
+  js_param["name"] = "clustering_patch_size";
+  js_param["value"] = config.clustering_patch_size;
+  js_params.push_back(js_param);
 
-      return true;
-    }
-
-    void ItempickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t)
-    {
-      json js_params = createSharedParameters(config);
-      json js_param;
-      js_param["name"] = "cluster_max_dimension";
-      js_param["value"] = config.cluster_max_dimension;
-      js_params.push_back(js_param);
-      js_param["name"] = "clustering_patch_size";
-      js_param["value"] = config.clustering_patch_size;
-      js_params.push_back(js_param);
-
-      rc_visard_communication_.setParameters(js_params);
-    }
+  rc_visard_communication_.setParameters(js_params);
+}
 
 }

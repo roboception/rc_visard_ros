@@ -32,6 +32,8 @@
 
 #include "boxpick_client.h"
 
+using namespace std;
+
 namespace ros_pick_client
 {
 
@@ -46,39 +48,7 @@ BoxpickClient::BoxpickClient(const string &host, const ros::NodeHandle &nh) : Pi
 bool BoxpickClient::computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest &request,
                                      rc_pick_client::ComputeBoxGraspsResponse &response)
 {
-
-  //parsing arguments
-  json js_args;
-  js_args["args"]["suction_surface_length"] = request.suction_surface_length;
-  js_args["args"]["suction_surface_width"] = request.suction_surface_width;
-  js_args["args"]["pose_frame"] = request.pose_frame;
-  if (request.pose_frame == "external")
-  {
-    utils::rosPoseToJson(request.robot_pose, js_args["args"]["robot_pose"]);
-  }
-  js_args["args"]["region_of_interest_id"] = request.region_of_interest_id;
-  if (request.load_carrier_id != "")
-  {
-    js_args["args"]["load_carrier_id"] = request.load_carrier_id;
-    utils::rosCompartmentToJson(request.load_carrier_compartment, js_args["args"]["load_carrier_compartment"]);
-  }
-  if (request.collision_detection.gripper_id != "") {
-    js_args["args"]["collision_detection"]["gripper_id"] = request.collision_detection.gripper_id;
-    if (request.collision_detection.pre_grasp_offset.x != 0 || request.collision_detection.pre_grasp_offset.y != 0 || request.collision_detection.pre_grasp_offset.z != 0 ) {
-      js_args["args"]["collision_detection"]["pre_grasp_offset"]["x"] = request.collision_detection.pre_grasp_offset.x;
-      js_args["args"]["collision_detection"]["pre_grasp_offset"]["y"] = request.collision_detection.pre_grasp_offset.y;
-      js_args["args"]["collision_detection"]["pre_grasp_offset"]["z"] = request.collision_detection.pre_grasp_offset.z;
-    }
-  }
-  if (!request.item_models.empty()) utils::rosBoxModelsToJson(request.item_models, js_args["args"]["item_models"]);
-
-  //communicating with rc_visard
-  auto json_resp = rc_visard_communication_.servicePutRequest("compute_grasps", js_args);
-  utils::parseReturnCode(response.return_code, json_resp["return_code"]);
-  utils::jsonGraspToRos(response.grasps, json_resp["grasps"]);
-  utils::jsonBoxItemToRos(response.items, json_resp["items"]);
-  utils::jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"], json_resp["timestamp"]);
-  utils::jsonTimestampToRos(response.timestamp, json_resp["timestamp"]);
+  callService("compute_grasps", request, response);
   visualizer_.visualizeGrasps(response.grasps);
   visualizer_.visualizeLoadCarriers(response.load_carriers);
   return true;
@@ -87,32 +57,9 @@ bool BoxpickClient::computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest &re
 bool BoxpickClient::detectItemsSrv(rc_pick_client::DetectBoxItemsRequest &request,
                                    rc_pick_client::DetectBoxItemsResponse &response)
 {
-  //parsing arguments
-  json js_args;
-  js_args["args"]["pose_frame"] = request.pose_frame;
-  if (request.pose_frame == "external")
-  {
-    utils::rosPoseToJson(request.robot_pose, js_args["args"]["robot_pose"]);
-  }
-  if (!request.region_of_interest_id.empty())
-  {
-    js_args["args"]["region_of_interest_id"] = request.region_of_interest_id;
-  }
-  if (request.load_carrier_id != "")
-  {
-    js_args["args"]["load_carrier_id"] = request.load_carrier_id;
-    utils::rosCompartmentToJson(request.load_carrier_compartment, js_args["args"]["load_carrier_compartment"]);
-  }
-  if (!request.item_models.empty()) utils::rosBoxModelsToJson(request.item_models, js_args["args"]["item_models"]);
-
-  //communicating with rc_visard
-  auto json_resp = rc_visard_communication_.servicePutRequest("detect_items", js_args);
-  utils::parseReturnCode(response.return_code, json_resp["return_code"]);
-  utils::jsonBoxItemToRos(response.items, json_resp["items"]);
-  utils::jsonLoadCarriersToRos(response.load_carriers, json_resp["load_carriers"], json_resp["timestamp"]);
-  utils::jsonTimestampToRos(response.timestamp, json_resp["timestamp"]);
-  visualizer_.visualizeLoadCarriers(response.load_carriers);
+  callService("detect_items", request, response);
   visualizer_.visualizeDetectedBoxes(response.items);
+  visualizer_.visualizeLoadCarriers(response.load_carriers);
   return true;
 }
 
