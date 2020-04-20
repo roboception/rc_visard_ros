@@ -66,7 +66,9 @@ bool BoxpickClient::detectItemsSrv(rc_pick_client::DetectBoxItemsRequest &reques
 void BoxpickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t)
 {
   json js_params = createSharedParameters(config);
-  rc_visard_communication_.setParameters(js_params);
+  json j_params_new = rc_visard_communication_.setParameters(js_params);
+  // set config with new params so they are updated if needed
+  paramsToCfg(j_params_new, config);
 }
 
 }

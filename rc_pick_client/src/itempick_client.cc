@@ -64,7 +64,9 @@ void ItempickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig
   js_param["value"] = config.clustering_patch_size;
   js_params.push_back(js_param);
 
-  rc_visard_communication_.setParameters(js_params);
+  json j_params_new = rc_visard_communication_.setParameters(js_params);
+  // set config with new params so they are updated if needed
+  paramsToCfg(j_params_new, config);
 }
 
 }

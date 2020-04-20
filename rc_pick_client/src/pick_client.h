@@ -83,6 +83,7 @@ class PickClient
     ros::ServiceServer srv_delete_rois_;
 
     json createSharedParameters(rc_pick_client::pickModuleConfig &config);
+    void paramsToCfg(const json& params, rc_pick_client::pickModuleConfig& cfg);
 
     template <typename Request, typename Response>
     bool callService(const std::string& name,

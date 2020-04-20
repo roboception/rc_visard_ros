@@ -133,7 +133,7 @@ void PickClient::advertiseServices()
   srv_set_roi_ = nh_.advertiseService("set_region_of_interest", &PickClient::setROI, this);
 }
 
-void paramsToCfg(const json& params, rc_pick_client::pickModuleConfig& cfg)
+void PickClient::paramsToCfg(const json& params, rc_pick_client::pickModuleConfig& cfg)
 {
   for (const auto& param : params)
   {
