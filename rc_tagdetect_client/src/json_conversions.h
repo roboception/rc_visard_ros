@@ -43,7 +43,6 @@
 
 namespace rc_tagdetect_client
 {
-
 inline void to_json(nlohmann::json& j, const Tag& r)
 {
   j["id"] = r.id;

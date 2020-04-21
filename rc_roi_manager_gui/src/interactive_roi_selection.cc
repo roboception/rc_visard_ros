@@ -36,7 +36,6 @@
 
 namespace rc_roi_manager_gui
 {
-
 InteractiveRoiSelection::InteractiveRoiSelection()
 {
   nh_ = std::make_shared<ros::NodeHandle>();
@@ -50,37 +49,34 @@ InteractiveRoiSelection::~InteractiveRoiSelection()
   server_.reset();
 }
 
-void
-InteractiveRoiSelection::computeVectorRotation(const tf::Vector3 &v, const tf::Quaternion &q, tf::Vector3 &rot_v)
+void InteractiveRoiSelection::computeVectorRotation(const tf::Vector3& v, const tf::Quaternion& q, tf::Vector3& rot_v)
 {
   tf::Vector3 u(q.x(), q.y(), q.z());
   double w = q.w();
   rot_v = 2.0f * u.dot(v) * u + (w * w - u.dot(u)) * v + 2.0f * w * u.cross(v);
-
 }
 
-void
-InteractiveRoiSelection::processRoiPoseFeedback(
-        const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback)
+void InteractiveRoiSelection::processRoiPoseFeedback(
+    const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)
 {
-  ROS_DEBUG_STREAM(feedback->marker_name << " is now at "
-                                         << feedback->pose.position.x << ", " << feedback->pose.position.y
-                                         << ", " << feedback->pose.position.z);
+  ROS_DEBUG_STREAM(feedback->marker_name << " is now at " << feedback->pose.position.x << ", "
+                                         << feedback->pose.position.y << ", " << feedback->pose.position.z);
 
   visualization_msgs::InteractiveMarker corner_int_marker;
   server_->get("corner_0", corner_int_marker);
 
   geometry_msgs::Pose corner_pose;
 
-  if (corner_int_marker.pose.orientation.w == 0) corner_int_marker.pose.orientation.w = 1;
-
+  if (corner_int_marker.pose.orientation.w == 0)
+    corner_int_marker.pose.orientation.w = 1;
 
   // Find out if a rotation has taken place
   double orientation_change = (feedback->pose.orientation.x + feedback->pose.orientation.y +
                                feedback->pose.orientation.z + feedback->pose.orientation.w) -
                               (corner_int_marker.pose.orientation.x + corner_int_marker.pose.orientation.y +
                                corner_int_marker.pose.orientation.z + corner_int_marker.pose.orientation.w);
-  if (orientation_change < 0) orientation_change *= -1;
+  if (orientation_change < 0)
+    orientation_change *= -1;
   bool center_has_rotated = (orientation_change > 0.001);
 
   corner_pose.orientation = feedback->pose.orientation;
@@ -103,13 +99,12 @@ InteractiveRoiSelection::processRoiPoseFeedback(
     corner_pose.position.y = transf_position.y() + feedback->pose.position.y;
     corner_pose.position.z = transf_position.z() + feedback->pose.position.z;
 
-    ROS_DEBUG_STREAM(
-            "center quaternion: " << q_center.x() << "," << q_center.y() << "," << q_center.z() << "," << q_center.w());
-    ROS_DEBUG_STREAM(
-            "corner quaternion: " << q_corner.x() << "," << q_corner.y() << "," << q_corner.z() << "," << q_corner.w());
-    ROS_DEBUG_STREAM(
-            "rotation quaternion: " << rot_quaternion.x() << "," << rot_quaternion.y() << "," << rot_quaternion.z()
-                                    << "," << rot_quaternion.w());
+    ROS_DEBUG_STREAM("center quaternion: " << q_center.x() << "," << q_center.y() << "," << q_center.z() << ","
+                                           << q_center.w());
+    ROS_DEBUG_STREAM("corner quaternion: " << q_corner.x() << "," << q_corner.y() << "," << q_corner.z() << ","
+                                           << q_corner.w());
+    ROS_DEBUG_STREAM("rotation quaternion: " << rot_quaternion.x() << "," << rot_quaternion.y() << ","
+                                             << rot_quaternion.z() << "," << rot_quaternion.w());
   }
   else
   {
@@ -125,21 +120,19 @@ InteractiveRoiSelection::processRoiPoseFeedback(
   tf::quaternionMsgToTF(corner_pose.orientation, center_orientation_);
   tf::pointMsgToTF(feedback->pose.position, center_position_);
 
-  ROS_DEBUG_STREAM("corner_0" << " is now at "
-                              << corner_pose.position.x << ", " << corner_pose.position.y
-                              << ", " << corner_pose.position.z);
-
+  ROS_DEBUG_STREAM("corner_0"
+                   << " is now at " << corner_pose.position.x << ", " << corner_pose.position.y << ", "
+                   << corner_pose.position.z);
 }
 
 void InteractiveRoiSelection::processSphereSizeFeedback(
-        const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback)
+    const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)
 {
   tf::Vector3 position;
   tf::pointMsgToTF(feedback->pose.position, position);
   float radius = (position - center_position_).length();
   dimensions_ = tf::Vector3(radius, radius, radius);
   updateCenterMarker();
-
 }
 
 void InteractiveRoiSelection::updateCenterMarker()
@@ -149,13 +142,11 @@ void InteractiveRoiSelection::updateCenterMarker()
   server_->applyChanges();
 }
 
-void
-InteractiveRoiSelection::processRoiSizeFeedback(
-        const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback)
+void InteractiveRoiSelection::processRoiSizeFeedback(
+    const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)
 {
-  ROS_DEBUG_STREAM(feedback->marker_name << " is now at "
-                                         << feedback->pose.position.x << ", " << feedback->pose.position.y
-                                         << ", " << feedback->pose.position.z);
+  ROS_DEBUG_STREAM(feedback->marker_name << " is now at " << feedback->pose.position.x << ", "
+                                         << feedback->pose.position.y << ", " << feedback->pose.position.z);
   tf::Vector3 present_dimensions(feedback->pose.position.x - center_position_.x(),
                                  feedback->pose.position.y - center_position_.y(),
                                  feedback->pose.position.z - center_position_.z());
@@ -168,8 +159,7 @@ InteractiveRoiSelection::processRoiSizeFeedback(
 }
 
 // Generate marker box
-visualization_msgs::Marker
-InteractiveRoiSelection::makeMarker(tf::Vector3 box_dimensions, bool is_center)
+visualization_msgs::Marker InteractiveRoiSelection::makeMarker(tf::Vector3 box_dimensions, bool is_center)
 {
   visualization_msgs::Marker marker;
 
@@ -200,9 +190,8 @@ InteractiveRoiSelection::makeMarker(tf::Vector3 box_dimensions, bool is_center)
   return marker;
 }
 
-
-void InteractiveRoiSelection::makeSphereControls(visualization_msgs::InteractiveMarker &interactive_marker, bool
-is_center)
+void InteractiveRoiSelection::makeSphereControls(visualization_msgs::InteractiveMarker& interactive_marker,
+                                                 bool is_center)
 {
   // Add controls for axis rotation and positioning
   if (is_center)
@@ -224,7 +213,6 @@ is_center)
     control.orientation.z = 0;
     control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
     interactive_marker.controls.push_back(control);
-
 
     control.name = "move_z";
     control.orientation.w = 1;
@@ -250,8 +238,7 @@ is_center)
 }
 
 // Generate interactive markers
-void InteractiveRoiSelection::makeBoxControls(visualization_msgs::InteractiveMarker &interactive_marker,
-                                              bool is_center)
+void InteractiveRoiSelection::makeBoxControls(visualization_msgs::InteractiveMarker& interactive_marker, bool is_center)
 {
   // Add controls for axis rotation and positioning
 
@@ -303,7 +290,7 @@ void InteractiveRoiSelection::makeBoxControls(visualization_msgs::InteractiveMar
 
 // Generate interactive markers
 void InteractiveRoiSelection::makeInteractiveMarker(std::string int_marker_name, std::string int_marker_description,
-                                                    const tf::Vector3 &position, bool is_center,
+                                                    const tf::Vector3& position, bool is_center,
                                                     tf::Vector3 box_dimensions, tf::Quaternion box_orientation)
 {
   visualization_msgs::InteractiveMarker int_marker;
@@ -329,13 +316,11 @@ void InteractiveRoiSelection::makeInteractiveMarker(std::string int_marker_name,
     server_->insert(int_marker);
     if (is_center)
     {
-      server_->setCallback(int_marker.name,
-                           boost::bind(&InteractiveRoiSelection::processRoiPoseFeedback, this, _1));
+      server_->setCallback(int_marker.name, boost::bind(&InteractiveRoiSelection::processRoiPoseFeedback, this, _1));
     }
     else
     {
-      server_->setCallback(int_marker.name,
-                           boost::bind(&InteractiveRoiSelection::processRoiSizeFeedback, this, _1));
+      server_->setCallback(int_marker.name, boost::bind(&InteractiveRoiSelection::processRoiSizeFeedback, this, _1));
     }
   }
   else if (interactive_roi_.primitive.type == shape_msgs::SolidPrimitive::Type::SPHERE)
@@ -344,13 +329,11 @@ void InteractiveRoiSelection::makeInteractiveMarker(std::string int_marker_name,
     server_->insert(int_marker);
     if (is_center)
     {
-      server_->setCallback(int_marker.name,
-                           boost::bind(&InteractiveRoiSelection::processRoiPoseFeedback, this, _1));
+      server_->setCallback(int_marker.name, boost::bind(&InteractiveRoiSelection::processRoiPoseFeedback, this, _1));
     }
     else
     {
-      server_->setCallback(int_marker.name,
-                           boost::bind(&InteractiveRoiSelection::processSphereSizeFeedback, this, _1));
+      server_->setCallback(int_marker.name, boost::bind(&InteractiveRoiSelection::processSphereSizeFeedback, this, _1));
     }
   }
   else
@@ -359,8 +342,7 @@ void InteractiveRoiSelection::makeInteractiveMarker(std::string int_marker_name,
   }
 }
 
-
-bool InteractiveRoiSelection::setInteractiveRoi(const rc_pick_client::RegionOfInterest &roi)
+bool InteractiveRoiSelection::setInteractiveRoi(const rc_pick_client::RegionOfInterest& roi)
 {
   interactive_roi_ = roi;
   tf::quaternionMsgToTF(interactive_roi_.pose.pose.orientation, center_orientation_);
@@ -368,13 +350,12 @@ bool InteractiveRoiSelection::setInteractiveRoi(const rc_pick_client::RegionOfIn
   tf::Vector3 corner_position_rot;
   if (interactive_roi_.primitive.type == shape_msgs::SolidPrimitive::Type::BOX)
   {
-    dimensions_ = tf::Vector3(interactive_roi_.primitive.dimensions[0] / 2,
-                              interactive_roi_.primitive.dimensions[1] / 2,
-                              interactive_roi_.primitive.dimensions[2] / 2);
+    dimensions_ =
+        tf::Vector3(interactive_roi_.primitive.dimensions[0] / 2, interactive_roi_.primitive.dimensions[1] / 2,
+                    interactive_roi_.primitive.dimensions[2] / 2);
 
     // Rotate corner marker position with the roi orientation.
     computeVectorRotation(dimensions_, center_orientation_, corner_position_rot);
-
   }
   else if (interactive_roi_.primitive.type == shape_msgs::SolidPrimitive::Type::SPHERE)
   {
@@ -392,17 +373,15 @@ bool InteractiveRoiSelection::setInteractiveRoi(const rc_pick_client::RegionOfIn
     return false;
   }
 
-  makeInteractiveMarker("center", "Pose", center_position_, true,
-                        dimensions_, center_orientation_);
-  makeInteractiveMarker("corner_0", "Size",
-                        center_position_ + corner_position_rot, false,
+  makeInteractiveMarker("center", "Pose", center_position_, true, dimensions_, center_orientation_);
+  makeInteractiveMarker("corner_0", "Size", center_position_ + corner_position_rot, false,
                         tf::Vector3(0.02, 0.02, 0.02), center_orientation_);
 
   server_->applyChanges();
   return true;
 }
 
-bool InteractiveRoiSelection::getInteractiveRoi(rc_pick_client::RegionOfInterest &roi)
+bool InteractiveRoiSelection::getInteractiveRoi(rc_pick_client::RegionOfInterest& roi)
 {
   if (interactive_roi_.primitive.type == shape_msgs::SolidPrimitive::Type::BOX)
   {
@@ -420,5 +399,4 @@ bool InteractiveRoiSelection::getInteractiveRoi(rc_pick_client::RegionOfInterest
   return true;
 }
 
-} //rc_roi_manager_gui
-
+}  // namespace rc_roi_manager_gui

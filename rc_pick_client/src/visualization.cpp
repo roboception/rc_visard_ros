@@ -34,8 +34,7 @@
 
 namespace pick_visualization
 {
-
-Visualization::Visualization(const ros::NodeHandle &nh) : nh_(nh)
+Visualization::Visualization(const ros::NodeHandle& nh) : nh_(nh)
 {
   grasp_marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("grasp", 1);
   lc_marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("lc", 1);
@@ -49,7 +48,7 @@ Visualization::~Visualization()
     deleteGraspMarkers();
     deleteLoadCarrierMarkers();
   }
-  catch (const std::exception &ex)
+  catch (const std::exception& ex)
   {
     ROS_FATAL("Exception during destruction of Visualization: %s", ex.what());
   }
@@ -59,8 +58,8 @@ Visualization::~Visualization()
   }
 }
 
-void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray &marker_array,
-                                         const rc_pick_client::LoadCarrier &lc, const int &lc_no)
+void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray& marker_array,
+                                         const rc_pick_client::LoadCarrier& lc, const int& lc_no)
 {
   visualization_msgs::Marker marker;
   marker.header.frame_id = lc.pose.header.frame_id;
@@ -70,10 +69,8 @@ void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray &marker
   marker.color.b = 0.80f;
   marker.color.a = 0.3;
   tf2::Transform bin_transform(tf2::Quaternion(lc.pose.pose.orientation.x, lc.pose.pose.orientation.y,
-                                               lc.pose.pose.orientation.z,
-                                               lc.pose.pose.orientation.w),
-                               tf2::Vector3(lc.pose.pose.position.x, lc.pose.pose.position.y,
-                                            lc.pose.pose.position.z));
+                                               lc.pose.pose.orientation.z, lc.pose.pose.orientation.w),
+                               tf2::Vector3(lc.pose.pose.position.x, lc.pose.pose.position.y, lc.pose.pose.position.z));
 
   double rim_thickness_x = (lc.outer_dimensions.x - lc.inner_dimensions.x) / 2;
   double dist_from_center_x = (lc.outer_dimensions.x - rim_thickness_x) / 2;
@@ -82,7 +79,7 @@ void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray &marker
   double bottom_thickness = lc.outer_dimensions.z - lc.inner_dimensions.z;
   tf2::Vector3 pose(0, 0, -(lc.outer_dimensions.z - bottom_thickness) / 2);
 
-  //calculate bottom
+  // calculate bottom
   pose = bin_transform * pose;
   marker.id = lc_no;
   marker.pose = lc.pose.pose;
@@ -94,7 +91,7 @@ void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray &marker
   marker.scale.z = bottom_thickness;
   marker_array.markers.push_back(marker);
 
-  //calculate longer sides
+  // calculate longer sides
   pose = tf2::Vector3(dist_from_center_x, 0, 0);
   pose = bin_transform * pose;
 
@@ -116,7 +113,7 @@ void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray &marker
   marker.pose.position.z = pose.getZ();
   marker_array.markers.push_back(marker);
 
-  //calculate shorter side
+  // calculate shorter side
   marker.id = lc_no + 3;
   pose = tf2::Vector3(0, dist_from_center_y, 0);
   pose = bin_transform * pose;
@@ -138,23 +135,21 @@ void Visualization::constructLoadCarrier(visualization_msgs::MarkerArray &marker
   marker.pose.position.z = pose.getZ();
   marker.scale.x = lc.outer_dimensions.x;
   marker_array.markers.push_back(marker);
-
 }
 
 void Visualization::deleteLoadCarrierMarkers()
 {
-  for (auto &i : markers_lcs_.markers)
+  for (auto& i : markers_lcs_.markers)
   {
     i.action = visualization_msgs::Marker::DELETE;
   }
   lc_marker_pub_.publish(markers_lcs_);
   markers_lcs_.markers.clear();
-
 }
 
 void Visualization::deleteGraspMarkers()
 {
-  for (auto &i : markers_grasps_.markers)
+  for (auto& i : markers_grasps_.markers)
   {
     i.action = visualization_msgs::Marker::DELETE;
   }
@@ -164,32 +159,31 @@ void Visualization::deleteGraspMarkers()
 
 void Visualization::deleteBoxItemMarkers()
 {
-  for (auto &i : markers_boxes_.markers)
+  for (auto& i : markers_boxes_.markers)
   {
     i.action = visualization_msgs::Marker::DELETE;
   }
   box_marker_pub_.publish(markers_boxes_);
   markers_boxes_.markers.clear();
-
 }
 
-void Visualization::visualizeLoadCarriers(const std::vector<rc_pick_client::LoadCarrier> &ros_lcs)
+void Visualization::visualizeLoadCarriers(const std::vector<rc_pick_client::LoadCarrier>& ros_lcs)
 {
   deleteLoadCarrierMarkers();
   if (!ros_lcs.empty())
   {
     int counter = 0;
-    for (auto &single_lc : ros_lcs)
+    for (auto& single_lc : ros_lcs)
     {
       constructLoadCarrier(markers_lcs_, single_lc, counter);
-      publishTf(single_lc.pose.pose, single_lc.pose.header.frame_id, "lc_"+std::to_string(counter));
+      publishTf(single_lc.pose.pose, single_lc.pose.header.frame_id, "lc_" + std::to_string(counter));
       counter++;
     }
     lc_marker_pub_.publish(markers_lcs_);
   }
 }
 
-void Visualization::visualizeGrasps(const std::vector<rc_pick_client::SuctionGrasp> &ros_grasps)
+void Visualization::visualizeGrasps(const std::vector<rc_pick_client::SuctionGrasp>& ros_grasps)
 {
   deleteGraspMarkers();
   if (!ros_grasps.empty())
@@ -199,12 +193,12 @@ void Visualization::visualizeGrasps(const std::vector<rc_pick_client::SuctionGra
     marker.action = visualization_msgs::Marker::ADD;
     marker.type = marker.SPHERE;
     rc_pick_client::Rectangle rect;
-    for (auto &single_grasp : ros_grasps)
+    for (auto& single_grasp : ros_grasps)
     {
       rect.x = single_grasp.max_suction_surface_width;
       rect.y = single_grasp.max_suction_surface_length;
       setMarker(marker, single_grasp.pose.pose, rect, single_grasp.pose.header.frame_id, counter);
-      publishTf(single_grasp.pose.pose, single_grasp.pose.header.frame_id, "grasp_"+ std::to_string(counter));
+      publishTf(single_grasp.pose.pose, single_grasp.pose.header.frame_id, "grasp_" + std::to_string(counter));
       markers_grasps_.markers.push_back(marker);
       counter++;
     }
@@ -212,7 +206,7 @@ void Visualization::visualizeGrasps(const std::vector<rc_pick_client::SuctionGra
   }
 }
 
-void Visualization::visualizeDetectedBoxes(const std::vector<rc_pick_client::BoxItem> &ros_boxitems)
+void Visualization::visualizeDetectedBoxes(const std::vector<rc_pick_client::BoxItem>& ros_boxitems)
 {
   deleteBoxItemMarkers();
   if (!ros_boxitems.empty())
@@ -220,18 +214,19 @@ void Visualization::visualizeDetectedBoxes(const std::vector<rc_pick_client::Box
     int counter = 0;
     visualization_msgs::Marker marker;
     marker.type = marker.CUBE;
-    for (auto &single_boxitem : ros_boxitems)
+    for (auto& single_boxitem : ros_boxitems)
     {
       setMarker(marker, single_boxitem.pose, single_boxitem.rectangle, single_boxitem.pose_frame, counter);
-      publishTf(single_boxitem.pose, single_boxitem.pose_frame, "boxitem_"+std::to_string(counter));
+      publishTf(single_boxitem.pose, single_boxitem.pose_frame, "boxitem_" + std::to_string(counter));
       markers_boxes_.markers.push_back(marker);
-      counter ++;
+      counter++;
     }
     box_marker_pub_.publish(markers_boxes_);
   }
 }
 
-void Visualization::setMarker(visualization_msgs::Marker &marker, const geometry_msgs::Pose &item_pose, const rc_pick_client::Rectangle &rectangle, std::string frame_id, int marker_id)
+void Visualization::setMarker(visualization_msgs::Marker& marker, const geometry_msgs::Pose& item_pose,
+                              const rc_pick_client::Rectangle& rectangle, std::string frame_id, int marker_id)
 {
   marker.scale.z = 0.001;
   marker.color.r = 0.800f;
@@ -246,19 +241,14 @@ void Visualization::setMarker(visualization_msgs::Marker &marker, const geometry
   marker.scale.y = rectangle.y;
 }
 
-void Visualization::publishTf(const geometry_msgs::Pose &ros_pose, std::string frame_id, std::string id)
+void Visualization::publishTf(const geometry_msgs::Pose& ros_pose, std::string frame_id, std::string id)
 {
   tf::Transform transform;
-  transform.setOrigin(tf::Vector3(ros_pose.position.x, ros_pose.position.y,
-                                  ros_pose.position.z));
-  transform.setRotation(tf::Quaternion(ros_pose.orientation.x, ros_pose.orientation.y,
-                                       ros_pose.orientation.z, ros_pose.orientation.w));
+  transform.setOrigin(tf::Vector3(ros_pose.position.x, ros_pose.position.y, ros_pose.position.z));
+  transform.setRotation(
+      tf::Quaternion(ros_pose.orientation.x, ros_pose.orientation.y, ros_pose.orientation.z, ros_pose.orientation.w));
   br_.sendTransform(
-          tf::StampedTransform(transform, ros::Time::now(), frame_id,
-                               std::string(nh_.getNamespace() + "/" + id)));
-
+      tf::StampedTransform(transform, ros::Time::now(), frame_id, std::string(nh_.getNamespace() + "/" + id)));
 }
 
-
-
-}
+}  // namespace pick_visualization

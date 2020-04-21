@@ -58,7 +58,6 @@
 
 namespace rc_pick_client
 {
-
 inline void to_json(nlohmann::json& j, const Box& r)
 {
   j["x"] = r.x;
@@ -269,7 +268,7 @@ inline void from_json(const nlohmann::json& j, RegionOfInterest& r)
 inline void to_json(nlohmann::json& j, const CollisionDetection& r)
 {
   j["gripper_id"] = r.gripper_id;
-  if (r.pre_grasp_offset.x != 0 || r.pre_grasp_offset.y != 0 || r.pre_grasp_offset.z != 0 )
+  if (r.pre_grasp_offset.x != 0 || r.pre_grasp_offset.y != 0 || r.pre_grasp_offset.z != 0)
   {
     j["pre_grasp_offset"] = r.pre_grasp_offset;
   }
@@ -326,7 +325,6 @@ inline void from_json(const nlohmann::json& j, DetectLoadCarriersResponse& r)
   j.at("return_code").get_to(r.return_code);
 }
 
-
 inline void to_json(nlohmann::json& j, const SetRegionOfInterestRequest& r)
 {
   j["region_of_interest"] = r.region_of_interest;
@@ -362,7 +360,6 @@ inline void from_json(const nlohmann::json& j, DeleteRegionsOfInterestResponse& 
 {
   j.at("return_code").get_to(r.return_code);
 }
-
 
 inline void to_json(nlohmann::json& j, const ComputeGraspsRequest& r)
 {

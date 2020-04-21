@@ -34,16 +34,17 @@
 #define EVENT_IDS_H
 
 #include <wx/event.h>
-namespace // anonymous
+namespace  // anonymous
 {
-    enum {
-        ID_NewButton = wxID_HIGHEST + 1,
-        ID_EditButton,
-        ID_SetButton,
-        ID_DeleteButton,
-        ID_SaveButton,
-        ID_CancelButton,
-        ID_UpdateRoiButton
-    };
-} //anonymous
-#endif //EVENT_IDS_H
+enum
+{
+  ID_NewButton = wxID_HIGHEST + 1,
+  ID_EditButton,
+  ID_SetButton,
+  ID_DeleteButton,
+  ID_SaveButton,
+  ID_CancelButton,
+  ID_UpdateRoiButton
+};
+}  // namespace
+#endif  // EVENT_IDS_H

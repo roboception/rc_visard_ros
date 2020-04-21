@@ -41,67 +41,62 @@
 
 namespace rc_roi_manager_gui
 {
-
 class NewRoiFrame;
 
 class RoiManagerFrame : public wxFrame
 {
-  public:
+public:
+  std::shared_ptr<InteractiveRoiSelection> interactive_roi_server_;
 
-    std::shared_ptr<InteractiveRoiSelection> interactive_roi_server_;
+  /**
+   * @brief Constructor.
+   * @param title title of the window
+   */
+  explicit RoiManagerFrame(const wxString& title);
 
-    /**
-     * @brief Constructor.
-     * @param title title of the window
-     */
-    explicit RoiManagerFrame(const wxString &title);
+  virtual ~RoiManagerFrame() = default;
 
-    virtual ~RoiManagerFrame() = default;
+  /**
+   * @brief Update list of shown rois on the gui
+   */
+  void updateGui();
 
-    /**
-     * @brief Update list of shown rois on the gui
-     */
-    void updateGui();
+  /**
+   * @brief Search if an roi is already present
+   * @param name Name of the roi to be searched for.
+   * @return Returns true if the roi is found in the item_list_
+   */
+  bool isItemInList(wxString name);
 
-    /**
-     * @brief Search if an roi is already present
-     * @param name Name of the roi to be searched for.
-     * @return Returns true if the roi is found in the item_list_
-     */
-    bool isItemInList(wxString name);
+  /**
+   * @brief Event handler for the delete button
+   */
+  void onDeleteButton(wxCommandEvent&);
 
-    /**
-     * @brief Event handler for the delete button
-     */
-    void onDeleteButton(wxCommandEvent &);
+private:
+  wxDataViewListCtrl* item_list_;
+  NewRoiFrame* create_roi_frame_;
+  std::shared_ptr<ros::NodeHandle> nh_;
+  ros::ServiceClient client_get_roi_;
+  ros::ServiceClient client_delete_roi_;
+  std::string pick_module_;
 
-  private:
+  /**
+   * @brief Event handler for the update button
+   */
+  void onUpdateButton(wxCommandEvent&);
 
-    wxDataViewListCtrl *item_list_;
-    NewRoiFrame *create_roi_frame_;
-    std::shared_ptr<ros::NodeHandle> nh_;
-    ros::ServiceClient client_get_roi_;
-    ros::ServiceClient client_delete_roi_;
-    std::string pick_module_;
+  /**
+   * @brief Event handler for the edit button
+   */
+  void onEditButton(wxCommandEvent&);
 
-    /**
-     * @brief Event handler for the update button
-     */
-    void onUpdateButton(wxCommandEvent &);
-
-    /**
-     * @brief Event handler for the edit button
-     */
-    void onEditButton(wxCommandEvent &);
-
-    /**
-     * @brief Event handler for the new button
-     */
-    void onNewButton(wxCommandEvent &);
-
+  /**
+   * @brief Event handler for the new button
+   */
+  void onNewButton(wxCommandEvent&);
 };
 
-
-} //rc_roi_manager_gui
+}  // namespace rc_roi_manager_gui
 
 #endif

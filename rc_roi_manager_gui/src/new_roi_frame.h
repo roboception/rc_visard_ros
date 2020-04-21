@@ -42,64 +42,59 @@
 
 namespace rc_roi_manager_gui
 {
-
 class RoiManagerFrame;
 
 class NewRoiFrame : public wxFrame
 {
+public:
+  /**
+   * @brief Constructor
+   * @param title Title of the wxFrame
+   * @param manager Pointer to the main RoiManagerFrame
+   * @param pick_module Name of the module being used. Either rc_itempick or rc_boxpick.
+   */
+  NewRoiFrame(const wxString& title, RoiManagerFrame* manager, std::string pick_module);
 
-  public:
-    /**
-     * @brief Constructor
-     * @param title Title of the wxFrame
-     * @param manager Pointer to the main RoiManagerFrame
-     * @param pick_module Name of the module being used. Either rc_itempick or rc_boxpick.
-     */
-    NewRoiFrame(const wxString &title, RoiManagerFrame *manager, std::string pick_module);
+  virtual ~NewRoiFrame();
 
-    virtual ~NewRoiFrame();
+  /**
+   * @brief sets the member roi_
+   * @param roi Region of Interest
+   * @param edit If true a roi is being editted. Otherwise a new roi is being created.
+   */
+  void setRoi(rc_pick_client::RegionOfInterest roi, bool edit);
 
-    /**
-     * @brief sets the member roi_
-     * @param roi Region of Interest
-     * @param edit If true a roi is being editted. Otherwise a new roi is being created.
-     */
-    void setRoi(rc_pick_client::RegionOfInterest roi, bool edit);
+private:
+  /**
+   * @brief Ros service that sets the region of interest from roi in interactive_roi_selection server
+   */
+  void setFromInteractiveRoi();
 
-  private:
+  /**
+   * @brief Event handler for the save button
+   */
+  void onSaveButton(wxCommandEvent&);
 
-    /**
-     * @brief Ros service that sets the region of interest from roi in interactive_roi_selection server
-     */
-    void setFromInteractiveRoi();
+  /**
+   * @brief Event handler for the cancel button
+   */
+  void onCancelButton(wxCommandEvent&);
 
-    /**
-     * @brief Event handler for the save button
-     */
-    void onSaveButton(wxCommandEvent &);
+  /**
+   * @brief Event handler for the update button
+   */
+  void onUpdateButton(wxCommandEvent&);
 
-    /**
-     * @brief Event handler for the cancel button
-     */
-    void onCancelButton(wxCommandEvent &);
-
-    /**
-     * @brief Event handler for the update button
-     */
-    void onUpdateButton(wxCommandEvent &);
-
-  private:
-    wxTextCtrl *name_box_;
-    wxChoice *shape_box_;
-    wxChoice *pose_frame_box_;
-    rc_pick_client::RegionOfInterest roi_;
-    std::shared_ptr <ros::NodeHandle> nh_;
-    ros::ServiceClient client_set_roi_;
-    RoiManagerFrame *manager_;
-    bool is_editing_;
-
-
+private:
+  wxTextCtrl* name_box_;
+  wxChoice* shape_box_;
+  wxChoice* pose_frame_box_;
+  rc_pick_client::RegionOfInterest roi_;
+  std::shared_ptr<ros::NodeHandle> nh_;
+  ros::ServiceClient client_set_roi_;
+  RoiManagerFrame* manager_;
+  bool is_editing_;
 };
-} //rc_roi_manager_gui
+}  // namespace rc_roi_manager_gui
 
-#endif //NEWROIFRAME_H
+#endif  // NEWROIFRAME_H

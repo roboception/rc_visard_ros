@@ -49,7 +49,6 @@
 #include <rc_silhouettematch_client/DeleteRegionsOfInterest.h>
 #include <rc_silhouettematch_client/DetectObject.h>
 
-
 #include <json/json.hpp>
 
 namespace rc_silhouettematch_client
@@ -131,7 +130,7 @@ inline void to_json(nlohmann::json& j, const CalibrateBasePlane::Request& r)
   j["offset"] = r.offset;
   if (r.plane_estimation_method == "STEREO")
   {
-    j["stereo"] = { {"plane_preference", r.stereo.plane_preference} };
+    j["stereo"] = { { "plane_preference", r.stereo.plane_preference } };
   }
   else
   {

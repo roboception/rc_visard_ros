@@ -57,86 +57,81 @@ using json = nlohmann::json;
 
 namespace ros_pick_client
 {
-
 class PickClient
 {
+public:
+  PickClient(const std::string& host, const std::string& node_name, const ros::NodeHandle& nh);
 
-  public:
-    PickClient(const std::string &host, const std::string &node_name, const ros::NodeHandle &nh);
+  virtual ~PickClient();
 
-    virtual ~PickClient();
+protected:
+  ros::NodeHandle nh_;
+  std::unique_ptr<dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>> server_;
 
-  protected:
-    ros::NodeHandle nh_;
-    std::unique_ptr<dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>> server_;
+  rc_rest_api::RestHelper rest_helper_;
 
-    rc_rest_api::RestHelper rest_helper_;
+  pick_visualization::Visualization visualizer_;
 
-    pick_visualization::Visualization visualizer_;
+  ros::ServiceServer srv_detect_lc_;
+  ros::ServiceServer srv_set_lc_;
+  ros::ServiceServer srv_get_lcs_;
+  ros::ServiceServer srv_delete_lcs_;
+  ros::ServiceServer srv_set_roi_;
+  ros::ServiceServer srv_get_rois_;
+  ros::ServiceServer srv_delete_rois_;
 
-    ros::ServiceServer srv_detect_lc_;
-    ros::ServiceServer srv_set_lc_;
-    ros::ServiceServer srv_get_lcs_;
-    ros::ServiceServer srv_delete_lcs_;
-    ros::ServiceServer srv_set_roi_;
-    ros::ServiceServer srv_get_rois_;
-    ros::ServiceServer srv_delete_rois_;
+  json createSharedParameters(rc_pick_client::pickModuleConfig& config);
+  void paramsToCfg(const json& params, rc_pick_client::pickModuleConfig& cfg);
 
-    json createSharedParameters(rc_pick_client::pickModuleConfig &config);
-    void paramsToCfg(const json& params, rc_pick_client::pickModuleConfig& cfg);
-
-    template <typename Request, typename Response>
-    bool callService(const std::string& name,
-                     const Request& req, Response& res)
+  template <typename Request, typename Response>
+  bool callService(const std::string& name, const Request& req, Response& res)
+  {
+    try
     {
-      try
-      {
-        json j_req = req;
-        const auto j_res = rest_helper_.servicePutRequest(name, j_req);
-        res = j_res;
-        return true;
-      }
-      catch (const std::exception& ex)
-      {
-        ROS_ERROR("%s", ex.what());
-        res.return_code.value = -2; // INTERNAL_ERROR
-        res.return_code.message = ex.what();
-        return false;
-      }
+      json j_req = req;
+      const auto j_res = rest_helper_.servicePutRequest(name, j_req);
+      res = j_res;
+      return true;
     }
+    catch (const std::exception& ex)
+    {
+      ROS_ERROR("%s", ex.what());
+      res.return_code.value = -2;  // INTERNAL_ERROR
+      res.return_code.message = ex.what();
+      return false;
+    }
+  }
 
-    bool detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest &request,
-                               rc_pick_client::DetectLoadCarriersResponse &response);
+  bool detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest& request,
+                             rc_pick_client::DetectLoadCarriersResponse& response);
 
-    bool deleteLoadCarriersSrv(rc_pick_client::DeleteLoadCarriersRequest &request,
-                               rc_pick_client::DeleteLoadCarriersResponse &response);
+  bool deleteLoadCarriersSrv(rc_pick_client::DeleteLoadCarriersRequest& request,
+                             rc_pick_client::DeleteLoadCarriersResponse& response);
 
-    bool getLoadCarriers(rc_pick_client::GetLoadCarriersRequest &request,
-                         rc_pick_client::GetLoadCarriersResponse &response);
+  bool getLoadCarriers(rc_pick_client::GetLoadCarriersRequest& request,
+                       rc_pick_client::GetLoadCarriersResponse& response);
 
-    bool setLoadCarrier(rc_pick_client::SetLoadCarrierRequest &request,
-                        rc_pick_client::SetLoadCarrierResponse &response);
+  bool setLoadCarrier(rc_pick_client::SetLoadCarrierRequest& request, rc_pick_client::SetLoadCarrierResponse& response);
 
-    bool deleteROISrv(rc_pick_client::DeleteRegionsOfInterestRequest &request,
-                      rc_pick_client::DeleteRegionsOfInterestResponse &response);
+  bool deleteROISrv(rc_pick_client::DeleteRegionsOfInterestRequest& request,
+                    rc_pick_client::DeleteRegionsOfInterestResponse& response);
 
-    bool getROIs(rc_pick_client::GetRegionsOfInterestRequest &request,
-                 rc_pick_client::GetRegionsOfInterestResponse &response);
+  bool getROIs(rc_pick_client::GetRegionsOfInterestRequest& request,
+               rc_pick_client::GetRegionsOfInterestResponse& response);
 
-    bool setROI(rc_pick_client::SetRegionOfInterestRequest &request,
-                rc_pick_client::SetRegionOfInterestResponse &response);
+  bool setROI(rc_pick_client::SetRegionOfInterestRequest& request,
+              rc_pick_client::SetRegionOfInterestResponse& response);
 
-    void startPick();
+  void startPick();
 
-    void stopPick();
+  void stopPick();
 
-    void advertiseServices();
+  void advertiseServices();
 
-    void initConfiguration();
+  void initConfiguration();
 
-    virtual void dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t) = 0;
-
+  virtual void dynamicReconfigureCallback(rc_pick_client::pickModuleConfig& config, uint32_t) = 0;
 };
-}
+}  // namespace ros_pick_client
 
-#endif // RC_PICK_CLIENT_PICK_CLIENT_H
+#endif  // RC_PICK_CLIENT_PICK_CLIENT_H

@@ -39,16 +39,15 @@
 class RoiManagerApp : public wxApp
 {
 public:
-    /**
-     * @brief Initialize the roi manager gui frame
-     */
-    virtual bool OnInit();
+  /**
+   * @brief Initialize the roi manager gui frame
+   */
+  virtual bool OnInit();
 
-    virtual ~RoiManagerApp() = default;
+  virtual ~RoiManagerApp() = default;
 
 private:
-
-    std::shared_ptr<rc_roi_manager_gui::RoiManagerFrame> frame_;
+  std::shared_ptr<rc_roi_manager_gui::RoiManagerFrame> frame_;
 };
 
 #endif

@@ -34,16 +34,14 @@
 
 namespace ros_pick_client
 {
-
-ItempickClient::ItempickClient(const std::string &host, const ros::NodeHandle &nh): PickClient(host, "rc_itempick", nh)
+ItempickClient::ItempickClient(const std::string& host, const ros::NodeHandle& nh) : PickClient(host, "rc_itempick", nh)
 {
   srv_compute_grasps_ = nh_.advertiseService("compute_grasps", &ItempickClient::computeGraspsSrv, this);
   server_->setCallback(boost::bind(&ItempickClient::dynamicReconfigureCallback, this, _1, _2));
-
 }
 
-bool ItempickClient::computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &request,
-                                      rc_pick_client::ComputeGraspsResponse &response)
+bool ItempickClient::computeGraspsSrv(rc_pick_client::ComputeGraspsRequest& request,
+                                      rc_pick_client::ComputeGraspsResponse& response)
 {
   callService("compute_grasps", request, response);
   visualizer_.visualizeGrasps(response.grasps);
@@ -51,7 +49,7 @@ bool ItempickClient::computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &requ
   return true;
 }
 
-void ItempickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t)
+void ItempickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig& config, uint32_t)
 {
   json js_params = createSharedParameters(config);
   json js_param;
@@ -67,4 +65,4 @@ void ItempickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig
   paramsToCfg(j_params_new, config);
 }
 
-}
+}  // namespace ros_pick_client

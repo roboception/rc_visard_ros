@@ -37,10 +37,9 @@ using std::string;
 
 namespace rc_tagdetect_client
 {
-
-RosTagdetectClient::RosTagdetectClient(const std::string &host, const ros::NodeHandle &nh,
-                                       const std::string &detection_type)
-        : nh_(nh)
+RosTagdetectClient::RosTagdetectClient(const std::string& host, const ros::NodeHandle& nh,
+                                       const std::string& detection_type)
+  : nh_(nh)
 
 {
   if (detection_type == "rc_april_tag_detect" || detection_type == "rc_qr_code_detect")
@@ -69,7 +68,7 @@ RosTagdetectClient::~RosTagdetectClient()
 
     stopTagDetect();
   }
-  catch (const std::exception &ex)
+  catch (const std::exception& ex)
   {
     ROS_FATAL("Exception during destruction of RosTagdetectClient: %s", ex.what());
   }
@@ -90,8 +89,7 @@ void RosTagdetectClient::stopTagDetect()
 }
 
 template <typename Request, typename Response>
-bool RosTagdetectClient::callService(const std::string& name,
-                                     const Request& req, Response& res)
+bool RosTagdetectClient::callService(const std::string& name, const Request& req, Response& res)
 {
   try
   {
@@ -103,20 +101,20 @@ bool RosTagdetectClient::callService(const std::string& name,
   catch (const rc_rest_api::NotAvailableInThisVersionException& ex)
   {
     ROS_ERROR("This rc_visard firmware does not support \"%s\"", ex.what());
-    res.return_code.value = -8; // NOT_APPLICABLE
+    res.return_code.value = -8;  // NOT_APPLICABLE
     res.return_code.message = "Not available in this firmware version";
     return false;
   }
   catch (const std::exception& ex)
   {
     ROS_ERROR("%s", ex.what());
-    res.return_code.value = -2; // INTERNAL_ERROR
+    res.return_code.value = -2;  // INTERNAL_ERROR
     res.return_code.message = ex.what();
     return false;
   }
 }
 
-bool RosTagdetectClient::detect(const std::vector<rc_tagdetect_client::Tag> &tags, DetectTagsResponse &res)
+bool RosTagdetectClient::detect(const std::vector<rc_tagdetect_client::Tag>& tags, DetectTagsResponse& res)
 {
   DetectTagsRequest req;
   req.tags = tags;
@@ -129,12 +127,12 @@ bool RosTagdetectClient::detect(const std::vector<rc_tagdetect_client::Tag> &tag
   return success;
 }
 
-bool RosTagdetectClient::detectService(DetectTagsRequest &req, DetectTagsResponse &res)
+bool RosTagdetectClient::detectService(DetectTagsRequest& req, DetectTagsResponse& res)
 {
   if (continuous_mode_thread_.joinable())
   {
     ROS_ERROR("Cannot execute detect when continuous mode is enabled.");
-    res.return_code.value = -8; // NOT_APPLICABLE
+    res.return_code.value = -8;  // NOT_APPLICABLE
     res.return_code.message = "Cannot execute detect when continuous mode is enabled.";
     return true;
   }
@@ -142,8 +140,7 @@ bool RosTagdetectClient::detectService(DetectTagsRequest &req, DetectTagsRespons
   return detect(req.tags, res);
 }
 
-bool RosTagdetectClient::stopContinousDetection(std_srvs::TriggerRequest &request,
-                                                   std_srvs::TriggerResponse &response)
+bool RosTagdetectClient::stopContinousDetection(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response)
 {
   if (continuous_mode_thread_.joinable())
   {
@@ -154,8 +151,8 @@ bool RosTagdetectClient::stopContinousDetection(std_srvs::TriggerRequest &reques
   return true;
 }
 
-bool RosTagdetectClient::startContinousDetection(StartContinuousDetectionRequest &request,
-                                                 StartContinuousDetectionResponse &response)
+bool RosTagdetectClient::startContinousDetection(StartContinuousDetectionRequest& request,
+                                                 StartContinuousDetectionResponse& response)
 {
   {
     std_srvs::TriggerRequest request;
@@ -166,34 +163,31 @@ bool RosTagdetectClient::startContinousDetection(StartContinuousDetectionRequest
   if (!continuous_mode_thread_.joinable())
   {
     stop_continuous_mode_thread_ = false;
-    continuous_mode_thread_ = std::thread(
-            [request, this]()
-            {
-              ROS_INFO("Entering continuous mode...");
+    continuous_mode_thread_ = std::thread([request, this]() {
+      ROS_INFO("Entering continuous mode...");
 
-              const double rate = 1.0;
+      const double rate = 1.0;
 
-              while (!stop_continuous_mode_thread_)
-              {
-                const auto start_time = std::chrono::steady_clock::now();
+      while (!stop_continuous_mode_thread_)
+      {
+        const auto start_time = std::chrono::steady_clock::now();
 
-                rc_tagdetect_client::DetectTagsResponse res;
-                if (!detect(request.tags, res))
-                {
-                  break;
-                }
+        rc_tagdetect_client::DetectTagsResponse res;
+        if (!detect(request.tags, res))
+        {
+          break;
+        }
 
-                while (!stop_continuous_mode_thread_ &&
-                       std::chrono::duration_cast<std::chrono::duration<double>>(
-                               std::chrono::steady_clock::now() -
-                               start_time).count() < rate)
-                {
-                  std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                }
-              }
+        while (!stop_continuous_mode_thread_ &&
+               std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - start_time)
+                       .count() < rate)
+        {
+          std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+      }
 
-              ROS_INFO("Stopping continuous mode...");
-            });
+      ROS_INFO("Stopping continuous mode...");
+    });
   }
 
   return true;
@@ -201,15 +195,13 @@ bool RosTagdetectClient::startContinousDetection(StartContinuousDetectionRequest
 
 void RosTagdetectClient::advertiseServicesAndTopics()
 {
-  detections_pub =
-          nh_.advertise<rc_tagdetect_client::DetectedTags>("detected_tags", 100);
+  detections_pub = nh_.advertise<rc_tagdetect_client::DetectedTags>("detected_tags", 100);
 
   srv_detect_ = nh_.advertiseService("detect", &RosTagdetectClient::detectService, this);
-  srv_start_continuous_detection_ = nh_.advertiseService("start_continuous_detection",
-                                                         &RosTagdetectClient::startContinousDetection, this);
-  srv_stop_continuous_detection_ = nh_.advertiseService("stop_continuous_detection",
-                                                        &RosTagdetectClient::stopContinousDetection, this);
-
+  srv_start_continuous_detection_ =
+      nh_.advertiseService("start_continuous_detection", &RosTagdetectClient::startContinousDetection, this);
+  srv_stop_continuous_detection_ =
+      nh_.advertiseService("stop_continuous_detection", &RosTagdetectClient::stopContinousDetection, this);
 }
 
 void paramsToCfg(const json& params, TagDetectConfig& cfg)
@@ -223,7 +215,7 @@ void paramsToCfg(const json& params, TagDetectConfig& cfg)
     }
     else if (name == "detect_inverted_tags")
     {
-      //TODO is it working with all versions?
+      // TODO is it working with all versions?
       cfg.detect_inverted_tags = param["value"];
     }
     else if (name == "forget_after_n_detections")
@@ -264,9 +256,7 @@ void RosTagdetectClient::initConfiguration()
   server_->setCallback(boost::bind(&RosTagdetectClient::dynamicReconfigureCallback, this, _1, _2));
 }
 
-void RosTagdetectClient::dynamicReconfigureCallback(rc_tagdetect_client::TagDetectConfig
-                                                       &config,
-                                                       uint32_t)
+void RosTagdetectClient::dynamicReconfigureCallback(rc_tagdetect_client::TagDetectConfig& config, uint32_t)
 {
   // fill json request from dynamic reconfigure request
   json js_params, js_param;
@@ -311,4 +301,4 @@ void RosTagdetectClient::dynamicReconfigureCallback(rc_tagdetect_client::TagDete
   paramsToCfg(j_params_new, config);
 }
 
-}
+}  // namespace rc_tagdetect_client

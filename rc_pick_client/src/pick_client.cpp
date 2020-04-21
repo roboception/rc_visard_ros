@@ -36,9 +36,8 @@ using std::string;
 
 namespace ros_pick_client
 {
-
-PickClient::PickClient(const string &host, const string &node_name, const ros::NodeHandle &nh)
-        : nh_(nh), rest_helper_(host, node_name, 10000), visualizer_(nh)
+PickClient::PickClient(const string& host, const string& node_name, const ros::NodeHandle& nh)
+  : nh_(nh), rest_helper_(host, node_name, 10000), visualizer_(nh)
 {
   initConfiguration();
   advertiseServices();
@@ -51,7 +50,7 @@ PickClient::~PickClient()
   {
     stopPick();
   }
-  catch (const std::exception &ex)
+  catch (const std::exception& ex)
   {
     ROS_FATAL("Exception during destruction of PickClient: %s", ex.what());
   }
@@ -71,56 +70,55 @@ void PickClient::stopPick()
   rest_helper_.servicePutRequest("stop");
 }
 
-bool PickClient::setLoadCarrier(rc_pick_client::SetLoadCarrierRequest &request,
-                                rc_pick_client::SetLoadCarrierResponse &response)
+bool PickClient::setLoadCarrier(rc_pick_client::SetLoadCarrierRequest& request,
+                                rc_pick_client::SetLoadCarrierResponse& response)
 {
   callService("set_load_carrier", request, response);
   return true;
 }
 
-bool PickClient::getLoadCarriers(rc_pick_client::GetLoadCarriersRequest &request,
-                                 rc_pick_client::GetLoadCarriersResponse &response)
+bool PickClient::getLoadCarriers(rc_pick_client::GetLoadCarriersRequest& request,
+                                 rc_pick_client::GetLoadCarriersResponse& response)
 {
   callService("get_load_carriers", request, response);
   return true;
 }
 
-bool PickClient::deleteLoadCarriersSrv(rc_pick_client::DeleteLoadCarriersRequest &request,
-                                       rc_pick_client::DeleteLoadCarriersResponse &response)
+bool PickClient::deleteLoadCarriersSrv(rc_pick_client::DeleteLoadCarriersRequest& request,
+                                       rc_pick_client::DeleteLoadCarriersResponse& response)
 {
   callService("delete_load_carriers", request, response);
   return true;
 }
 
-bool PickClient::detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest &request,
-                                       rc_pick_client::DetectLoadCarriersResponse &response)
+bool PickClient::detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest& request,
+                                       rc_pick_client::DetectLoadCarriersResponse& response)
 {
   callService("detect_load_carriers", request, response);
   visualizer_.visualizeLoadCarriers(response.load_carriers);
   return true;
 }
 
-bool PickClient::setROI(rc_pick_client::SetRegionOfInterestRequest &request,
-                        rc_pick_client::SetRegionOfInterestResponse &response)
+bool PickClient::setROI(rc_pick_client::SetRegionOfInterestRequest& request,
+                        rc_pick_client::SetRegionOfInterestResponse& response)
 {
   callService("set_region_of_interest", request, response);
   return true;
 }
 
-bool PickClient::getROIs(rc_pick_client::GetRegionsOfInterestRequest &request,
-                         rc_pick_client::GetRegionsOfInterestResponse &response)
+bool PickClient::getROIs(rc_pick_client::GetRegionsOfInterestRequest& request,
+                         rc_pick_client::GetRegionsOfInterestResponse& response)
 {
   callService("get_regions_of_interest", request, response);
   return true;
 }
 
-bool PickClient::deleteROISrv(rc_pick_client::DeleteRegionsOfInterestRequest &request,
-                              rc_pick_client::DeleteRegionsOfInterestResponse &response)
+bool PickClient::deleteROISrv(rc_pick_client::DeleteRegionsOfInterestRequest& request,
+                              rc_pick_client::DeleteRegionsOfInterestResponse& response)
 {
   callService("delete_regions_of_interest", request, response);
   return true;
 }
-
 
 void PickClient::advertiseServices()
 {
@@ -203,7 +201,7 @@ void PickClient::initConfiguration()
   server_ = std::unique_ptr<RCFSRV>(new dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>(nh_));
 }
 
-json PickClient::createSharedParameters(rc_pick_client::pickModuleConfig &config)
+json PickClient::createSharedParameters(rc_pick_client::pickModuleConfig& config)
 {
   // fill json request from dynamic reconfigure request
   json js_params, js_param;
@@ -224,5 +222,4 @@ json PickClient::createSharedParameters(rc_pick_client::pickModuleConfig &config
   return js_params;
 }
 
-}
-
+}  // namespace ros_pick_client

@@ -39,10 +39,9 @@
 
 namespace rc_rest_api
 {
-
+using std::endl;
 using std::string;
 using std::stringstream;
-using std::endl;
 
 static string toString(cpr::Response resp)
 {
@@ -54,7 +53,7 @@ static string toString(cpr::Response resp)
   return s.str();
 }
 
-static void handleCPRResponse(const cpr::Response &r)
+static void handleCPRResponse(const cpr::Response& r)
 {
   if (r.status_code != 200)
   {
@@ -62,22 +61,19 @@ static void handleCPRResponse(const cpr::Response &r)
   }
 }
 
-RestHelper::RestHelper(const string &host,
-                                         const string &node_name,
-                                         int timeout)
-        : host_(host),
-          services_url_("http://" + host + "/api/v1/nodes/" + node_name + "/services/"),
-          params_url_("http://" + host + "/api/v1/nodes/" + node_name + "/parameters"),
-          version_url_("http://" + host + "/api/v1/system"),
-          timeout_curl_(timeout)
+RestHelper::RestHelper(const string& host, const string& node_name, int timeout)
+  : host_(host)
+  , services_url_("http://" + host + "/api/v1/nodes/" + node_name + "/services/")
+  , params_url_("http://" + host + "/api/v1/nodes/" + node_name + "/parameters")
+  , version_url_("http://" + host + "/api/v1/system")
+  , timeout_curl_(timeout)
 {
-
   int num_tries = 5;
   bool comm_established = false;
 
   while (!comm_established)
   {
-    const auto response = cpr::Get(version_url_, cpr::Timeout{timeout_curl_});
+    const auto response = cpr::Get(version_url_, cpr::Timeout{ timeout_curl_ });
     if (response.status_code == 200)
     {
       comm_established = true;
@@ -93,36 +89,35 @@ RestHelper::RestHelper(const string &host,
   }
 }
 
-json RestHelper::servicePutRequest(const std::string &service_name)
+json RestHelper::servicePutRequest(const std::string& service_name)
 {
-  cpr::Url url = cpr::Url{services_url_ + service_name};
-  auto rest_resp = cpr::Put(url, cpr::Timeout{timeout_curl_});
+  cpr::Url url = cpr::Url{ services_url_ + service_name };
+  auto rest_resp = cpr::Put(url, cpr::Timeout{ timeout_curl_ });
   handleCPRResponse(rest_resp);
   return json::parse(rest_resp.text)["response"];
 }
 
-json RestHelper::servicePutRequest(const std::string &service_name, const json &js_args)
+json RestHelper::servicePutRequest(const std::string& service_name, const json& js_args)
 {
-  cpr::Url url = cpr::Url{services_url_ + service_name};
-  nlohmann::json j = { {"args", js_args} };
-  auto rest_resp = cpr::Put(url, cpr::Timeout{timeout_curl_}, cpr::Body{j.dump()},
-                            cpr::Header{{"Content-Type", "application/json"}});
+  cpr::Url url = cpr::Url{ services_url_ + service_name };
+  nlohmann::json j = { { "args", js_args } };
+  auto rest_resp = cpr::Put(url, cpr::Timeout{ timeout_curl_ }, cpr::Body{ j.dump() },
+                            cpr::Header{ { "Content-Type", "application/json" } });
   handleCPRResponse(rest_resp);
   return json::parse(rest_resp.text)["response"];
 }
 
 json RestHelper::getParameters()
 {
-  auto rest_resp = cpr::Get(params_url_, cpr::Timeout{timeout_curl_});
+  auto rest_resp = cpr::Get(params_url_, cpr::Timeout{ timeout_curl_ });
   handleCPRResponse(rest_resp);
   return json::parse(rest_resp.text);
 }
 
-json RestHelper::setParameters(const json &js_params)
+json RestHelper::setParameters(const json& js_params)
 {
-  auto rest_resp = cpr::Put(params_url_, cpr::Timeout{timeout_curl_},
-                            cpr::Body{js_params.dump()},
-                            cpr::Header{{"Content-Type", "application/json"}});
+  auto rest_resp = cpr::Put(params_url_, cpr::Timeout{ timeout_curl_ }, cpr::Body{ js_params.dump() },
+                            cpr::Header{ { "Content-Type", "application/json" } });
 
   handleCPRResponse(rest_resp);
   return json::parse(rest_resp.text);
@@ -130,15 +125,12 @@ json RestHelper::setParameters(const json &js_params)
 
 std::tuple<size_t, size_t, size_t> RestHelper::getImageVersion()
 {
-  const auto response = cpr::Get(version_url_, cpr::Timeout{timeout_curl_});
+  const auto response = cpr::Get(version_url_, cpr::Timeout{ timeout_curl_ });
   handleCPRResponse(response);
   try
   {
     const auto j = json::parse(response.text);
-    std::string image_version = j.at("firmware").
-            at("active_image").
-            at("image_version").
-            get<std::string>();
+    std::string image_version = j.at("firmware").at("active_image").at("image_version").get<std::string>();
     const std::string prefix = "rc_visard_v";
     if (image_version.find(prefix) == 0)
     {
@@ -158,9 +150,7 @@ std::tuple<size_t, size_t, size_t> RestHelper::getImageVersion()
     }
     if (version_components.size() == 3)
     {
-      auto image_version_tuple = std::make_tuple(version_components[0],
-                                                 version_components[1],
-                                                 version_components[2]);
+      auto image_version_tuple = std::make_tuple(version_components[0], version_components[1], version_components[2]);
       return image_version_tuple;
     }
     else
@@ -168,11 +158,10 @@ std::tuple<size_t, size_t, size_t> RestHelper::getImageVersion()
       throw std::runtime_error("Could not parse image version");
     }
   }
-  catch (const std::exception &ex)
+  catch (const std::exception& ex)
   {
     throw MiscException(std::string("Could not parse response: ") + ex.what());
   }
 }
 
-
-}
+}  // namespace rc_rest_api

@@ -34,17 +34,15 @@
 
 namespace ros_pick_client
 {
-
-BoxpickClient::BoxpickClient(const std::string &host, const ros::NodeHandle &nh) : PickClient(host, "rc_boxpick", nh)
+BoxpickClient::BoxpickClient(const std::string& host, const ros::NodeHandle& nh) : PickClient(host, "rc_boxpick", nh)
 {
   srv_compute_grasps_ = nh_.advertiseService("compute_grasps", &BoxpickClient::computeGraspsSrv, this);
   srv_detect_items_ = nh_.advertiseService("detect_items", &BoxpickClient::detectItemsSrv, this);
   server_->setCallback(boost::bind(&BoxpickClient::dynamicReconfigureCallback, this, _1, _2));
-
 }
 
-bool BoxpickClient::computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest &request,
-                                     rc_pick_client::ComputeBoxGraspsResponse &response)
+bool BoxpickClient::computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest& request,
+                                     rc_pick_client::ComputeBoxGraspsResponse& response)
 {
   callService("compute_grasps", request, response);
   visualizer_.visualizeGrasps(response.grasps);
@@ -52,8 +50,8 @@ bool BoxpickClient::computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest &re
   return true;
 }
 
-bool BoxpickClient::detectItemsSrv(rc_pick_client::DetectBoxItemsRequest &request,
-                                   rc_pick_client::DetectBoxItemsResponse &response)
+bool BoxpickClient::detectItemsSrv(rc_pick_client::DetectBoxItemsRequest& request,
+                                   rc_pick_client::DetectBoxItemsResponse& response)
 {
   callService("detect_items", request, response);
   visualizer_.visualizeDetectedBoxes(response.items);
@@ -61,7 +59,7 @@ bool BoxpickClient::detectItemsSrv(rc_pick_client::DetectBoxItemsRequest &reques
   return true;
 }
 
-void BoxpickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t)
+void BoxpickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig& config, uint32_t)
 {
   json js_params = createSharedParameters(config);
   json j_params_new = rest_helper_.setParameters(js_params);
@@ -69,4 +67,4 @@ void BoxpickClient::dynamicReconfigureCallback(rc_pick_client::pickModuleConfig 
   paramsToCfg(j_params_new, config);
 }
 
-}
+}  // namespace ros_pick_client

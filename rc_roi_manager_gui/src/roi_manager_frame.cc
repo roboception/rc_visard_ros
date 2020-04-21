@@ -45,9 +45,8 @@
 #include "event_ids.h"
 namespace rc_roi_manager_gui
 {
-
-RoiManagerFrame::RoiManagerFrame(const wxString &title)
-        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 300))
+RoiManagerFrame::RoiManagerFrame(const wxString& title)
+  : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 300))
 {
   nh_ = std::make_shared<ros::NodeHandle>();
   ros::Duration(1).sleep();
@@ -59,15 +58,15 @@ RoiManagerFrame::RoiManagerFrame(const wxString &title)
   }
   ROS_INFO_STREAM("Using: " << pick_module_ << " as pick module.");
   ROS_ASSERT((pick_module_ == "rc_itempick") || (pick_module_ == "rc_boxpick"));
-  client_get_roi_ = nh_->serviceClient<rc_pick_client::GetRegionsOfInterest>
-          ("/" + pick_module_ + "/get_regions_of_interest");
-  client_delete_roi_ = nh_->serviceClient<rc_pick_client::DeleteRegionsOfInterest>(
-          "/" + pick_module_ + "/delete_regions_of_interest");
+  client_get_roi_ =
+      nh_->serviceClient<rc_pick_client::GetRegionsOfInterest>("/" + pick_module_ + "/get_regions_of_interest");
+  client_delete_roi_ =
+      nh_->serviceClient<rc_pick_client::DeleteRegionsOfInterest>("/" + pick_module_ + "/delete_regions_of_interest");
 
   client_get_roi_.waitForExistence();
   interactive_roi_server_ = std::make_shared<InteractiveRoiSelection>();
 
-  wxPanel *panel = new wxPanel(this, -1);
+  wxPanel* panel = new wxPanel(this, -1);
   item_list_ = new wxDataViewListCtrl(panel, wxID_ANY, wxPoint(-1, -1), wxSize(-1, -1));
   item_list_->AppendTextColumn("Name", wxDATAVIEW_CELL_INERT, 200, wxALIGN_LEFT,
                                wxDATAVIEW_COL_RESIZABLE | wxDATAVIEW_COL_SORTABLE);
@@ -76,16 +75,16 @@ RoiManagerFrame::RoiManagerFrame(const wxString &title)
   item_list_->AppendTextColumn("Shape", wxDATAVIEW_CELL_INERT, 80, wxALIGN_LEFT,
                                wxDATAVIEW_COL_RESIZABLE | wxDATAVIEW_COL_SORTABLE);
 
-  wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
-  auto *data_box = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
+  auto* data_box = new wxBoxSizer(wxHORIZONTAL);
   data_box->Add(item_list_, 1, wxEXPAND);
   vbox->Add(data_box, 1, wxLEFT | wxRIGHT | wxEXPAND, 10);
 
-  auto *button_box = new wxBoxSizer(wxHORIZONTAL);
-  auto *new_button = new wxButton(panel, ID_NewButton, "New");
-  auto *set_button = new wxButton(panel, ID_SetButton, "Update");
-  auto *edit_button = new wxButton(panel, ID_EditButton, "Edit");
-  auto *delete_button = new wxButton(panel, ID_DeleteButton, "Delete");
+  auto* button_box = new wxBoxSizer(wxHORIZONTAL);
+  auto* new_button = new wxButton(panel, ID_NewButton, "New");
+  auto* set_button = new wxButton(panel, ID_SetButton, "Update");
+  auto* edit_button = new wxButton(panel, ID_EditButton, "Edit");
+  auto* delete_button = new wxButton(panel, ID_DeleteButton, "Delete");
   button_box->Add(new_button, 1);
   button_box->Add(set_button, 1);
   button_box->Add(edit_button, 1);
@@ -102,7 +101,7 @@ RoiManagerFrame::RoiManagerFrame(const wxString &title)
   Connect(ID_DeleteButton, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(RoiManagerFrame::onDeleteButton));
 }
 
-void RoiManagerFrame::onDeleteButton(wxCommandEvent &)
+void RoiManagerFrame::onDeleteButton(wxCommandEvent&)
 {
   int selected_row = item_list_->GetSelectedRow();
   rc_pick_client::DeleteRegionsOfInterest srv;
@@ -117,7 +116,7 @@ void RoiManagerFrame::onDeleteButton(wxCommandEvent &)
   updateGui();
 }
 
-void RoiManagerFrame::onUpdateButton(wxCommandEvent &)
+void RoiManagerFrame::onUpdateButton(wxCommandEvent&)
 {
   updateGui();
 }
@@ -127,12 +126,13 @@ bool RoiManagerFrame::isItemInList(wxString name)
   for (int i = 0; i < item_list_->GetItemCount(); i++)
   {
     auto item_name = item_list_->GetTextValue(i, 0);
-    if (wxString(name) == item_name) return true;
+    if (wxString(name) == item_name)
+      return true;
   }
   return false;
 }
 
-void RoiManagerFrame::onEditButton(wxCommandEvent &)
+void RoiManagerFrame::onEditButton(wxCommandEvent&)
 {
   int selected_row = item_list_->GetSelectedRow();
   if (selected_row != wxNOT_FOUND)
@@ -152,12 +152,12 @@ void RoiManagerFrame::onEditButton(wxCommandEvent &)
   }
 }
 
-void RoiManagerFrame::onNewButton(wxCommandEvent &)
+void RoiManagerFrame::onNewButton(wxCommandEvent&)
 {
   create_roi_frame_ = new NewRoiFrame("New Roi Frame", this, pick_module_);
   rc_pick_client::RegionOfInterest roi;
   roi.id = "";
-  roi.primitive.dimensions = {0.1, 0.1, 0.1};
+  roi.primitive.dimensions = { 0.1, 0.1, 0.1 };
   roi.pose.pose.orientation.w = 1;
   roi.pose.header.frame_id = "camera";
   roi.primitive.type = 1;
@@ -169,14 +169,14 @@ void RoiManagerFrame::updateGui()
 {
   item_list_->DeleteAllItems();
   rc_pick_client::GetRegionsOfInterest srv;
-  wxString shapes[] = {"Box", "Sphere"};
+  wxString shapes[] = { "Box", "Sphere" };
   ros::Duration(0.01).sleep();
   if (client_get_roi_.call(srv))
   {
     ROS_DEBUG("Size of vector of regions of interest: %zu", srv.response.regions_of_interest.size());
     for (rc_pick_client::RegionOfInterest roi : srv.response.regions_of_interest)
     {
-      wxVector <wxVariant> item;
+      wxVector<wxVariant> item;
       wxString pose_frame = wxString(roi.pose.header.frame_id);
       wxString name = wxString(roi.id);
       wxString shape = shapes[roi.primitive.type - 1];
@@ -191,4 +191,4 @@ void RoiManagerFrame::updateGui()
     ROS_ERROR("UpdateGui: Failed to call service get_regions_of_interest");
   }
 }
-} //rc_roi_manager_gui
+}  // namespace rc_roi_manager_gui

@@ -44,24 +44,23 @@ namespace rc_rest_api
 {
 class RestHelper
 {
-  public:
-    RestHelper(const std::string &host, const std::string &node_name,
-                        int timeout);
+public:
+  RestHelper(const std::string& host, const std::string& node_name, int timeout);
 
-    json servicePutRequest(const std::string &service_name);
+  json servicePutRequest(const std::string& service_name);
 
-    json servicePutRequest(const std::string &service_name, const json &js_args);
+  json servicePutRequest(const std::string& service_name, const json& js_args);
 
-    json getParameters();
+  json getParameters();
 
-    std::tuple<size_t, size_t, size_t> getImageVersion();
+  std::tuple<size_t, size_t, size_t> getImageVersion();
 
-    json setParameters(const json &js_params);
+  json setParameters(const json& js_params);
 
-  private:
-    const std::string host_, services_url_, params_url_, version_url_;
-    const int timeout_curl_; // ms
+private:
+  const std::string host_, services_url_, params_url_, version_url_;
+  const int timeout_curl_;  // ms
 };
 
-}
-#endif //rc_rest_api_HELPER_H
+}  // namespace rc_rest_api
+#endif  // rc_rest_api_HELPER_H

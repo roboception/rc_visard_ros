@@ -47,10 +47,9 @@
 
 namespace geometry_msgs
 {
-
 inline void to_json(nlohmann::json& j, const geometry_msgs::Point& r)
 {
-  j = nlohmann::json{ {"x", r.x}, {"y", r.y}, {"z", r.z} };
+  j = nlohmann::json{ { "x", r.x }, { "y", r.y }, { "z", r.z } };
 }
 
 inline void from_json(const nlohmann::json& j, geometry_msgs::Point& r)
@@ -62,7 +61,7 @@ inline void from_json(const nlohmann::json& j, geometry_msgs::Point& r)
 
 inline void to_json(nlohmann::json& j, const geometry_msgs::Vector3& r)
 {
-  j = nlohmann::json{ {"x", r.x}, {"y", r.y}, {"z", r.z} };
+  j = nlohmann::json{ { "x", r.x }, { "y", r.y }, { "z", r.z } };
 }
 
 inline void from_json(const nlohmann::json& j, geometry_msgs::Vector3& r)
@@ -74,7 +73,7 @@ inline void from_json(const nlohmann::json& j, geometry_msgs::Vector3& r)
 
 inline void to_json(nlohmann::json& j, const geometry_msgs::Quaternion& r)
 {
-  j = nlohmann::json{ {"x", r.x}, {"y", r.y}, {"z", r.z}, {"w", r.w} };
+  j = nlohmann::json{ { "x", r.x }, { "y", r.y }, { "z", r.z }, { "w", r.w } };
 }
 
 inline void from_json(const nlohmann::json& j, geometry_msgs::Quaternion& r)

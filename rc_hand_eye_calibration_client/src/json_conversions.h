@@ -41,7 +41,6 @@
 
 namespace rc_hand_eye_calibration_client
 {
-
 inline void to_json(nlohmann::json& j, const TriggerRequest& r)
 {
   j = {};
@@ -82,7 +81,6 @@ inline void from_json(const nlohmann::json& j, CalibrationResponse& r)
   j.at("robot_mounted").get_to(r.robot_mounted);
 }
 
-
-}  // namespace rc_tagdetect_client
+}  // namespace rc_hand_eye_calibration_client
 
 #endif  // RC_HAND_EYE_CALIB_JSON_CONVERSIONS_H

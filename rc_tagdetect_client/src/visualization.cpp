@@ -34,8 +34,7 @@
 
 namespace rc_tagdetect_client
 {
-
-static std::string make_tf_prefix(const ros::NodeHandle &nh)
+static std::string make_tf_prefix(const ros::NodeHandle& nh)
 {
   std::string ns = ros::this_node::getNamespace();
   if (ns.empty())
@@ -61,9 +60,7 @@ static std::string make_tf_prefix(const ros::NodeHandle &nh)
   }
 }
 
-Visualization::Visualization(const ros::NodeHandle &nh) :
-        nh_(nh),
-        tf_prefix_(make_tf_prefix(nh_))
+Visualization::Visualization(const ros::NodeHandle& nh) : nh_(nh), tf_prefix_(make_tf_prefix(nh_))
 {
   tag_marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("tag_markers", 10);
 }
@@ -74,7 +71,7 @@ Visualization::~Visualization()
   {
     deleteMarkers();
   }
-  catch (const std::exception &ex)
+  catch (const std::exception& ex)
   {
     ROS_FATAL("Exception during destruction of Visualization: %s", ex.what());
   }
@@ -86,7 +83,7 @@ Visualization::~Visualization()
 
 void Visualization::deleteMarkers()
 {
-  for (auto &i : markers_.markers)
+  for (auto& i : markers_.markers)
   {
     i.action = visualization_msgs::Marker::DELETE;
   }
@@ -94,11 +91,10 @@ void Visualization::deleteMarkers()
   markers_.markers.clear();
 }
 
-void Visualization::publishTags(
-        const std::vector<rc_tagdetect_client::DetectedTag> &tags)
+void Visualization::publishTags(const std::vector<rc_tagdetect_client::DetectedTag>& tags)
 {
   deleteMarkers();
-  for (const auto &t : tags)
+  for (const auto& t : tags)
   {
     transform_broadcaster_.sendTransform(createTf(t));
     markers_.markers.push_back(createMarker(t));
@@ -106,14 +102,12 @@ void Visualization::publishTags(
   tag_marker_pub_.publish(markers_);
 }
 
-visualization_msgs::Marker
-Visualization::createMarker(const rc_tagdetect_client::DetectedTag &tag) const
+visualization_msgs::Marker Visualization::createMarker(const rc_tagdetect_client::DetectedTag& tag) const
 {
   visualization_msgs::Marker marker;
   marker.header.stamp = tag.header.stamp;
   marker.header.frame_id = tf_prefix_ + tag.tag.id + '_' + tag.instance_id;
-  marker.id = static_cast<int32_t>(std::stol(tag.instance_id) %
-                                   std::numeric_limits<int32_t>::max());
+  marker.id = static_cast<int32_t>(std::stol(tag.instance_id) % std::numeric_limits<int32_t>::max());
   marker.lifetime = ros::Duration();
   marker.type = visualization_msgs::Marker::CUBE;
   marker.action = visualization_msgs::Marker::ADD;
@@ -131,8 +125,7 @@ Visualization::createMarker(const rc_tagdetect_client::DetectedTag &tag) const
   return marker;
 }
 
-geometry_msgs::TransformStamped
-Visualization::createTf(const rc_tagdetect_client::DetectedTag &tag) const
+geometry_msgs::TransformStamped Visualization::createTf(const rc_tagdetect_client::DetectedTag& tag) const
 {
   geometry_msgs::TransformStamped tf;
   tf.header.frame_id = tf_prefix_ + tag.header.frame_id;
@@ -148,5 +141,4 @@ Visualization::createTf(const rc_tagdetect_client::DetectedTag &tag) const
   return tf;
 }
 
-
-}
+}  // namespace rc_tagdetect_client

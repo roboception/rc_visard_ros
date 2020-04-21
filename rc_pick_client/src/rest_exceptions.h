@@ -35,39 +35,42 @@
 
 namespace rc_rest_api
 {
-
 class RestClientException : public std::runtime_error
 {
-  public:
-    explicit RestClientException(const std::string &msg) :
-        std::runtime_error(msg) {}
-    virtual ~RestClientException() = default;
+public:
+  explicit RestClientException(const std::string& msg) : std::runtime_error(msg)
+  {
+  }
+  virtual ~RestClientException() = default;
 };
 
 class NotAvailableInThisVersionException : public RestClientException
 {
-  public:
-    explicit NotAvailableInThisVersionException(const std::string &msg) :
-        RestClientException(msg) {}
-    virtual ~NotAvailableInThisVersionException() = default;
+public:
+  explicit NotAvailableInThisVersionException(const std::string& msg) : RestClientException(msg)
+  {
+  }
+  virtual ~NotAvailableInThisVersionException() = default;
 };
 
 class MiscException : public RestClientException
 {
-  public:
-    explicit MiscException(const std::string &msg) :
-        RestClientException(msg) {}
-    virtual ~MiscException() = default;
+public:
+  explicit MiscException(const std::string& msg) : RestClientException(msg)
+  {
+  }
+  virtual ~MiscException() = default;
 };
 
 class RequestException : public RestClientException
 {
-  public:
-    RequestException(const std::string &msg) :
-        RestClientException(msg) {}
-    virtual ~RequestException() = default;
+public:
+  RequestException(const std::string& msg) : RestClientException(msg)
+  {
+  }
+  virtual ~RequestException() = default;
 };
 
-}
+}  // namespace rc_rest_api
 
-#endif //rc_rest_api_EXCEPTIONS_H
+#endif  // rc_rest_api_EXCEPTIONS_H
