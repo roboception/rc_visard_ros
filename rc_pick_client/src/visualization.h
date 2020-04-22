@@ -38,6 +38,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_broadcaster.h>
 #include <rc_pick_client/LoadCarrier.h>
+#include <rc_pick_client/LoadCarrierWithFillingLevel.h>
 #include <rc_pick_client/Item.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -64,6 +65,13 @@ public:
    * on topic lc in node_namespace
    */
   void visualizeLoadCarriers(const std::vector<rc_pick_client::LoadCarrier>& ros_lcs);
+
+  /*
+   * Remove previously published markers of this type.
+   * Publish load carrier position as tf frame (name: lc_#) and load carrier model as 5 cube markers on topic
+   * on topic lc in node_namespace
+   */
+  void visualizeLoadCarriers(const std::vector<rc_pick_client::LoadCarrierWithFillingLevel>& ros_lcs);
 
   /*
    * Remove previously published markers of this type.

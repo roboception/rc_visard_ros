@@ -99,6 +99,14 @@ bool PickClient::detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest
   return true;
 }
 
+bool PickClient::detectFillingLevelSrv(rc_pick_client::DetectFillingLevelRequest& request,
+                                       rc_pick_client::DetectFillingLevelResponse& response)
+{
+  callService("detect_filling_level", request, response);
+  visualizer_.visualizeLoadCarriers(response.load_carriers);
+  return true;
+}
+
 bool PickClient::setROI(rc_pick_client::SetRegionOfInterestRequest& request,
                         rc_pick_client::SetRegionOfInterestResponse& response)
 {
@@ -129,6 +137,7 @@ void PickClient::advertiseServices()
   srv_delete_rois_ = nh_.advertiseService("delete_regions_of_interest", &PickClient::deleteROISrv, this);
   srv_get_rois_ = nh_.advertiseService("get_regions_of_interest", &PickClient::getROIs, this);
   srv_set_roi_ = nh_.advertiseService("set_region_of_interest", &PickClient::setROI, this);
+  srv_detect_filling_level_ = nh_.advertiseService("detect_filling_level", &PickClient::detectFillingLevelSrv, this);
 }
 
 void PickClient::paramsToCfg(const json& params, rc_pick_client::pickModuleConfig& cfg)

@@ -39,9 +39,13 @@
 #include <rc_pick_client/Item.h>
 #include <rc_pick_client/ItemModel.h>
 #include <rc_pick_client/LoadCarrier.h>
+#include <rc_pick_client/LoadCarrierWithFillingLevel.h>
 #include <rc_pick_client/SuctionGrasp.h>
 #include <rc_pick_client/RegionOfInterest.h>
 #include <rc_pick_client/Compartment.h>
+#include <rc_pick_client/CellFillingLevel.h>
+#include <rc_pick_client/GridSize.h>
+#include <rc_pick_client/RangeValue.h>
 
 #include <rc_pick_client/DetectLoadCarriers.h>
 #include <rc_pick_client/DeleteLoadCarriers.h>
@@ -53,6 +57,7 @@
 #include <rc_pick_client/ComputeGrasps.h>
 #include <rc_pick_client/ComputeBoxGrasps.h>
 #include <rc_pick_client/DetectItems.h>
+#include <rc_pick_client/DetectFillingLevel.h>
 
 namespace rc_pick_client
 {
@@ -106,6 +111,50 @@ inline void from_json(const nlohmann::json& j, RangeRectangle& r)
   j.at("max_dimensions").get_to(r.max_dimensions);
 }
 
+inline void to_json(nlohmann::json& j, const GridSize& r)
+{
+  j["x"] = r.x;
+  j["y"] = r.y;
+}
+
+inline void from_json(const nlohmann::json& j, GridSize& r)
+{
+  j.at("x").get_to(r.x);
+  j.at("y").get_to(r.y);
+}
+
+inline void to_json(nlohmann::json& j, const RangeValue& r)
+{
+  j["min"] = r.min;
+  j["max"] = r.max;
+  j["mean"] = r.mean;
+}
+
+inline void from_json(const nlohmann::json& j, RangeValue& r)
+{
+  j.at("min").get_to(r.min);
+  j.at("max").get_to(r.max);
+  j.at("mean").get_to(r.mean);
+}
+
+inline void to_json(nlohmann::json& j, const CellFillingLevel& r)
+{
+  j["cell_size"] = r.cell_size;
+  j["cell_position"] = r.cell_position;
+  j["level_in_percent"] = r.level_in_percent;
+  j["level_free_in_meters"] = r.level_free_in_meters;
+  j["coverage"] = r.coverage;
+}
+
+inline void from_json(const nlohmann::json& j, CellFillingLevel& r)
+{
+  j.at("cell_size").get_to(r.cell_size);
+  j.at("cell_position").get_to(r.cell_position);
+  j.at("level_in_percent").get_to(r.level_in_percent);
+  j.at("level_free_in_meters").get_to(r.level_free_in_meters);
+  j.at("coverage").get_to(r.coverage);
+}
+
 inline void from_json(const nlohmann::json& j, SuctionGrasp& r)
 {
   j.at("uuid").get_to(r.uuid);
@@ -151,6 +200,7 @@ inline void to_json(nlohmann::json& j, const LoadCarrier& r)
   j["pose"] = r.pose.pose;
   j["pose_frame"] = r.pose.header.frame_id;
   j["timestamp"] = r.pose.header.stamp;
+  // overfilled flag is not used when setting load carrier
 }
 
 inline void from_json(const nlohmann::json& j, LoadCarrier& r)
@@ -162,6 +212,23 @@ inline void from_json(const nlohmann::json& j, LoadCarrier& r)
   j.at("pose").get_to(r.pose.pose);
   j.at("pose_frame").get_to(r.pose.header.frame_id);
   j.at("timestamp").get_to(r.pose.header.stamp);
+  if (j.count("overfilled"))
+    j.at("overfilled").get_to(r.overfilled);
+}
+
+inline void from_json(const nlohmann::json& j, LoadCarrierWithFillingLevel& r)
+{
+  j.at("id").get_to(r.id);
+  j.at("outer_dimensions").get_to(r.outer_dimensions);
+  j.at("inner_dimensions").get_to(r.inner_dimensions);
+  j.at("rim_thickness").get_to(r.rim_thickness);
+  j.at("pose").get_to(r.pose.pose);
+  j.at("pose_frame").get_to(r.pose.header.frame_id);
+  j.at("timestamp").get_to(r.pose.header.stamp);
+  j.at("overfilled").get_to(r.overfilled);
+  j.at("overall_filling_level").get_to(r.overall_filling_level);
+  j.at("cells_filling_levels").get_to(r.cells_filling_levels);
+  j.at("filling_level_cell_count").get_to(r.filling_level_cell_count);
 }
 
 inline void to_json(nlohmann::json& j, const Compartment& r)
@@ -406,6 +473,25 @@ inline void from_json(const nlohmann::json& j, DetectItemsResponse& r)
   j.at("timestamp").get_to(r.timestamp);
   j.at("load_carriers").get_to(r.load_carriers);
   j.at("items").get_to(r.items);
+  j.at("return_code").get_to(r.return_code);
+}
+
+inline void to_json(nlohmann::json& j, const DetectFillingLevelRequest& r)
+{
+  j["pose_frame"] = r.pose_frame;
+  j["region_of_interest_id"] = r.region_of_interest_id;
+  j["load_carrier_ids"] = r.load_carrier_ids;
+  if (r.pose_frame == "external")
+  {
+    j["robot_pose"] = r.robot_pose;
+  }
+  j["filling_level_cell_count"] = r.filling_level_cell_count;
+}
+
+inline void from_json(const nlohmann::json& j, DetectFillingLevelResponse& r)
+{
+  j.at("timestamp").get_to(r.timestamp);
+  j.at("load_carriers").get_to(r.load_carriers);
   j.at("return_code").get_to(r.return_code);
 }
 

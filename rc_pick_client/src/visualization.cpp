@@ -183,6 +183,30 @@ void Visualization::visualizeLoadCarriers(const std::vector<rc_pick_client::Load
   }
 }
 
+void Visualization::visualizeLoadCarriers(const std::vector<rc_pick_client::LoadCarrierWithFillingLevel>& ros_lcs)
+{
+  deleteLoadCarrierMarkers();
+  if (!ros_lcs.empty())
+  {
+    int counter = 0;
+    for (auto& lc_with_level : ros_lcs)
+    {
+      rc_pick_client::LoadCarrier lc;
+      lc.id = lc_with_level.id;
+      lc.outer_dimensions = lc_with_level.outer_dimensions;
+      lc.inner_dimensions = lc_with_level.inner_dimensions;
+      lc.rim_thickness = lc_with_level.rim_thickness;
+      lc.pose = lc_with_level.pose;
+      lc.overfilled = lc_with_level.overfilled;
+      constructLoadCarrier(markers_lcs_, lc, counter);
+      publishTf(lc.pose.pose, lc.pose.header.frame_id, "lc_" + std::to_string(counter));
+      // TODO: visualize filling level somehow?
+      counter++;
+    }
+    lc_marker_pub_.publish(markers_lcs_);
+  }
+}
+
 void Visualization::visualizeGrasps(const std::vector<rc_pick_client::SuctionGrasp>& ros_grasps)
 {
   deleteGraspMarkers();

@@ -43,6 +43,7 @@
 #include <rc_pick_client/DeleteLoadCarriers.h>
 #include <rc_pick_client/DeleteRegionsOfInterest.h>
 #include <rc_pick_client/GetLoadCarriers.h>
+#include <rc_pick_client/DetectFillingLevel.h>
 #include <rc_pick_client/GetRegionsOfInterest.h>
 #include <rc_pick_client/SetLoadCarrier.h>
 #include <rc_pick_client/SetRegionOfInterest.h>
@@ -73,6 +74,7 @@ protected:
   pick_visualization::Visualization visualizer_;
 
   ros::ServiceServer srv_detect_lc_;
+  ros::ServiceServer srv_detect_filling_level_;
   ros::ServiceServer srv_set_lc_;
   ros::ServiceServer srv_get_lcs_;
   ros::ServiceServer srv_delete_lcs_;
@@ -112,6 +114,9 @@ protected:
                        rc_pick_client::GetLoadCarriersResponse& response);
 
   bool setLoadCarrier(rc_pick_client::SetLoadCarrierRequest& request, rc_pick_client::SetLoadCarrierResponse& response);
+
+  bool detectFillingLevelSrv(rc_pick_client::DetectFillingLevelRequest& request,
+                             rc_pick_client::DetectFillingLevelResponse& response);
 
   bool deleteROISrv(rc_pick_client::DeleteRegionsOfInterestRequest& request,
                     rc_pick_client::DeleteRegionsOfInterestResponse& response);
