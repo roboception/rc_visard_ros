@@ -50,8 +50,8 @@ bool BoxpickClient::computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest& re
   return true;
 }
 
-bool BoxpickClient::detectItemsSrv(rc_pick_client::DetectBoxItemsRequest& request,
-                                   rc_pick_client::DetectBoxItemsResponse& response)
+bool BoxpickClient::detectItemsSrv(rc_pick_client::DetectItemsRequest& request,
+                                   rc_pick_client::DetectItemsResponse& response)
 {
   callService("detect_items", request, response);
   visualizer_.visualizeDetectedBoxes(response.items);

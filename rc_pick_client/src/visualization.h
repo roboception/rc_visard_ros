@@ -38,7 +38,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_broadcaster.h>
 #include <rc_pick_client/LoadCarrier.h>
-#include <rc_pick_client/BoxItem.h>
+#include <rc_pick_client/Item.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
@@ -69,7 +69,7 @@ public:
    * Remove previously published markers of this type.
    * Publish box item position as tf frame (name: boxitem_#) and cube markers on topic boxitem in node_namespace
    */
-  void visualizeDetectedBoxes(const std::vector<rc_pick_client::BoxItem>& ros_boxitems);
+  void visualizeDetectedBoxes(const std::vector<rc_pick_client::Item>& ros_boxitems);
 
   /*
    * Remove previously published box item markers.

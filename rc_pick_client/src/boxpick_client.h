@@ -35,7 +35,7 @@
 
 #include "pick_client.h"
 #include "rc_pick_client/ComputeBoxGrasps.h"
-#include "rc_pick_client/DetectBoxItems.h"
+#include "rc_pick_client/DetectItems.h"
 
 namespace ros_pick_client
 {
@@ -50,7 +50,7 @@ private:
   bool computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest& request,
                         rc_pick_client::ComputeBoxGraspsResponse& response);
 
-  bool detectItemsSrv(rc_pick_client::DetectBoxItemsRequest& request, rc_pick_client::DetectBoxItemsResponse& response);
+  bool detectItemsSrv(rc_pick_client::DetectItemsRequest& request, rc_pick_client::DetectItemsResponse& response);
 
   void dynamicReconfigureCallback(rc_pick_client::pickModuleConfig& config, uint32_t);
 

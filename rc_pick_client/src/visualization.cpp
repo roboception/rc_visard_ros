@@ -206,7 +206,7 @@ void Visualization::visualizeGrasps(const std::vector<rc_pick_client::SuctionGra
   }
 }
 
-void Visualization::visualizeDetectedBoxes(const std::vector<rc_pick_client::BoxItem>& ros_boxitems)
+void Visualization::visualizeDetectedBoxes(const std::vector<rc_pick_client::Item>& ros_boxitems)
 {
   deleteBoxItemMarkers();
   if (!ros_boxitems.empty())
@@ -214,10 +214,10 @@ void Visualization::visualizeDetectedBoxes(const std::vector<rc_pick_client::Box
     int counter = 0;
     visualization_msgs::Marker marker;
     marker.type = marker.CUBE;
-    for (auto& single_boxitem : ros_boxitems)
+    for (auto& item : ros_boxitems)
     {
-      setMarker(marker, single_boxitem.pose, single_boxitem.rectangle, single_boxitem.pose_frame, counter);
-      publishTf(single_boxitem.pose, single_boxitem.pose_frame, "boxitem_" + std::to_string(counter));
+      setMarker(marker, item.pose.pose, item.rectangle, item.pose.header.frame_id, counter);
+      publishTf(item.pose.pose, item.pose.header.frame_id, "boxitem_" + std::to_string(counter));
       markers_boxes_.markers.push_back(marker);
       counter++;
     }

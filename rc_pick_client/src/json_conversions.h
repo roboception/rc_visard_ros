@@ -37,8 +37,6 @@
 
 #include <rc_pick_client/Box.h>
 #include <rc_pick_client/Item.h>
-#include <rc_pick_client/BoxItem.h>
-#include <rc_pick_client/BoxModel.h>
 #include <rc_pick_client/ItemModel.h>
 #include <rc_pick_client/LoadCarrier.h>
 #include <rc_pick_client/SuctionGrasp.h>
@@ -54,7 +52,7 @@
 #include <rc_pick_client/SetRegionOfInterest.h>
 #include <rc_pick_client/ComputeGrasps.h>
 #include <rc_pick_client/ComputeBoxGrasps.h>
-#include <rc_pick_client/DetectBoxItems.h>
+#include <rc_pick_client/DetectItems.h>
 
 namespace rc_pick_client
 {
@@ -120,38 +118,28 @@ inline void from_json(const nlohmann::json& j, SuctionGrasp& r)
   j.at("max_suction_surface_width").get_to(r.max_suction_surface_width);
 }
 
-inline void to_json(nlohmann::json& j, const BoxModel& r)
+inline void to_json(nlohmann::json& j, const ItemModel& r)
 {
   j["type"] = r.type;
-  j["rectangle"] = r.rectangle;
+  if (r.type == r.UNKNOWN)
+  {
+    j["unknown"] = r.unknown;
+  }
+  else if (r.type == r.RECTANGLE)
+  {
+    j["rectangle"] = r.rectangle;
+  }
 }
 
-inline void from_json(const nlohmann::json& j, BoxModel& r)
+inline void from_json(const nlohmann::json& j, Item& r)
 {
-  j.at("type").get_to(r.type);
-  j.at("rectangle").get_to(r.rectangle);
-}
-
-inline void to_json(nlohmann::json& j, const BoxItem& r)
-{
-  j["grasp_uuids"] = r.grasp_uuids;
-  j["pose"] = r.pose;
-  j["pose_frame"] = r.pose_frame;
-  j["rectangle"] = r.rectangle;
-  j["timestamp"] = r.timestamp;
-  j["type"] = r.type;
-  j["uuid"] = r.uuid;
-}
-
-inline void from_json(const nlohmann::json& j, BoxItem& r)
-{
-  j.at("grasp_uuids").get_to(r.grasp_uuids);
-  j.at("pose").get_to(r.pose);
-  j.at("pose_frame").get_to(r.pose_frame);
-  j.at("rectangle").get_to(r.rectangle);
-  j.at("timestamp").get_to(r.timestamp);
-  j.at("type").get_to(r.type);
   j.at("uuid").get_to(r.uuid);
+  j.at("grasp_uuids").get_to(r.grasp_uuids);
+  j.at("type").get_to(r.type);
+  j.at("rectangle").get_to(r.rectangle);
+  j.at("pose").get_to(r.pose.pose);
+  j.at("timestamp").get_to(r.pose.header.stamp);
+  j.at("pose_frame").get_to(r.pose.header.frame_id);;
 }
 
 inline void to_json(nlohmann::json& j, const LoadCarrier& r)
@@ -174,43 +162,6 @@ inline void from_json(const nlohmann::json& j, LoadCarrier& r)
   j.at("pose").get_to(r.pose.pose);
   j.at("pose_frame").get_to(r.pose.header.frame_id);
   j.at("timestamp").get_to(r.pose.header.stamp);
-}
-
-inline void to_json(nlohmann::json& j, const Item& r)
-{
-  j["uuid"] = r.uuid;
-  j["grasp_uuids"] = r.grasp_uuids;
-  j["rectangle"] = r.rectangle;
-  j["pose"] = r.pose.pose;
-  j["pose_frame"] = r.pose.header.frame_id;
-  j["timestamp"] = r.pose.header.stamp;
-}
-
-inline void from_json(const nlohmann::json& j, Item& r)
-{
-  j.at("uuid").get_to(r.uuid);
-  j.at("grasp_uuids").get_to(r.grasp_uuids);
-  j.at("rectangle").get_to(r.rectangle);
-  j.at("pose").get_to(r.pose.pose);
-  j.at("pose_frame").get_to(r.pose.header.frame_id);
-  j.at("timestamp").get_to(r.pose.header.stamp);
-}
-
-inline void to_json(nlohmann::json& j, const ItemModel& r)
-{
-  j["type"] = r.type;
-  if (r.type == r.UNKNOWN)
-  {
-    j["unknown"] = r.unknown;
-  }
-  else if (r.type == r.RECTANGLE)
-  {
-    j["rectangle"] = r.rectangle;
-  }
-  else
-  {
-    throw std::runtime_error("Type of the model has to be of type \"UNKNOWN\" or \"RECTANGLE\"");
-  }
 }
 
 inline void to_json(nlohmann::json& j, const Compartment& r)
@@ -390,7 +341,6 @@ inline void from_json(const nlohmann::json& j, ComputeGraspsResponse& r)
 {
   j.at("timestamp").get_to(r.timestamp);
   j.at("load_carriers").get_to(r.load_carriers);
-  j.at("items").get_to(r.items);
   j.at("grasps").get_to(r.grasps);
   j.at("return_code").get_to(r.return_code);
 }
@@ -432,7 +382,7 @@ inline void from_json(const nlohmann::json& j, ComputeBoxGraspsResponse& r)
   j.at("return_code").get_to(r.return_code);
 }
 
-inline void to_json(nlohmann::json& j, const DetectBoxItemsRequest& r)
+inline void to_json(nlohmann::json& j, const DetectItemsRequest& r)
 {
   j["item_models"] = r.item_models;
   j["pose_frame"] = r.pose_frame;
@@ -451,7 +401,7 @@ inline void to_json(nlohmann::json& j, const DetectBoxItemsRequest& r)
   }
 }
 
-inline void from_json(const nlohmann::json& j, DetectBoxItemsResponse& r)
+inline void from_json(const nlohmann::json& j, DetectItemsResponse& r)
 {
   j.at("timestamp").get_to(r.timestamp);
   j.at("load_carriers").get_to(r.load_carriers);

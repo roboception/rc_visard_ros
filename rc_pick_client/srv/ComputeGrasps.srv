@@ -33,8 +33,6 @@ time timestamp
 
 LoadCarrier[] load_carriers
 
-Item[] items
-
 SuctionGrasp[] grasps
 
 rc_common_msgs/ReturnCode return_code
