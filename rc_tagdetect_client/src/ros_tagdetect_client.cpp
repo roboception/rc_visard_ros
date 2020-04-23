@@ -193,6 +193,7 @@ bool RosTagdetectClient::startContinousDetection(StartContinuousDetectionRequest
     });
   }
 
+  response.success = true;
   return true;
 }
 

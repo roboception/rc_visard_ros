@@ -206,8 +206,8 @@ void PickClient::initConfiguration()
   nh_.setParam("load_carrier_model_tolerance", cfg.load_carrier_model_tolerance);
 
   // instantiate dynamic reconfigure server that will initially read those values
-  using RCFSRV = dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>;
-  server_ = std::unique_ptr<RCFSRV>(new dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>(nh_));
+  using ReconfServer = dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>;
+  server_ = std::unique_ptr<ReconfServer>(new ReconfServer(nh_));
 }
 
 json PickClient::createSharedParameters(rc_pick_client::pickModuleConfig& config)

@@ -1,4 +1,4 @@
-# Description: Triggers a detection for the given tags
+# Description: Triggers continuous detection for the given tags
 
 # Tags to detect. For pose estimation by homography, the sizes of the tags
 # must be set.
@@ -11,3 +11,6 @@ string pose_frame
 geometry_msgs/Pose robot_pose
 
 ---
+
+bool success
+string message
