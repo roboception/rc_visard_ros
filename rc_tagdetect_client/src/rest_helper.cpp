@@ -100,7 +100,9 @@ json RestHelper::servicePutRequest(const std::string& service_name)
 json RestHelper::servicePutRequest(const std::string& service_name, const json& js_args)
 {
   cpr::Url url = cpr::Url{ services_url_ + service_name };
-  nlohmann::json j = { { "args", js_args } };
+  nlohmann::json j = nlohmann::json::object();
+  if (!js_args.empty())
+    j["args"] = js_args;
   auto rest_resp = cpr::Put(url, cpr::Timeout{ timeout_curl_ }, cpr::Body{ j.dump() },
                             cpr::Header{ { "Content-Type", "application/json" } });
   handleCPRResponse(rest_resp);
