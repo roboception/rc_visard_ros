@@ -59,8 +59,6 @@ public:
 
   ~RosTagdetectClient();
 
-  typedef std::tuple<rc_tagdetect_client::DetectedTags, rc_common_msgs::ReturnCode> Result;
-
 private:
   template <typename Request, typename Response>
   bool callService(const std::string& name, const Request& req, Response& res);
@@ -81,8 +79,6 @@ private:
 
   void advertiseServicesAndTopics();
 
-  Result detect(const std::vector<rc_tagdetect_client::Tag>& tags);
-
   /*
    * Reads tagdetect parameters from sensor and ros parameter (if a value for a parameter is defined in ROS parameter
    * server this value is used), and start dynamic reconfigure server.
@@ -96,7 +92,7 @@ private:
   ros::ServiceServer srv_start_continuous_detection_;
   ros::ServiceServer srv_stop_continuous_detection_;
 
-  ros::Publisher detections_pub;
+  ros::Publisher detections_pub_;
 
   std::thread continuous_mode_thread_;
   std::atomic_bool stop_continuous_mode_thread_;

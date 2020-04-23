@@ -37,7 +37,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <rc_tagdetect_client/DetectedTags.h>
+#include <rc_tagdetect_client/DetectedTag.h>
 
 namespace rc_tagdetect_client
 {

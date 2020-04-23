@@ -123,7 +123,7 @@ bool RosTagdetectClient::detect(const std::vector<rc_tagdetect_client::Tag>& tag
   {
     visualizer_->publishTags(res.tags);
   }
-  detections_pub.publish(res);
+  detections_pub_.publish(res);
   return success;
 }
 
@@ -137,7 +137,8 @@ bool RosTagdetectClient::detectService(DetectTagsRequest& req, DetectTagsRespons
     return true;
   }
 
-  return detect(req.tags, res);
+  detect(req.tags, res);
+  return true;
 }
 
 bool RosTagdetectClient::stopContinousDetection(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response)
@@ -195,7 +196,7 @@ bool RosTagdetectClient::startContinousDetection(StartContinuousDetectionRequest
 
 void RosTagdetectClient::advertiseServicesAndTopics()
 {
-  detections_pub = nh_.advertise<rc_tagdetect_client::DetectedTags>("detected_tags", 100);
+  detections_pub_ = nh_.advertise<rc_tagdetect_client::DetectedTags>("detected_tags", 100);
 
   srv_detect_ = nh_.advertiseService("detect", &RosTagdetectClient::detectService, this);
   srv_start_continuous_detection_ =

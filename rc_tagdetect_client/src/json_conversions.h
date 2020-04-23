@@ -36,10 +36,9 @@
 #include "json_conversions_common.h"
 
 #include <rc_tagdetect_client/Tag.h>
-#include <rc_tagdetect_client/DetectedTags.h>
+#include <rc_tagdetect_client/DetectedTag.h>
 
 #include <rc_tagdetect_client/DetectTags.h>
-#include <rc_tagdetect_client/StartContinuousDetection.h>
 
 namespace rc_tagdetect_client
 {
@@ -59,7 +58,8 @@ inline void from_json(const nlohmann::json& j, DetectedTag& r)
 {
   j.at("timestamp").get_to(r.header.stamp);
   j.at("pose_frame").get_to(r.header.frame_id);
-  j.at("tag").get_to(r.tag);
+  j.at("id").get_to(r.tag.id);
+  j.at("size").get_to(r.tag.size);
   j.at("instance_id").get_to(r.instance_id);
   j.at("pose").get_to(r.pose.pose);
   r.pose.header.stamp = r.header.stamp;
