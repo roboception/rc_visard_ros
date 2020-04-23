@@ -114,10 +114,8 @@ bool RosTagdetectClient::callService(const std::string& name, const Request& req
   }
 }
 
-bool RosTagdetectClient::detect(const std::vector<rc_tagdetect_client::Tag>& tags, DetectTagsResponse& res)
+bool RosTagdetectClient::detect(DetectTagsRequest& req, DetectTagsResponse& res)
 {
-  DetectTagsRequest req;
-  req.tags = tags;
   bool success = callService("detect", req, res);
   if (success && res.return_code.value >= 0 && visualizer_)
   {
@@ -137,7 +135,7 @@ bool RosTagdetectClient::detectService(DetectTagsRequest& req, DetectTagsRespons
     return true;
   }
 
-  detect(req.tags, res);
+  detect(req, res);
   return true;
 }
 
@@ -173,8 +171,12 @@ bool RosTagdetectClient::startContinousDetection(StartContinuousDetectionRequest
       {
         const auto start_time = std::chrono::steady_clock::now();
 
-        rc_tagdetect_client::DetectTagsResponse res;
-        if (!detect(request.tags, res))
+        DetectTagsRequest req;
+        req.tags = request.tags;
+        req.pose_frame = request.pose_frame;
+        req.robot_pose = request.robot_pose;
+        DetectTagsResponse res;
+        if (!detect(req, res))
         {
           break;
         }

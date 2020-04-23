@@ -4,4 +4,10 @@
 # must be set.
 Tag[] tags
 
+# Optional. Pose frame for output poses (valid values are 'camera' and 'external', defaults to 'camera')
+string pose_frame
+
+# Required only if reference frame = external and sensor is robot-mounted
+geometry_msgs/Pose robot_pose
+
 ---

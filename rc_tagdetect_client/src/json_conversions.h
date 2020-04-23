@@ -69,6 +69,14 @@ inline void from_json(const nlohmann::json& j, DetectedTag& r)
 inline void to_json(nlohmann::json& j, const DetectTagsRequest& r)
 {
   j["tags"] = r.tags;
+  if (!r.pose_frame.empty())
+  {
+    j["pose_frame"] = r.pose_frame;
+    if (r.pose_frame == "external")
+    {
+      j["robot_pose"] = r.robot_pose;
+    }
+  }
 }
 
 inline void from_json(const nlohmann::json& j, DetectTagsResponse& r)

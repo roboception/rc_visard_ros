@@ -63,7 +63,7 @@ private:
   template <typename Request, typename Response>
   bool callService(const std::string& name, const Request& req, Response& res);
 
-  bool detect(const std::vector<rc_tagdetect_client::Tag>& tags, rc_tagdetect_client::DetectTagsResponse& response);
+  bool detect(rc_tagdetect_client::DetectTagsRequest& req, rc_tagdetect_client::DetectTagsResponse& response);
 
   bool detectService(rc_tagdetect_client::DetectTagsRequest& request,
                      rc_tagdetect_client::DetectTagsResponse& response);
