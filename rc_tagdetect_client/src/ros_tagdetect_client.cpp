@@ -253,9 +253,16 @@ void RosTagdetectClient::initConfiguration()
   nh_.param("max_corner_distance", cfg.max_corner_distance, cfg.max_corner_distance);
   nh_.param("use_cached_images", cfg.use_cached_images, cfg.use_cached_images);
 
+  // set parameters on parameter server so that dynamic reconfigure picks them up
+  nh_.setParam("quality", cfg.quality);
+  nh_.setParam("detect_inverted_tags", cfg.detect_inverted_tags);
+  nh_.setParam("forget_after_n_detections", cfg.forget_after_n_detections);
+  nh_.setParam("max_corner_distance", cfg.max_corner_distance);
+  nh_.setParam("use_cached_images", cfg.use_cached_images);
+
   // instantiate dynamic reconfigure server that will initially read those values
-  using RCFSRV = dynamic_reconfigure::Server<rc_tagdetect_client::TagDetectConfig>;
-  server_ = std::unique_ptr<RCFSRV>(new dynamic_reconfigure::Server<rc_tagdetect_client::TagDetectConfig>(nh_));
+  using ReconfServer = dynamic_reconfigure::Server<rc_tagdetect_client::TagDetectConfig>;
+  server_ = std::unique_ptr<ReconfServer>(new ReconfServer(nh_));
   server_->setCallback(boost::bind(&RosTagdetectClient::dynamicReconfigureCallback, this, _1, _2));
 }
 

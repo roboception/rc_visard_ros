@@ -41,7 +41,6 @@ namespace rc_silhouettematch_client
 SilhouetteMatchClient::SilhouetteMatchClient(const std::string& host, ros::NodeHandle& nh)
   : nh_(nh)
   , rest_helper_(new rc_rest_api::RestHelper(host, "rc_silhouettematch", 10000))
-  , dyn_reconf_(new dynamic_reconfigure::Server<SilhouetteMatchConfig>(nh))
 {
   srvs_.emplace_back(nh.advertiseService("detect_object", &SilhouetteMatchClient::detectObject, this));
   srvs_.emplace_back(nh.advertiseService("calibrate_base_plane", &SilhouetteMatchClient::calibrateBasePlane, this));
@@ -170,7 +169,16 @@ void SilhouetteMatchClient::initParameters()
   nh_.param("match_percentile", cfg.match_percentile, cfg.match_percentile);
   nh_.param("quality", cfg.quality, cfg.quality);
 
-  // set callback for dynamic reconfigure that will initially read those values
+  // set parameters on parameter server so that dynamic reconfigure picks them up
+  nh_.setParam("max_number_of_detected_objects", cfg.max_number_of_detected_objects);
+  nh_.setParam("edge_sensitivity", cfg.edge_sensitivity);
+  nh_.setParam("match_max_distance", cfg.match_max_distance);
+  nh_.setParam("match_percentile", cfg.match_percentile);
+  nh_.setParam("quality", cfg.quality);
+
+  // instantiate dynamic reconfigure server that will initially read those values
+  using ReconfServer = dynamic_reconfigure::Server<SilhouetteMatchConfig>;
+  dyn_reconf_ = std::unique_ptr<ReconfServer>(new ReconfServer(nh_));
   dyn_reconf_->setCallback(boost::bind(&SilhouetteMatchClient::updateParameters, this, _1, _2));
 }
 
