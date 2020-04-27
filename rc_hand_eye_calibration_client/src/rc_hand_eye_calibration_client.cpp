@@ -229,6 +229,10 @@ void paramsToCfg(const json& params, hand_eye_calibrationConfig& cfg)
       cfg.grid_height = param["value"];
     else if (name == "robot_mounted")
       cfg.robot_mounted = (bool)param["value"];
+    else if (name == "tcp_rotation_axis")
+      cfg.tcp_rotation_axis = (int)param["value"];
+    else if (name == "tcp_offset")
+      cfg.tcp_offset = param["value"];
   }
 }
 
@@ -244,6 +248,8 @@ void HandEyeCalibClient::initConfiguration()
   nh_.param("grid_width", cfg.grid_width, cfg.grid_width);
   nh_.param("grid_height", cfg.grid_height, cfg.grid_height);
   nh_.param("robot_mounted", cfg.robot_mounted, cfg.robot_mounted);
+  nh_.param("tcp_rotation_axis", cfg.tcp_rotation_axis, cfg.tcp_rotation_axis);
+  nh_.param("tcp_offset", cfg.tcp_offset, cfg.tcp_offset);
 
   // see if those parameters are available otherwise use default (set in class header)
   nh_.param("rc_visard_frame_id", camera_frame_id_, camera_frame_id_);
@@ -256,6 +262,8 @@ void HandEyeCalibClient::initConfiguration()
   nh_.setParam("grid_width", cfg.grid_width);
   nh_.setParam("grid_height", cfg.grid_height);
   nh_.setParam("robot_mounted", cfg.robot_mounted);
+  nh_.setParam("tcp_rotation_axis", cfg.tcp_rotation_axis);
+  nh_.setParam("tcp_offset", cfg.tcp_offset);
 
   // instantiate dynamic reconfigure server that will initially read those values
   using RCFSRV = dynamic_reconfigure::Server<hand_eye_calibrationConfig>;
@@ -265,8 +273,8 @@ void HandEyeCalibClient::initConfiguration()
 
 void HandEyeCalibClient::dynamicReconfigureCb(hand_eye_calibrationConfig& config, uint32_t)
 {
-  ROS_DEBUG("Reconfigure Request: (%f x %f) %s", config.grid_width, config.grid_height,
-            config.robot_mounted ? "True" : "False");
+  ROS_DEBUG("Reconfigure Request: (%f x %f) %s, 4DOF: %d, offset: %f", config.grid_width, config.grid_height,
+            config.robot_mounted, config.tcp_rotation_axis, config.tcp_offset ? "True" : "False");
 
   // fill json request from dynamic reconfigure request
   json j_params, j_param;
@@ -278,6 +286,12 @@ void HandEyeCalibClient::dynamicReconfigureCb(hand_eye_calibrationConfig& config
   j_params.push_back(j_param);
   j_param["name"] = "robot_mounted";
   j_param["value"] = config.robot_mounted;
+  j_params.push_back(j_param);
+  j_param["name"] = "tcp_rotation_axis";
+  j_param["value"] = config.tcp_rotation_axis;
+  j_params.push_back(j_param);
+  j_param["name"] = "tcp_offset";
+  j_param["value"] = config.tcp_offset;
   j_params.push_back(j_param);
 
   json j_params_new = rest_helper_.setParameters(j_params);
