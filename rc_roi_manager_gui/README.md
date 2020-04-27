@@ -12,5 +12,5 @@ This node can be started using the roslaunch command.
 For this, the sensor serial number and the module to be utilized (rc_itempick or rc_boxpick) have to be given as arguments.
 
 ~~~
-roslaunch rc_roi_manager_gui interactive_roi_selection.launch device:=:<serial_number> pick_module=rc_itempick
+roslaunch rc_roi_manager_gui interactive_roi_selection.launch device:=:<serial_number> pick_module:=rc_itempick
 ~~~
