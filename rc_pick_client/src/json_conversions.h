@@ -199,8 +199,7 @@ inline void to_json(nlohmann::json& j, const LoadCarrier& r)
   j["rim_thickness"] = r.rim_thickness;
   j["pose"] = r.pose.pose;
   j["pose_frame"] = r.pose.header.frame_id;
-  j["timestamp"] = r.pose.header.stamp;
-  // overfilled flag is not used when setting load carrier
+  // timestamp and overfilled flag is not used when setting load carrier
 }
 
 inline void from_json(const nlohmann::json& j, LoadCarrier& r)
@@ -211,7 +210,7 @@ inline void from_json(const nlohmann::json& j, LoadCarrier& r)
   j.at("rim_thickness").get_to(r.rim_thickness);
   j.at("pose").get_to(r.pose.pose);
   j.at("pose_frame").get_to(r.pose.header.frame_id);
-  j.at("timestamp").get_to(r.pose.header.stamp);
+  // timestamp is set from enclosing msg
   if (j.count("overfilled"))
     j.at("overfilled").get_to(r.overfilled);
 }
@@ -224,7 +223,7 @@ inline void from_json(const nlohmann::json& j, LoadCarrierWithFillingLevel& r)
   j.at("rim_thickness").get_to(r.rim_thickness);
   j.at("pose").get_to(r.pose.pose);
   j.at("pose_frame").get_to(r.pose.header.frame_id);
-  j.at("timestamp").get_to(r.pose.header.stamp);
+  // timestamp is set from enclosing msg
   j.at("overfilled").get_to(r.overfilled);
   j.at("overall_filling_level").get_to(r.overall_filling_level);
   j.at("cells_filling_levels").get_to(r.cells_filling_levels);
@@ -243,6 +242,10 @@ inline void to_json(nlohmann::json& j, const RegionOfInterest& r)
   if (r.primitive.type == shape_msgs::SolidPrimitive::BOX)
   {
     j["type"] = "BOX";
+    if (r.primitive.dimensions.size() != 3)
+    {
+      throw std::runtime_error("Solid primitive of type \"box\" needs 3 dimensions.");
+    }
     j["box"]["x"] = r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_X];
     j["box"]["y"] = r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Y];
     j["box"]["z"] = r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Z];
@@ -250,6 +253,10 @@ inline void to_json(nlohmann::json& j, const RegionOfInterest& r)
   else if (r.primitive.type == shape_msgs::SolidPrimitive::SPHERE)
   {
     j["type"] = "SPHERE";
+    if (r.primitive.dimensions.size() != 1)
+    {
+      throw std::runtime_error("Solid primitive of type \"sphere\" needs 1 dimension.");
+    }
     j["sphere"]["radius"] = r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_X];
   }
   else
@@ -266,13 +273,15 @@ inline void from_json(const nlohmann::json& j, RegionOfInterest& r)
   if (j.at("type") == "BOX")
   {
     r.primitive.type = shape_msgs::SolidPrimitive::BOX;
-    r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_X] = j.at("x");
-    r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Y] = j.at("y");
-    r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Z] = j.at("z");
+    r.primitive.dimensions.resize(3);
+    r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_X] = j.at("box").at("x");
+    r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Y] = j.at("box").at("y");
+    r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Z] = j.at("box").at("z");
   }
   else if (j.at("type") == "SPHERE")
   {
     r.primitive.type = shape_msgs::SolidPrimitive::SPHERE;
+    r.primitive.dimensions.resize(1);
     r.primitive.dimensions[shape_msgs::SolidPrimitive::BOX_X] = j.at("sphere").at("radius");
   }
   else
@@ -340,6 +349,10 @@ inline void from_json(const nlohmann::json& j, DetectLoadCarriersResponse& r)
 {
   j.at("timestamp").get_to(r.timestamp);
   j.at("load_carriers").get_to(r.load_carriers);
+  for (auto lc : r.load_carriers)
+  {
+    j.at("timestamp").get_to(lc.pose.header.stamp);
+  }
   j.at("return_code").get_to(r.return_code);
 }
 
@@ -492,6 +505,10 @@ inline void from_json(const nlohmann::json& j, DetectFillingLevelResponse& r)
 {
   j.at("timestamp").get_to(r.timestamp);
   j.at("load_carriers").get_to(r.load_carriers);
+  for (auto lc : r.load_carriers)
+  {
+    j.at("timestamp").get_to(lc.pose.header.stamp);
+  }
   j.at("return_code").get_to(r.return_code);
 }
 
