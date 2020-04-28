@@ -41,8 +41,6 @@
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/PoseStamped.h>
 
-#include <rc_common_msgs/ReturnCode.h>
-
 #include <json/json.hpp>
 
 namespace geometry_msgs
@@ -97,16 +95,6 @@ inline void from_json(const nlohmann::json& j, geometry_msgs::Pose& r)
 }
 
 }  // namespace geometry_msgs
-
-namespace rc_common_msgs
-{
-inline void from_json(const nlohmann::json& j, ReturnCode& r)
-{
-  j.at("value").get_to(r.value);
-  j.at("message").get_to(r.message);
-}
-
-}  // namespace rc_common_msgs
 
 namespace ros
 {

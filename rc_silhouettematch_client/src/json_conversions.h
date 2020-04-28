@@ -35,6 +35,8 @@
 
 #include "json_conversions_common.h"
 
+#include <rc_common_msgs/ReturnCode.h>
+
 #include <rc_silhouettematch_client/Instance.h>
 #include <rc_silhouettematch_client/Plane.h>
 #include <rc_silhouettematch_client/EstimatedPlane.h>
@@ -49,7 +51,15 @@
 #include <rc_silhouettematch_client/DeleteRegionsOfInterest.h>
 #include <rc_silhouettematch_client/DetectObject.h>
 
-#include <json/json.hpp>
+namespace rc_common_msgs
+{
+inline void from_json(const nlohmann::json& j, ReturnCode& r)
+{
+  j.at("value").get_to(r.value);
+  j.at("message").get_to(r.message);
+}
+
+}  // namespace rc_common_msgs
 
 namespace rc_silhouettematch_client
 {

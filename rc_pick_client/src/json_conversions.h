@@ -35,6 +35,8 @@
 
 #include "json_conversions_common.h"
 
+#include <rc_common_msgs/ReturnCode.h>
+
 #include <rc_pick_client/Box.h>
 #include <rc_pick_client/Item.h>
 #include <rc_pick_client/ItemModel.h>
@@ -58,6 +60,16 @@
 #include <rc_pick_client/ComputeBoxGrasps.h>
 #include <rc_pick_client/DetectItems.h>
 #include <rc_pick_client/DetectFillingLevel.h>
+
+namespace rc_common_msgs
+{
+inline void from_json(const nlohmann::json& j, ReturnCode& r)
+{
+  j.at("value").get_to(r.value);
+  j.at("message").get_to(r.message);
+}
+
+}  // namespace rc_common_msgs
 
 namespace rc_pick_client
 {

@@ -35,10 +35,22 @@
 
 #include "json_conversions_common.h"
 
+#include <rc_common_msgs/ReturnCode.h>
+
 #include <rc_tagdetect_client/Tag.h>
 #include <rc_tagdetect_client/DetectedTag.h>
 
 #include <rc_tagdetect_client/DetectTags.h>
+
+namespace rc_common_msgs
+{
+inline void from_json(const nlohmann::json& j, ReturnCode& r)
+{
+  j.at("value").get_to(r.value);
+  j.at("message").get_to(r.message);
+}
+
+}  // namespace rc_common_msgs
 
 namespace rc_tagdetect_client
 {
