@@ -243,6 +243,8 @@ void HandEyeCalibClient::initConfiguration()
   // first get the current values from sensor
   const auto j_params = rest_helper_.getParameters();
 
+  paramsToCfg(j_params, cfg);
+
   // second, try to get ROS parameters:
   // if parameter is not set in parameter server, we default to current sensor configuration
   nh_.param("grid_width", cfg.grid_width, cfg.grid_width);
@@ -267,7 +269,7 @@ void HandEyeCalibClient::initConfiguration()
 
   // instantiate dynamic reconfigure server that will initially read those values
   using RCFSRV = dynamic_reconfigure::Server<hand_eye_calibrationConfig>;
-  server_ = std::unique_ptr<RCFSRV>(new dynamic_reconfigure::Server<hand_eye_calibrationConfig>(nh_));
+  server_ = std::unique_ptr<RCFSRV>(new RCFSRV(nh_));
   server_->setCallback(boost::bind(&HandEyeCalibClient::dynamicReconfigureCb, this, _1, _2));
 }
 
