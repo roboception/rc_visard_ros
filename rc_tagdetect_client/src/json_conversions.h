@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2019 Roboception GmbH
+ * Copyright (c) 2020 Roboception GmbH
  *
- * Author: Carlos Xavier Garcia Briones, Monika Florek-Jasinska
+ * Author: Elena Gambaro
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,33 +30,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_PICK_CLIENT_BOXPICK_CLIENT_H
-#define RC_PICK_CLIENT_BOXPICK_CLIENT_H
+#ifndef RC_TAGDETECT_JSON_CONVERSIONS_H
+#define RC_TAGDETECT_JSON_CONVERSIONS_H
 
-#include "pick_client.h"
-#include "rc_pick_client/ComputeBoxGrasps.h"
-#include "rc_pick_client/DetectItems.h"
+#include "json_conversions_common.h"
 
-namespace ros_pick_client
+#include <rc_tagdetect_client/Tag.h>
+#include <rc_tagdetect_client/DetectedTag.h>
+
+#include <rc_tagdetect_client/DetectTags.h>
+
+namespace rc_tagdetect_client
 {
-class BoxpickClient : public PickClient
+inline void to_json(nlohmann::json& j, const Tag& r)
 {
-public:
-  BoxpickClient(const std::string& host, const ros::NodeHandle& nh);
+  j["id"] = r.id;
+  j["size"] = r.size;
+}
 
-  ~BoxpickClient() = default;
+inline void from_json(const nlohmann::json& j, Tag& r)
+{
+  j.at("id").get_to(r.id);
+  j.at("size").get_to(r.size);
+}
 
-private:
-  bool computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest& request,
-                        rc_pick_client::ComputeBoxGraspsResponse& response);
+inline void from_json(const nlohmann::json& j, DetectedTag& r)
+{
+  j.at("timestamp").get_to(r.header.stamp);
+  j.at("pose_frame").get_to(r.header.frame_id);
+  j.at("id").get_to(r.tag.id);
+  j.at("size").get_to(r.tag.size);
+  j.at("instance_id").get_to(r.instance_id);
+  j.at("pose").get_to(r.pose.pose);
+  r.pose.header.stamp = r.header.stamp;
+  r.pose.header.frame_id = r.header.frame_id;
+}
 
-  bool detectItemsSrv(rc_pick_client::DetectItemsRequest& request, rc_pick_client::DetectItemsResponse& response);
+inline void to_json(nlohmann::json& j, const DetectTagsRequest& r)
+{
+  j["tags"] = r.tags;
+  if (!r.pose_frame.empty())
+  {
+    j["pose_frame"] = r.pose_frame;
+    if (r.pose_frame == "external")
+    {
+      j["robot_pose"] = r.robot_pose;
+    }
+  }
+}
 
-  void dynamicReconfigureCallback(rc_pick_client::pickModuleConfig& config, uint32_t);
+inline void from_json(const nlohmann::json& j, DetectTagsResponse& r)
+{
+  j.at("tags").get_to(r.tags);
+  j.at("timestamp").get_to(r.timestamp);
+  j.at("return_code").get_to(r.return_code);
+}
 
-  ros::ServiceServer srv_detect_items_;
-  ros::ServiceServer srv_compute_grasps_;
-};
-}  // namespace ros_pick_client
+}  // namespace rc_tagdetect_client
 
-#endif  // RC_PICK_CLIENT_BOXPICK_CLIENT_H
+#endif  // RC_TAGDETECT_JSON_CONVERSIONS_H

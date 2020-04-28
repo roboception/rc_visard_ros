@@ -1,7 +1,16 @@
-# Description: Triggers a detection for the given tags
+# Description: Triggers continuous detection for the given tags
 
 # Tags to detect. For pose estimation by homography, the sizes of the tags
 # must be set.
 Tag[] tags
 
+# Optional. Pose frame for output poses (valid values are 'camera' and 'external', defaults to 'camera')
+string pose_frame
+
+# Required only if reference frame = external and sensor is robot-mounted
+geometry_msgs/Pose robot_pose
+
 ---
+
+bool success
+string message

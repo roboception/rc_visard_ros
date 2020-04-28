@@ -1,13 +1,17 @@
-# Definition of an item
+# Definition of a detected item
 
-# Required
 string uuid
 
-# Optional
+# Contains uuids of grasps on this object (if requested)
 string[] grasp_uuids
 
-# Required
+string type
+
+# Types
+string RECTANGLE=RECTANGLE
+
+# if type==RECTANGLE
 Rectangle rectangle
 
-# Required. The pose of the item
+# The pose of the item
 geometry_msgs/PoseStamped pose

@@ -46,9 +46,10 @@
 #include <dynamic_reconfigure/server.h>
 #include <rc_silhouettematch_client/SilhouetteMatchConfig.h>
 
+#include "rest_helper.h"
+
 namespace rc_silhouettematch_client
 {
-class CommunicationHelper;
 class Visualizer;
 
 class SilhouetteMatchClient
@@ -61,23 +62,17 @@ public:
 protected:
   bool detectObject(DetectObject::Request& req, DetectObject::Response& res);
 
-  bool calibrateBasePlane(CalibrateBasePlane::Request& req,
-                          CalibrateBasePlane::Response& res);
+  bool calibrateBasePlane(CalibrateBasePlane::Request& req, CalibrateBasePlane::Response& res);
 
-  bool getBasePlaneCalib(GetBasePlaneCalibration::Request& req,
-                         GetBasePlaneCalibration::Response& res);
+  bool getBasePlaneCalib(GetBasePlaneCalibration::Request& req, GetBasePlaneCalibration::Response& res);
 
-  bool deleteBasePlaneCalib(DeleteBasePlaneCalibration::Request& req,
-                            DeleteBasePlaneCalibration::Response& res);
+  bool deleteBasePlaneCalib(DeleteBasePlaneCalibration::Request& req, DeleteBasePlaneCalibration::Response& res);
 
-  bool setROI(SetRegionOfInterest::Request& req,
-              SetRegionOfInterest::Response& res);
+  bool setROI(SetRegionOfInterest::Request& req, SetRegionOfInterest::Response& res);
 
-  bool getROIs(GetRegionsOfInterest::Request& req,
-               GetRegionsOfInterest::Response& res);
+  bool getROIs(GetRegionsOfInterest::Request& req, GetRegionsOfInterest::Response& res);
 
-  bool deleteROIs(DeleteRegionsOfInterest::Request& req,
-                  DeleteRegionsOfInterest::Response& res);
+  bool deleteROIs(DeleteRegionsOfInterest::Request& req, DeleteRegionsOfInterest::Response& res);
 
   void initParameters();
 
@@ -90,9 +85,8 @@ private:
   ros::NodeHandle nh_;
   std::vector<ros::ServiceServer> srvs_;
 
-  std::unique_ptr<CommunicationHelper> rc_visard_comm_if_;
-  std::unique_ptr<dynamic_reconfigure::Server<SilhouetteMatchConfig>>
-      dyn_reconf_;
+  std::unique_ptr<rc_rest_api::RestHelper> rest_helper_;
+  std::unique_ptr<dynamic_reconfigure::Server<SilhouetteMatchConfig>> dyn_reconf_;
   std::unique_ptr<Visualizer> visualizer_;
 };
 

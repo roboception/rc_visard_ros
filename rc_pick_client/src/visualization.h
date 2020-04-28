@@ -38,85 +38,89 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_broadcaster.h>
 #include <rc_pick_client/LoadCarrier.h>
-#include <rc_pick_client/BoxItem.h>
+#include <rc_pick_client/LoadCarrierWithFillingLevel.h>
+#include <rc_pick_client/Item.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 namespace pick_visualization
 {
-
 class Visualization
 {
-  public:
-    explicit Visualization(const ros::NodeHandle &nh);
+public:
+  explicit Visualization(const ros::NodeHandle& nh);
 
-    ~Visualization();
+  ~Visualization();
 
-    /*
-     * Remove previously published markers of this type.
-     * Publish grasps as tf frames (name: node_namespace/grasp_#) and marker spheres on topic grasp in node_namespace
-     * of size (max_suction_surface_length, max_suction_surface_width, 0)
-     */
-    void visualizeGrasps(const std::vector<rc_pick_client::SuctionGrasp> &ros_grasps);
+  /*
+   * Remove previously published markers of this type.
+   * Publish grasps as tf frames (name: node_namespace/grasp_#) and marker spheres on topic grasp in node_namespace
+   * of size (max_suction_surface_length, max_suction_surface_width, 0)
+   */
+  void visualizeGrasps(const std::vector<rc_pick_client::SuctionGrasp>& ros_grasps);
 
-    /*
-     * Remove previously published markers of this type.
-     * Publish load carrier position as tf frame (name: lc_#) and load carrier model as 5 cube markers on topic
-     * on topic lc in node_namespace
-     */
-    void visualizeLoadCarriers(const std::vector<rc_pick_client::LoadCarrier> &ros_lcs);
+  /*
+   * Remove previously published markers of this type.
+   * Publish load carrier position as tf frame (name: lc_#) and load carrier model as 5 cube markers on topic
+   * on topic lc in node_namespace
+   */
+  void visualizeLoadCarriers(const std::vector<rc_pick_client::LoadCarrier>& ros_lcs);
 
-    /*
-     * Remove previously published markers of this type.
-     * Publish box item position as tf frame (name: boxitem_#) and cube markers on topic boxitem in node_namespace
-     */
-    void visualizeDetectedBoxes(const std::vector<rc_pick_client::BoxItem> &ros_boxitems);
+  /*
+   * Remove previously published markers of this type.
+   * Publish load carrier position as tf frame (name: lc_#) and load carrier model as 5 cube markers on topic
+   * on topic lc in node_namespace
+   */
+  void visualizeLoadCarriers(const std::vector<rc_pick_client::LoadCarrierWithFillingLevel>& ros_lcs);
 
-    /*
-     * Remove previously published box item markers.
-     */
-    void deleteBoxItemMarkers();
+  /*
+   * Remove previously published markers of this type.
+   * Publish box item position as tf frame (name: boxitem_#) and cube markers on topic boxitem in node_namespace
+   */
+  void visualizeDetectedBoxes(const std::vector<rc_pick_client::Item>& ros_boxitems);
 
-    /*
-     * Remove previously published load carrier markers.
-     */
-    void deleteLoadCarrierMarkers();
+  /*
+   * Remove previously published box item markers.
+   */
+  void deleteBoxItemMarkers();
 
-    /*
-     * Remove previously published grasp markers.
-     */
-    void deleteGraspMarkers();
+  /*
+   * Remove previously published load carrier markers.
+   */
+  void deleteLoadCarrierMarkers();
 
-  private:
+  /*
+   * Remove previously published grasp markers.
+   */
+  void deleteGraspMarkers();
 
-    ros::NodeHandle nh_;
+private:
+  ros::NodeHandle nh_;
 
-    ros::Publisher grasp_marker_pub_;
-    ros::Publisher lc_marker_pub_;
-    ros::Publisher box_marker_pub_;
-    tf::TransformBroadcaster br_;
-    visualization_msgs::MarkerArray markers_lcs_;
-    visualization_msgs::MarkerArray markers_grasps_;
-    visualization_msgs::MarkerArray markers_boxes_;
-    /*
-     * Construct model of the load carrier that consist of 5 cube meshes representing 5 walls of the load carrier and
-     * append it to marker_array
-     */
-    static void constructLoadCarrier(visualization_msgs::MarkerArray &marker_array,
-                                     const rc_pick_client::LoadCarrier &lc,
-                                     const int &lc_no);
-    /*
-     * Set markers characteristics
-     */
-    void setMarker(visualization_msgs::Marker &marker, const geometry_msgs::Pose &item_pose, const rc_pick_client::Rectangle &rectangle, std::string frame_id, int marker_id);
+  ros::Publisher grasp_marker_pub_;
+  ros::Publisher lc_marker_pub_;
+  ros::Publisher box_marker_pub_;
+  tf::TransformBroadcaster br_;
+  visualization_msgs::MarkerArray markers_lcs_;
+  visualization_msgs::MarkerArray markers_grasps_;
+  visualization_msgs::MarkerArray markers_boxes_;
+  /*
+   * Construct model of the load carrier that consist of 5 cube meshes representing 5 walls of the load carrier and
+   * append it to marker_array
+   */
+  static void constructLoadCarrier(visualization_msgs::MarkerArray& marker_array, const rc_pick_client::LoadCarrier& lc,
+                                   const int& lc_no);
+  /*
+   * Set markers characteristics
+   */
+  void setMarker(visualization_msgs::Marker& marker, const geometry_msgs::Pose& item_pose,
+                 const rc_pick_client::Rectangle& rectangle, std::string frame_id, int marker_id);
 
-    /*
-     * Publish given pose as tf frame
-     */
-    void publishTf(const geometry_msgs::Pose &ros_pose, std::string frame_id, std::string id);
-
-
+  /*
+   * Publish given pose as tf frame
+   */
+  void publishTf(const geometry_msgs::Pose& ros_pose, std::string frame_id, std::string id);
 };
-}
+}  // namespace pick_visualization
 
-#endif //RC_PICK_CLIENT_PUBLISH_PICK_VISULIZATION_H
+#endif  // RC_PICK_CLIENT_PUBLISH_PICK_VISULIZATION_H

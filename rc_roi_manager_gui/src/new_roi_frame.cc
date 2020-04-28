@@ -41,29 +41,27 @@
 
 namespace rc_roi_manager_gui
 {
-
-
-NewRoiFrame::NewRoiFrame(const wxString &title, RoiManagerFrame *manager, std::string pick_module)
-        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(300, 280)), manager_(manager)
+NewRoiFrame::NewRoiFrame(const wxString& title, RoiManagerFrame* manager, std::string pick_module)
+  : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(300, 280)), manager_(manager)
 {
   manager_->Show(false);
   nh_ = std::make_shared<ros::NodeHandle>();
-  client_set_roi_ = nh_->serviceClient<rc_pick_client::SetRegionOfInterest>(
-          "/" + pick_module + "/set_region_of_interest");
+  client_set_roi_ =
+      nh_->serviceClient<rc_pick_client::SetRegionOfInterest>("/" + pick_module + "/set_region_of_interest");
 
-  wxPanel *panel = new wxPanel(this, -1);
+  wxPanel* panel = new wxPanel(this, -1);
   auto name_str = new wxStaticText(panel, wxID_ANY, wxT("Roi Name"));
   name_box_ = new wxTextCtrl(panel, wxID_ANY);
 
   auto pose_frame_str = new wxStaticText(panel, wxID_ANY, wxT("Pose Frame"));
-  wxString pose_frame_choices[] = {"camera", "external"};
+  wxString pose_frame_choices[] = { "camera", "external" };
   pose_frame_box_ = new wxChoice(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, pose_frame_choices);
 
   auto shape_str = new wxStaticText(panel, wxID_ANY, wxT("Shape"));
-  wxString shape_choices[] = {"box", "sphere"};
+  wxString shape_choices[] = { "box", "sphere" };
   shape_box_ = new wxChoice(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, shape_choices);
 
-  auto *vbox = new wxBoxSizer(wxVERTICAL);
+  auto* vbox = new wxBoxSizer(wxVERTICAL);
   vbox->Add(name_str, 0, wxLEFT | wxRIGHT | wxTOP, 10);
   vbox->Add(name_box_, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 10);
   vbox->Add(pose_frame_str, 0, wxLEFT | wxTOP, 10);
@@ -71,10 +69,10 @@ NewRoiFrame::NewRoiFrame(const wxString &title, RoiManagerFrame *manager, std::s
   vbox->Add(shape_str, 0, wxLEFT | wxTOP, 10);
   vbox->Add(shape_box_, 0, wxLEFT | wxTOP, 10);
 
-  wxButton *btn1 = new wxButton(panel, ID_SaveButton, wxT("Save"));
-  wxButton *btn2 = new wxButton(panel, ID_UpdateRoiButton, wxT("Update"));
-  wxButton *btn3 = new wxButton(panel, ID_CancelButton, wxT("Cancel"));
-  auto *hbox = new wxBoxSizer(wxHORIZONTAL);
+  wxButton* btn1 = new wxButton(panel, ID_SaveButton, wxT("Save"));
+  wxButton* btn2 = new wxButton(panel, ID_UpdateRoiButton, wxT("Update"));
+  wxButton* btn3 = new wxButton(panel, ID_CancelButton, wxT("Cancel"));
+  auto* hbox = new wxBoxSizer(wxHORIZONTAL);
   hbox->Add(btn1, 0, wxLEFT | wxTOP, 10);
   hbox->Add(btn2, 0, wxLEFT | wxTOP, 10);
   hbox->Add(btn3, 0, wxLEFT | wxTOP, 10);
@@ -100,7 +98,7 @@ void NewRoiFrame::setRoi(rc_pick_client::RegionOfInterest roi, bool edit)
   }
 }
 
-//TODO get suggests that you are getting something in return. What is this function doing?
+// TODO get suggests that you are getting something in return. What is this function doing?
 void NewRoiFrame::setFromInteractiveRoi()
 {
   if (!manager_->interactive_roi_server_->getInteractiveRoi(roi_))
@@ -109,20 +107,19 @@ void NewRoiFrame::setFromInteractiveRoi()
   }
 }
 
-
-void NewRoiFrame::onCancelButton(wxCommandEvent &)
+void NewRoiFrame::onCancelButton(wxCommandEvent&)
 {
   this->Close();
 }
 
-void NewRoiFrame::onSaveButton(wxCommandEvent &)
+void NewRoiFrame::onSaveButton(wxCommandEvent&)
 {
   setFromInteractiveRoi();
 
   if (manager_->isItemInList(name_box_->GetValue()) && (roi_.id != name_box_->GetValue()))
   {
-    wxMessageDialog *pop_up = new wxMessageDialog(this, "A region of interest with that name already exists!",
-                                                  "Name Error");
+    wxMessageDialog* pop_up =
+        new wxMessageDialog(this, "A region of interest with that name already exists!", "Name Error");
     pop_up->ShowModal();
     return;
   }
@@ -144,7 +141,7 @@ void NewRoiFrame::onSaveButton(wxCommandEvent &)
   this->Close();
 }
 
-void NewRoiFrame::onUpdateButton(wxCommandEvent &)
+void NewRoiFrame::onUpdateButton(wxCommandEvent&)
 {
   setFromInteractiveRoi();
   roi_.pose.header.frame_id = pose_frame_box_->GetStringSelection();
@@ -153,7 +150,6 @@ void NewRoiFrame::onUpdateButton(wxCommandEvent &)
   {
     ROS_ERROR("Failed to set the interactive region of interest");
   }
-
 }
 
 NewRoiFrame::~NewRoiFrame()
@@ -163,5 +159,4 @@ NewRoiFrame::~NewRoiFrame()
   manager_->Show(true);
 }
 
-
-} //rc_roi_manager_gui
+}  // namespace rc_roi_manager_gui

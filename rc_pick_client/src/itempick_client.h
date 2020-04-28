@@ -36,23 +36,22 @@
 #include "pick_client.h"
 #include <rc_pick_client/ComputeGrasps.h>
 
+namespace ros_pick_client
+{
+class ItempickClient : public PickClient
+{
+public:
+  ItempickClient(const std::string& host, const ros::NodeHandle& nh);
 
-namespace ros_pick_client {
-    class ItempickClient : public PickClient {
-    public:
-        ItempickClient(const std::string &host, const ros::NodeHandle &nh);
+  virtual ~ItempickClient() = default;
 
-        virtual ~ItempickClient() = default;
+private:
+  ros::ServiceServer srv_compute_grasps_;
 
-    private:
+  bool computeGraspsSrv(rc_pick_client::ComputeGraspsRequest& request, rc_pick_client::ComputeGraspsResponse& response);
 
-        ros::ServiceServer srv_compute_grasps_;
+  void dynamicReconfigureCallback(rc_pick_client::pickModuleConfig& config, uint32_t);
+};
+}  // namespace ros_pick_client
 
-        bool computeGraspsSrv(rc_pick_client::ComputeGraspsRequest &request,
-                              rc_pick_client::ComputeGraspsResponse &response);
-
-        void dynamicReconfigureCallback(rc_pick_client::pickModuleConfig &config, uint32_t);
-    };
-}
-
-#endif // RC_PICK_CLIENT_ITEMPICK_CLIENT_H
+#endif  // RC_PICK_CLIENT_ITEMPICK_CLIENT_H

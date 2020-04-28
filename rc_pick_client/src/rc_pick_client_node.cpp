@@ -46,7 +46,7 @@ void sigintHandler(int)
   ros::shutdown();
 }
 
-std::string getHost(const std::string &device_name, const std::string &interface)
+std::string getHost(const std::string& device_name, const std::string& interface)
 {
   // broadcast discover request
   rcdiscover::Discover discover;
@@ -55,10 +55,12 @@ std::string getHost(const std::string &device_name, const std::string &interface
   std::vector<rcdiscover::DeviceInfo> infos;
 
   // get responses
-  while (discover.getResponse(infos, 100)) { }
+  while (discover.getResponse(infos, 100))
+  {
+  }
 
   std::vector<std::vector<std::string>> devices;
-  std::vector<std::string> filtered_info = {"", ""};
+  std::vector<std::string> filtered_info = { "", "" };
   for (const auto& info : infos)
   {
     if (!interface.empty() && interface != info.getIfaceName())
@@ -102,20 +104,21 @@ std::string getHost(const std::string &device_name, const std::string &interface
   else if (devices.size() > 1)
   {
     ROS_FATAL_STREAM("Found " << devices.size() << " devices with the name '" << device_name
-                     << "'. Please specify a unique device name.");
+                              << "'. Please specify a unique device name.");
     return "";
   }
 
-  ROS_INFO_STREAM("Using device '" << device_name << "' with name '" << devices[0][0] << "' and IP address " << devices[0][1]);
+  ROS_INFO_STREAM("Using device '" << device_name << "' with name '" << devices[0][0] << "' and IP address "
+                                   << devices[0][1]);
   return devices[0][1];
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   std::string pick_type = PICK_TYPE;
   ros::init(argc, argv, pick_type, ros::init_options::NoSigintHandler);
 
-  if (pick_type != "rc_boxpick" && pick_type !="rc_itempick")
+  if (pick_type != "rc_boxpick" && pick_type != "rc_itempick")
   {
     ROS_FATAL("node type not defined");
   }
@@ -164,9 +167,8 @@ int main(int argc, char **argv)
       pick_client.reset(new ros_pick_client::ItempickClient(host, pnh));
     }
     ROS_INFO_STREAM(pick_type << " node started for host: " << host);
-
   }
-  catch (const std::exception &ex)
+  catch (const std::exception& ex)
   {
     ROS_FATAL("Client could not be created due to an error: %s", ex.what());
     return 1;

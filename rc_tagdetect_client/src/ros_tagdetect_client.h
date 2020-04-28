@@ -47,67 +47,63 @@
 #include <rc_tagdetect_client/TagDetectConfig.h>
 #include <rc_common_msgs/ReturnCode.h>
 
-#include "communication_helper.h"
+#include "rest_helper.h"
 #include "visualization.h"
-#include "exceptions.h"
 
 namespace rc_tagdetect_client
 {
-
 class RosTagdetectClient
 {
-  public:
-    RosTagdetectClient(const std::string &host, const ros::NodeHandle &nh,
-                           const std::string &detection_type);
+public:
+  RosTagdetectClient(const std::string& host, const ros::NodeHandle& nh, const std::string& detection_type);
 
-    ~RosTagdetectClient();
+  ~RosTagdetectClient();
 
-    typedef std::tuple<rc_tagdetect_client::DetectedTags, rc_common_msgs::ReturnCode> Result;
+private:
+  template <typename Request, typename Response>
+  bool callService(const std::string& name, const Request& req, Response& res);
 
-  private:
+  bool detect(rc_tagdetect_client::DetectTagsRequest& req, rc_tagdetect_client::DetectTagsResponse& response);
 
-    bool detectService(rc_tagdetect_client::DetectTagsRequest &request,
-                       rc_tagdetect_client::DetectTagsResponse &response);
+  bool detectService(rc_tagdetect_client::DetectTagsRequest& request,
+                     rc_tagdetect_client::DetectTagsResponse& response);
 
-    bool startContinousDetection(rc_tagdetect_client::StartContinuousDetectionRequest &request,
-                                 rc_tagdetect_client::StartContinuousDetectionResponse &response);
+  bool startContinousDetection(rc_tagdetect_client::StartContinuousDetectionRequest& request,
+                               rc_tagdetect_client::StartContinuousDetectionResponse& response);
 
-    bool stopContinousDetection(std_srvs::TriggerRequest &request,
-                                std_srvs::TriggerResponse &response);
+  bool stopContinousDetection(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
 
-    void startTagDetect();
+  void startTagDetect();
 
-    void stopTagDetect();
+  void stopTagDetect();
 
-    void advertiseServicesAndTopics();
+  void advertiseServicesAndTopics();
 
-    Result detect(const std::vector<rc_tagdetect_client::Tag> &tags);
+  /*
+   * Reads tagdetect parameters from sensor and ros parameter (if a value for a parameter is defined in ROS parameter
+   * server this value is used), and start dynamic reconfigure server.
+   */
+  void initConfiguration();
 
-    /*
-     * Reads tagdetect parameters from sensor and ros parameter (if a value for a parameter is defined in ROS parameter
-     * server this value is used), and start dynamic reconfigure server.
-     */
-    void initConfiguration();
+  void dynamicReconfigureCallback(rc_tagdetect_client::TagDetectConfig& config, uint32_t);
 
-    void dynamicReconfigureCallback(rc_tagdetect_client::TagDetectConfig &config, uint32_t);
+  ros::NodeHandle nh_;
+  ros::ServiceServer srv_detect_;
+  ros::ServiceServer srv_start_continuous_detection_;
+  ros::ServiceServer srv_stop_continuous_detection_;
 
-    ros::NodeHandle nh_;
-    ros::ServiceServer srv_detect_;
-    ros::ServiceServer srv_start_continuous_detection_;
-    ros::ServiceServer srv_stop_continuous_detection_;
+  ros::Publisher detections_pub_;
 
-    ros::Publisher detections_pub;
+  std::thread continuous_mode_thread_;
+  std::atomic_bool stop_continuous_mode_thread_;
 
-    std::thread continuous_mode_thread_;
-    std::atomic_bool stop_continuous_mode_thread_;
+  std::unique_ptr<dynamic_reconfigure::Server<rc_tagdetect_client::TagDetectConfig>> server_;
+  std::unique_ptr<rc_rest_api::RestHelper> rest_helper_;
+  std::unique_ptr<rc_tagdetect_client::Visualization> visualizer_;
 
-    std::unique_ptr<dynamic_reconfigure::Server<rc_tagdetect_client::TagDetectConfig>> server_;
-    std::unique_ptr<rc_tagdetect_client::CommunicationHelper> rc_visard_communication_;
-    std::unique_ptr<rc_tagdetect_client::Visualization> visualizer_;
-
-    std::tuple<size_t, size_t, size_t> image_version_;
+  std::tuple<size_t, size_t, size_t> image_version_;
 };
 
-}
+}  // namespace rc_tagdetect_client
 
-#endif //RC_TAGDETECTION_CLIENT_ROS_TAGDETECT_CLIENT_H
+#endif  // RC_TAGDETECTION_CLIENT_ROS_TAGDETECT_CLIENT_H

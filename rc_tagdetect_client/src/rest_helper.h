@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019 Roboception GmbH
  *
- * Author: Carlos Xavier Garcia Briones, Monika Florek-Jasinska
+ * Author: Monika Florek-Jasinska
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,33 +30,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_PICK_CLIENT_BOXPICK_CLIENT_H
-#define RC_PICK_CLIENT_BOXPICK_CLIENT_H
+#ifndef rc_rest_api_HELPER_H
+#define rc_rest_api_HELPER_H
 
-#include "pick_client.h"
-#include "rc_pick_client/ComputeBoxGrasps.h"
-#include "rc_pick_client/DetectItems.h"
+#include <string>
+#include <json/json.hpp>
 
-namespace ros_pick_client
+#include "rest_exceptions.h"
+
+using json = nlohmann::json;
+
+namespace rc_rest_api
 {
-class BoxpickClient : public PickClient
+class RestHelper
 {
 public:
-  BoxpickClient(const std::string& host, const ros::NodeHandle& nh);
+  RestHelper(const std::string& host, const std::string& node_name, int timeout);
 
-  ~BoxpickClient() = default;
+  json servicePutRequest(const std::string& service_name);
+
+  json servicePutRequest(const std::string& service_name, const json& js_args);
+
+  json getParameters();
+
+  std::tuple<size_t, size_t, size_t> getImageVersion();
+
+  json setParameters(const json& js_params);
 
 private:
-  bool computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest& request,
-                        rc_pick_client::ComputeBoxGraspsResponse& response);
-
-  bool detectItemsSrv(rc_pick_client::DetectItemsRequest& request, rc_pick_client::DetectItemsResponse& response);
-
-  void dynamicReconfigureCallback(rc_pick_client::pickModuleConfig& config, uint32_t);
-
-  ros::ServiceServer srv_detect_items_;
-  ros::ServiceServer srv_compute_grasps_;
+  const std::string host_, services_url_, params_url_, version_url_;
+  const int timeout_curl_;  // ms
 };
-}  // namespace ros_pick_client
 
-#endif  // RC_PICK_CLIENT_BOXPICK_CLIENT_H
+}  // namespace rc_rest_api
+#endif  // rc_rest_api_HELPER_H

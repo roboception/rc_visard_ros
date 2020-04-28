@@ -30,52 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_SILHOUETTEMATCH_CLIENT_EXCEPTIONS_H
-#define RC_SILHOUETTEMATCH_CLIENT_EXCEPTIONS_H
+#ifndef rc_rest_api_EXCEPTIONS_H
+#define rc_rest_api_EXCEPTIONS_H
 
-#include <stdexcept>
-
-namespace rc_silhouettematch_client
+namespace rc_rest_api
 {
-class SilhouetteMatchException : public std::runtime_error
+class RestClientException : public std::runtime_error
 {
 public:
-  explicit SilhouetteMatchException(const std::string& msg)
-    : std::runtime_error(msg)
+  explicit RestClientException(const std::string& msg) : std::runtime_error(msg)
   {
   }
-  virtual ~SilhouetteMatchException() = default;
+  virtual ~RestClientException() = default;
 };
 
-class NotAvailableInThisVersionException : public SilhouetteMatchException
+class NotAvailableInThisVersionException : public RestClientException
 {
 public:
-  explicit NotAvailableInThisVersionException(const std::string& msg)
-    : SilhouetteMatchException(msg)
+  explicit NotAvailableInThisVersionException(const std::string& msg) : RestClientException(msg)
   {
   }
   virtual ~NotAvailableInThisVersionException() = default;
 };
 
-class MiscException : public SilhouetteMatchException
+class MiscException : public RestClientException
 {
 public:
-  explicit MiscException(const std::string& msg)
-    : SilhouetteMatchException(msg)
+  explicit MiscException(const std::string& msg) : RestClientException(msg)
   {
   }
   virtual ~MiscException() = default;
 };
 
-class RequestException : public SilhouetteMatchException
+class RequestException : public RestClientException
 {
 public:
-  RequestException(const std::string& msg) : SilhouetteMatchException(msg)
+  RequestException(const std::string& msg) : RestClientException(msg)
   {
   }
   virtual ~RequestException() = default;
 };
 
-}  // namespace rc_silhouettematch_client
+}  // namespace rc_rest_api
 
-#endif  // RC_SILHOUETTEMATCH_CLIENT_EXCEPTIONS_H
+#endif  // rc_rest_api_EXCEPTIONS_H

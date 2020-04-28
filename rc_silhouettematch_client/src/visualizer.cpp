@@ -73,7 +73,7 @@ Visualizer::~Visualizer()
   {
     deleteMarkers();
   }
-  catch (const std::exception &ex)
+  catch (const std::exception& ex)
   {
     ROS_FATAL("Exception during destruction of Visualization: %s", ex.what());
   }
@@ -85,7 +85,7 @@ Visualizer::~Visualizer()
 
 void Visualizer::deleteMarkers()
 {
-  for (auto &i : markers_.markers)
+  for (auto& i : markers_.markers)
   {
     i.action = visualization_msgs::Marker::DELETE;
   }
@@ -108,9 +108,9 @@ void Visualizer::visBasePlane(const EstimatedPlane& plane, const ros::Time times
   marker.scale.x = 1.0;
   marker.scale.y = 1.0;
   marker.scale.z = 0.001;
-  marker.pose.position.x = - plane.normal.x * plane.distance;
-  marker.pose.position.y = - plane.normal.y * plane.distance;
-  marker.pose.position.z = - plane.normal.z * plane.distance;
+  marker.pose.position.x = -plane.normal.x * plane.distance;
+  marker.pose.position.y = -plane.normal.y * plane.distance;
+  marker.pose.position.z = -plane.normal.z * plane.distance;
   // quaternion yielding double the desired rotation (if normal is normalized):
   // q.w = dot(zaxis, normal), q.xyz = cross(zaxis, normal)
   // add quaternion with zero rotation (xyz=0, w=1) to get half the rotation from above

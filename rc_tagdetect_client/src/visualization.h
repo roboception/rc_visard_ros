@@ -30,45 +30,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_ITEMPICK_CLIENT_PUBLISH_ITEMPICK_VISULIZATION_H
-#define RC_ITEMPICK_CLIENT_PUBLISH_ITEMPICK_VISULIZATION_H
+#ifndef RC_TAGDETECT_CLIENT_VISUALIZATION_H
+#define RC_TAGDETECT_CLIENT_VISUALIZATION_H
 
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <rc_tagdetect_client/DetectedTags.h>
+#include <rc_tagdetect_client/DetectedTag.h>
 
 namespace rc_tagdetect_client
 {
-
 class Visualization
 {
-  public:
-    explicit Visualization(const ros::NodeHandle &nh);
+public:
+  explicit Visualization(const ros::NodeHandle& nh);
 
-    ~Visualization();
+  ~Visualization();
 
-    /*
-     * Remove previously published tag markers.
-     */
-    void deleteMarkers();
+  /*
+   * Remove previously published tag markers.
+   */
+  void deleteMarkers();
 
-    /*
-     * Publish tags as tf and marker
-     */
-    void publishTags(const std::vector<rc_tagdetect_client::DetectedTag> &tags);
+  /*
+   * Publish tags as tf and marker
+   */
+  void publishTags(const std::vector<rc_tagdetect_client::DetectedTag>& tags);
 
-  private:
-    geometry_msgs::TransformStamped createTf(const rc_tagdetect_client::DetectedTag &tag) const;
-    visualization_msgs::Marker createMarker(const rc_tagdetect_client::DetectedTag &tag) const;
+private:
+  geometry_msgs::TransformStamped createTf(const rc_tagdetect_client::DetectedTag& tag) const;
+  visualization_msgs::Marker createMarker(const rc_tagdetect_client::DetectedTag& tag) const;
 
-    ros::NodeHandle nh_;
-    std::string tf_prefix_;
-    ros::Publisher tag_marker_pub_;
-    visualization_msgs::MarkerArray markers_;
-    tf2_ros::TransformBroadcaster transform_broadcaster_;
+  ros::NodeHandle nh_;
+  std::string tf_prefix_;
+  ros::Publisher tag_marker_pub_;
+  visualization_msgs::MarkerArray markers_;
+  tf2_ros::TransformBroadcaster transform_broadcaster_;
 };
-}
+}  // namespace rc_tagdetect_client
 
-#endif //RC_ITEMPICK_CLIENT_PUBLISH_ITEMPICK_VISULIZATION_H
+#endif  // RC_TAGDETECT_CLIENT_VISUALIZATION_H

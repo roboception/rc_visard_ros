@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2019 Roboception GmbH
+ * Copyright (c) 2020 Roboception GmbH
  *
- * Author: Carlos Xavier Garcia Briones, Monika Florek-Jasinska
+ * Author: Elena Gambaro
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,33 +30,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RC_PICK_CLIENT_BOXPICK_CLIENT_H
-#define RC_PICK_CLIENT_BOXPICK_CLIENT_H
+#ifndef RC_HAND_EYE_CALIB_JSON_CONVERSIONS_H
+#define RC_HAND_EYE_CALIB_JSON_CONVERSIONS_H
 
-#include "pick_client.h"
-#include "rc_pick_client/ComputeBoxGrasps.h"
-#include "rc_pick_client/DetectItems.h"
+#include "json_conversions_common.h"
 
-namespace ros_pick_client
+#include <rc_hand_eye_calibration_client/SetCalibrationPose.h>
+#include <rc_hand_eye_calibration_client/Calibration.h>
+#include <rc_hand_eye_calibration_client/Trigger.h>
+
+namespace rc_hand_eye_calibration_client
 {
-class BoxpickClient : public PickClient
+inline void to_json(nlohmann::json& j, const TriggerRequest& r)
 {
-public:
-  BoxpickClient(const std::string& host, const ros::NodeHandle& nh);
+  j = {};
+}
 
-  ~BoxpickClient() = default;
+inline void from_json(const nlohmann::json& j, TriggerResponse& r)
+{
+  j.at("success").get_to(r.success);
+  j.at("status").get_to(r.status);
+  j.at("message").get_to(r.message);
+}
 
-private:
-  bool computeGraspsSrv(rc_pick_client::ComputeBoxGraspsRequest& request,
-                        rc_pick_client::ComputeBoxGraspsResponse& response);
+inline void to_json(nlohmann::json& j, const SetCalibrationPoseRequest& r)
+{
+  j["slot"] = r.slot;
+  j["pose"] = r.pose;
+}
 
-  bool detectItemsSrv(rc_pick_client::DetectItemsRequest& request, rc_pick_client::DetectItemsResponse& response);
+inline void from_json(const nlohmann::json& j, SetCalibrationPoseResponse& r)
+{
+  j.at("success").get_to(r.success);
+  j.at("status").get_to(r.status);
+  j.at("message").get_to(r.message);
+}
 
-  void dynamicReconfigureCallback(rc_pick_client::pickModuleConfig& config, uint32_t);
+inline void to_json(nlohmann::json& j, const CalibrationRequest& r)
+{
+  j = {};
+}
 
-  ros::ServiceServer srv_detect_items_;
-  ros::ServiceServer srv_compute_grasps_;
-};
-}  // namespace ros_pick_client
+inline void from_json(const nlohmann::json& j, CalibrationResponse& r)
+{
+  j.at("success").get_to(r.success);
+  j.at("status").get_to(r.status);
+  j.at("message").get_to(r.message);
+  j.at("pose").get_to(r.pose);
+  j.at("error").get_to(r.error);
+  j.at("robot_mounted").get_to(r.robot_mounted);
+}
 
-#endif  // RC_PICK_CLIENT_BOXPICK_CLIENT_H
+}  // namespace rc_hand_eye_calibration_client
+
+#endif  // RC_HAND_EYE_CALIB_JSON_CONVERSIONS_H

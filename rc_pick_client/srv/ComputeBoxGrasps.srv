@@ -18,7 +18,7 @@ string load_carrier_id
 Compartment load_carrier_compartment
 
 # Optional. If empty, means one item of type unknown without dimensions
-BoxModel[] item_models
+ItemModel[] item_models
 
 # Required. Dimensions of the gripper suction surface
 # In case of circular suction cups, the two values are expected to be the same and set to the suction cup diameter
@@ -36,10 +36,10 @@ CollisionDetection collision_detection
 
 time timestamp
 
-LoadCarrier[] load_carriers
-
-BoxItem[] items
+Item[] items
 
 SuctionGrasp[] grasps
+
+LoadCarrier[] load_carriers
 
 rc_common_msgs/ReturnCode return_code

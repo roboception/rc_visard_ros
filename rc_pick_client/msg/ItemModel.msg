@@ -1,9 +1,9 @@
-# Definition of an item model for the itempick component
+# Definition of an item model for the ItemPick and BoxPick components
 
 # Required
 string type
 
-# Supported types
+# Supported types (depending on component)
 string UNKNOWN=UNKNOWN
 string RECTANGLE=RECTANGLE
 

@@ -30,44 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PROJECT_EXCEPTIONS_H
-#define PROJECT_EXCEPTIONS_H
+#ifndef rc_rest_api_EXCEPTIONS_H
+#define rc_rest_api_EXCEPTIONS_H
 
-namespace rc_tagdetect_client
+namespace rc_rest_api
 {
-
-class TagDetectClientException : public std::runtime_error
+class RestClientException : public std::runtime_error
 {
-  public:
-    explicit TagDetectClientException(const std::string &msg) :
-        std::runtime_error(msg) {}
-    virtual ~TagDetectClientException() = default;
+public:
+  explicit RestClientException(const std::string& msg) : std::runtime_error(msg)
+  {
+  }
+  virtual ~RestClientException() = default;
 };
 
-class NotAvailableInThisVersionException : public TagDetectClientException
+class NotAvailableInThisVersionException : public RestClientException
 {
-  public:
-    explicit NotAvailableInThisVersionException(const std::string &msg) :
-        TagDetectClientException(msg) {}
-    virtual ~NotAvailableInThisVersionException() = default;
+public:
+  explicit NotAvailableInThisVersionException(const std::string& msg) : RestClientException(msg)
+  {
+  }
+  virtual ~NotAvailableInThisVersionException() = default;
 };
 
-class MiscException : public TagDetectClientException
+class MiscException : public RestClientException
 {
-  public:
-    explicit MiscException(const std::string &msg) :
-        TagDetectClientException(msg) {}
-    virtual ~MiscException() = default;
+public:
+  explicit MiscException(const std::string& msg) : RestClientException(msg)
+  {
+  }
+  virtual ~MiscException() = default;
 };
 
-class RequestException : public TagDetectClientException
+class RequestException : public RestClientException
 {
-  public:
-    RequestException(const std::string &msg) :
-        TagDetectClientException(msg) {}
-    virtual ~RequestException() = default;
+public:
+  RequestException(const std::string& msg) : RestClientException(msg)
+  {
+  }
+  virtual ~RequestException() = default;
 };
 
-}
+}  // namespace rc_rest_api
 
-#endif //PROJECT_EXCEPTIONS_H
+#endif  // rc_rest_api_EXCEPTIONS_H

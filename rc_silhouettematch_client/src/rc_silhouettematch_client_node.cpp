@@ -47,8 +47,7 @@ void sigintHandler(int)
   ros::shutdown();
 }
 
-std::string getHost(const std::string& device_name,
-                    const std::string& interface)
+std::string getHost(const std::string& device_name, const std::string& interface)
 {
   // broadcast discover request
   rcdiscover::Discover discover;
@@ -87,8 +86,7 @@ std::string getHost(const std::string& device_name,
         devices.push_back(filtered_info);
       }
     }
-    else if ((device_name == info.getSerialNumber()) ||
-             (device_name == user_defined_name))
+    else if ((device_name == info.getSerialNumber()) || (device_name == user_defined_name))
     {
       filtered_info[0] = user_defined_name;
       filtered_info[1] = ip2string(info.getIP());
@@ -106,22 +104,19 @@ std::string getHost(const std::string& device_name,
   }
   else if (devices.size() > 1)
   {
-    ROS_FATAL_STREAM("Found " << devices.size() << " devices with the name '"
-                              << device_name
+    ROS_FATAL_STREAM("Found " << devices.size() << " devices with the name '" << device_name
                               << "'. Please specify a unique device name.");
     return "";
   }
 
-  ROS_INFO_STREAM("Using device '" << device_name << "' with name '"
-                                   << devices[0][0] << "' and IP address "
+  ROS_INFO_STREAM("Using device '" << device_name << "' with name '" << devices[0][0] << "' and IP address "
                                    << devices[0][1]);
   return devices[0][1];
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "rc_silhouettematch_client",
-            ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "rc_silhouettematch_client", ros::init_options::NoSigintHandler);
   signal(SIGINT, sigintHandler);
 
   ros::NodeHandle pnh("~");
