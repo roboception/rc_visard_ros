@@ -76,6 +76,7 @@ find_package(RCDISCOVER REQUIRED)
 add_service_files(
   FILES
   Calibration.srv
+  SetCalibration.srv
   SetCalibrationPose.srv
   Trigger.srv
 )

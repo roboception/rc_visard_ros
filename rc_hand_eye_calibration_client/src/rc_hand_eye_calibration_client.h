@@ -34,6 +34,7 @@
 #define RC_HAND_EYE_CALIBRATION_CLIENT_H
 
 #include <rc_hand_eye_calibration_client/SetCalibrationPose.h>
+#include <rc_hand_eye_calibration_client/SetCalibration.h>
 #include <rc_hand_eye_calibration_client/Calibration.h>
 #include <rc_hand_eye_calibration_client/hand_eye_calibrationConfig.h>
 #include <rc_hand_eye_calibration_client/Trigger.h>
@@ -91,6 +92,10 @@ private:
   bool setSlotSrv(rc_hand_eye_calibration_client::SetCalibrationPoseRequest& req,
                   rc_hand_eye_calibration_client::SetCalibrationPoseResponse& res);
 
+  /// Service call to set the calibration
+  bool setCalibSrv(rc_hand_eye_calibration_client::SetCalibrationRequest& req,
+                   rc_hand_eye_calibration_client::SetCalibrationResponse& res);
+
   /// Advertises the services in the namespace of nh_
   void advertiseServices();
 
@@ -119,6 +124,7 @@ private:
   ros::ServiceServer srv_remove_;
   ros::ServiceServer srv_publish_transform_;
   ros::ServiceServer srv_get_result_;
+  ros::ServiceServer srv_set_calibration_;
   /// To be used for on-change sending only
   tf2_ros::StaticTransformBroadcaster static_tf2_broadcaster_;
   /// To be used for periodic sending
@@ -141,6 +147,8 @@ private:
 
   // REST stuff
   rc_rest_api::RestHelper rest_helper_;
+
+  std::tuple<size_t, size_t, size_t> image_version_;
 };
 
 }  // namespace rc_hand_eye_calibration_client

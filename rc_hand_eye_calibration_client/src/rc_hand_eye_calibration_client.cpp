@@ -48,6 +48,7 @@ HandEyeCalibClient::HandEyeCalibClient(std::string host, ros::NodeHandle nh)
   initConfiguration();
   advertiseServices();
   initTimers();
+  image_version_ = rest_helper_.getImageVersion();
 }
 
 template <typename Request, typename Response>
@@ -164,6 +165,21 @@ bool HandEyeCalibClient::getCalibResultSrv(CalibrationRequest& req, CalibrationR
   return true;
 }
 
+bool  HandEyeCalibClient::setCalibSrv(SetCalibrationRequest& req, SetCalibrationResponse& res)
+{
+  if (image_version_ >= std::make_tuple(20ul, 4ul, 0ul))
+  {
+    callService("set_calibration", req, res);
+  }
+  else
+  {
+    res.message = "set_calibration is not supported in this firmware version";
+    res.success = false;
+    ROS_WARN_STREAM(res.message);
+  }
+  return true;
+}
+
 void HandEyeCalibClient::requestCalibration(const ros::SteadyTimerEvent&)
 {
   CalibrationRequest req;
@@ -216,6 +232,7 @@ void HandEyeCalibClient::advertiseServices()
   srv_reset_ = nh_.advertiseService("reset_calibration", &CW::resetSrv, this);
   // remove calibration
   srv_remove_ = nh_.advertiseService("remove_calibration", &CW::removeSrv, this);
+  srv_set_calibration_ = nh_.advertiseService("set_calibration", &CW::setCalibSrv, this);
 }
 
 void paramsToCfg(const json& params, hand_eye_calibrationConfig& cfg)

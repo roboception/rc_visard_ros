@@ -77,11 +77,11 @@ The following services are offered to follow the calibration routine:
 
 * `reset_calibration` [rc_hand_eye_calibration_client/Trigger]: Deletes all previously provided poses and corresponding images. The last saved calibration result is reloaded. This service might be used to (re-)start the hand-eye calibration from scratch.
 * `set_pose` [rc_hand_eye_calibration_client/SetCalibrationPose]: Provides a robot pose as calibration pose to the hand-eye calibration routine.
-* `calibrate` [rc_hand_eye_calibration_client::Calibration]: Calculates and returns the hand-eye calibration transformation with the robot poses configured by the `set_pose` service. Broadcasts the result via `/tf` or `/tf_static`.
-* `get_calibration` [rc_hand_eye_calibration_client::Calibration]: Returns the existing hand-eye calibration transformation. Broadcasts the result via `/tf` or `/tf_static`.
+* `calibrate` [rc_hand_eye_calibration_client/Calibration]: Calculates and returns the hand-eye calibration transformation with the robot poses configured by the `set_pose` service. Broadcasts the result via `/tf` or `/tf_static`.
+* `get_calibration` [rc_hand_eye_calibration_client/Calibration]: Returns the existing hand-eye calibration transformation. Broadcasts the result via `/tf` or `/tf_static`.
 * `save_calibration` [rc_hand_eye_calibration_client/Trigger]: Persistently saves the result of hand-eye calibration to the rc_visard and overwrites the existing one. The stored result can be retrieved any time by the get_calibration service.
 * `remove_calibration` [rc_hand_eye_calibration_client/Trigger]: Removes the stored hand-eye calibration on the rc_visard. After this call the `get_calibration` service reports again that no hand-eye calibration is available. Periodic broadcasting via `/tf` will be stopped.
-
+* `set_calibration` [rc_hand_eye_calibration_client/SetCalibration]: Sets the hand-eye calibration transformation. The calibration transformation is expected in the same format as returned by the `calibrate` and `get_calibration` calls. `save_calibration` must be called to make the calibration transformation persistent.
 
 Launching
 ---------

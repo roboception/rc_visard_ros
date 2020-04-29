@@ -36,6 +36,7 @@
 #include "json_conversions_common.h"
 
 #include <rc_hand_eye_calibration_client/SetCalibrationPose.h>
+#include <rc_hand_eye_calibration_client/SetCalibration.h>
 #include <rc_hand_eye_calibration_client/Calibration.h>
 #include <rc_hand_eye_calibration_client/Trigger.h>
 
@@ -79,6 +80,19 @@ inline void from_json(const nlohmann::json& j, CalibrationResponse& r)
   j.at("pose").get_to(r.pose);
   j.at("error").get_to(r.error);
   j.at("robot_mounted").get_to(r.robot_mounted);
+}
+
+inline void to_json(nlohmann::json& j, const SetCalibrationRequest& r)
+{
+  j["pose"] = r.pose;
+  j["robot_mounted"] = r.robot_mounted;
+}
+
+inline void from_json(const nlohmann::json& j, SetCalibrationResponse& r)
+{
+  j.at("success").get_to(r.success);
+  j.at("status").get_to(r.status);
+  j.at("message").get_to(r.message);
 }
 
 }  // namespace rc_hand_eye_calibration_client
