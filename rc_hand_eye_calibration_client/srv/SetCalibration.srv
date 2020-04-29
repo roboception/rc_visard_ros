@@ -1,0 +1,16 @@
+# Description: Set hand-eye calibration
+
+# Relative pose of grid with respect to the frame for which the pose was given in the request of SetCalibrationPose
+geometry_msgs/Pose pose
+# True if calibration was done with sensor mounted on robot
+bool robot_mounted
+---
+# True if calibration result is valid
+bool success
+# Internal status:
+# 0: Success
+# 7: License not available
+# 12: Invalid orientation given, i.e. quaternion must have length 1
+int32 status
+# Human readable message, for development
+string message
