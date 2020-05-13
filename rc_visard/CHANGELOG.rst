@@ -2,8 +2,8 @@
 Changelog for package rc_visard
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2019-05-13)
+------------------
 * add rc_silhouettematch_client package
 
 2.7.0 (2019-07-19)

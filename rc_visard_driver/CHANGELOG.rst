@@ -2,8 +2,8 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2019-05-13)
+------------------
 * rc_visard_driver depends on rc_common_msgs >= 0.5
 * Added estimated noise level of image as extra_data in CameraParam message
 * Added dynamic parameter camera_exp_auto_mode with backward compatibility to old rc_visards

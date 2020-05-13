@@ -2,8 +2,8 @@
 Changelog for package rc_pick_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2019-05-13)
+------------------
 * refactoring and cleanup
 * add overfilled flag and detect_filling_level
 * cleanup/consolidate messages

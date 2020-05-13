@@ -2,8 +2,8 @@
 Changelog for package rc_hand_eye_calibration_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2019-05-13)
+------------------
 * add set_calibration service
 * refactor an cleanup
 * added 4DOF calibration parameters

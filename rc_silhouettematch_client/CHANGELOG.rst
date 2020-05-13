@@ -2,8 +2,8 @@
 Changelog for package rc_silhouettematch_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2019-05-13)
+------------------
 * refactoring and cleanup
 * set parameters on parameter server so that dynamic reconfigure picks them up
 * enum for dynamic reconfigure quality params

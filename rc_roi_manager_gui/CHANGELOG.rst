@@ -2,8 +2,8 @@
 Changelog for package rc_roi_manager_gui
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2019-05-13)
+------------------
 * fix typo in readme
 * code format
 * Contributors: Felix Ruess
