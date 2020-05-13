@@ -2,6 +2,17 @@
 Changelog for package rc_hand_eye_calibration_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add set_calibration service
+* refactor an cleanup
+* added 4DOF calibration parameters
+* update cpr for support of curl >= 7.62.0
+  and set EXCLUDE_FROM_ALL to not install it
+* update nlohmann json to 3.7.3
+* Using own trigger message with integer status return field
+* Contributors: Annett Stelzer, Christian Emmerich, Felix Ruess, Heiko Hirschmueller
+
 2.7.0 (2019-07-19)
 ------------------
 * add `device` parameter that can take serial number or GEV name

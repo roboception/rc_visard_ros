@@ -2,6 +2,10 @@
 Changelog for package rc_visard
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add rc_silhouettematch_client package
+
 2.7.0 (2019-07-19)
 ------------------
 * add rc_roi_manager_gui package

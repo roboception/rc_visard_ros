@@ -2,6 +2,32 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* rc_visard_driver depends on rc_common_msgs >= 0.5
+* Added estimated noise level of image as extra_data in CameraParam message
+* Added dynamic parameter camera_exp_auto_mode with backward compatibility to old rc_visards
+* Only update dynamic out1_mode parameter from buffers with intensity images or by polling global nodemap
+* Ensure that the alternate active mode is set before publishing images
+* Used updating of out1_mode to check for valid connection, even if no buffers are expected.
+* dynamic reconfigure parameter out1_mode is automatically updated if changed on sensor
+* Disparity range that is used for disparity images and visualization now correctly considers quality setting
+* warn if DepthAcquisitionMode is not supported by rc_visard firmware version
+* add complete_buffers_total to diagnostics
+* Publish rc_common_msgs/CameraParams with every image.
+  This provides information that is missing in CameraInfo,
+  like current exposure time and gain.
+* add imu2cam as static tf which is published once the driver is ready
+  - driver checks if cam2imu transform can be retrieved from sensor
+  or if sensor image is too old
+  - in first case static tf is published
+  - in latter case old behaviour is implemented, i.e. tf is published
+  when subscribed to dynamics stream
+* fix empty error message
+* change to warning for those logs that inform about missing left images for disp images
+* Implemented depth acquisition mode SingleFrameOut1
+* Contributors: Christian Emmerich, Felix Ruess, Heiko Hirschmueller
+
 2.7.0 (2019-07-19)
 ------------------
 * replaced std_srvs/Trigger with rc_common_msgs/Trigger

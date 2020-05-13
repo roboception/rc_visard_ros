@@ -2,6 +2,17 @@
 Changelog for package rc_pick_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* refactoring and cleanup
+* add overfilled flag and detect_filling_level
+* cleanup/consolidate messages
+* new field collsion check added
+* update cpr for support of curl >= 7.62.0
+  and set EXCLUDE_FROM_ALL to not install it
+* update nlohmann json to 3.7.3
+* Contributors: Felix Ruess, florek
+
 2.7.0 (2019-07-19)
 ------------------
 * add BoxPick client `rc_boxpick_client_node`
