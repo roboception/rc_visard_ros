@@ -44,10 +44,16 @@ ROS client for rc_visard's grasp generation modules.
 See the [rc_pick_client README](rc_pick_client/README.md) for more details.
 
 rc_tagdetect_client
---------------
+-------------------
 
 ROS client for rc_visard's tag detection modules.
 See the [rc_tagdetect_client README](rc_tagdetect_client/README.md) for more details
+
+rc_silhouettematch_client
+-------------------------
+
+ROS client for rc_visard's SilhouetteMatch module.
+See the [rc_silhouettematch_client README](rc_silhouettematch_client/README.md) for more details
 
 Acknowledgements
 ----------------

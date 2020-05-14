@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rc_silhouettematch_client</name>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
   <description>The ros client for roboception silhouette match module</description>
 
   <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>

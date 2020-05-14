@@ -2,6 +2,10 @@
 Changelog for package rc_silhouettematch_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.1 (2019-05-14)
+------------------
+* add missing msg dependencies
+
 3.0.0 (2019-05-13)
 ------------------
 * refactoring and cleanup

@@ -2,6 +2,9 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.1 (2019-05-14)
+------------------
+
 3.0.0 (2019-05-13)
 ------------------
 * rc_visard_driver depends on rc_common_msgs >= 0.5

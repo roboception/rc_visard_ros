@@ -2,6 +2,9 @@
 Changelog for package rc_hand_eye_calibration_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.1 (2019-05-14)
+------------------
+
 3.0.0 (2019-05-13)
 ------------------
 * add set_calibration service
