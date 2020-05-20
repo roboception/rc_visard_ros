@@ -68,7 +68,9 @@ Configuration
 
 * `grid_width`: The width of the calibration pattern in meters.
 * `grid_height`: The height of the calibration pattern in meters.
-* `robot_mounted` Whether the camera is mounted on the robot or not.
+* `robot_mounted`: Whether the camera is mounted on the robot or not.
+* `tcp_rotation_axis`:, TCP rotation axis for 4 DOF robot calibration (-1 for general robot)
+* `tcp_offset`: Offset from the TCP for 4 DOF robot calibration
 
 Services
 --------

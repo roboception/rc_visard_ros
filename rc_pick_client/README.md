@@ -60,6 +60,7 @@ The following services are offered by the node:
 * `delete_load_carriers`: Deletes the configured load carriers with the requested load_carrier_ids
 * `detect_load_carrier`: Triggers a load carrier detection.
 * `compute_grasps`: Triggers the computation of grasping poses for a suction device. All images used by the node are guaranteed to be newer than the service trigger time.
+* `detect_filling_level`: Triggers the detection of the given load carriers and their filling level.
 
 For the BoxPick node, an additional service is offered:
 
