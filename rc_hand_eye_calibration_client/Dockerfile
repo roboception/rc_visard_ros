@@ -12,7 +12,7 @@ RUN if [ -n "${RC_REPO}" ]; then \
 WORKDIR /workspace
 COPY . rc_hand_eye_calibration_client
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y "rcdiscover$|ros-melodic-rcdiscover$" \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y file "rcdiscover$|ros-melodic-rcdiscover$" \
     && rosdep install --from-paths . --ignore-src -r -y
 RUN mkdir build && cd build \
     && . /opt/ros/${ROS_DISTRO}/setup.sh \

@@ -11,7 +11,7 @@ RUN if [ -n "${RC_REPO}" ]; then \
     fi
 WORKDIR /workspace
 COPY . rc_visard_driver
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && rosdep install --from-paths . --ignore-src -r -y
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y file && rosdep install --from-paths . --ignore-src -r -y
 RUN mkdir build && cd build \
     && . /opt/ros/${ROS_DISTRO}/setup.sh \
     && cmake -DCATKIN_BUILD_BINARY_PACKAGE="1" -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ../rc_visard_driver \
