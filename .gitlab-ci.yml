@@ -1,6 +1,7 @@
 before_script:
-  - export DISTRO_CODENAME=`lsb_release -cs` && echo Using distro $DISTRO_CODENAME
   - export DEBIAN_FRONTEND=noninteractive
+  - apt-get update -yq && apt-get install -y curl lsb-release
+  - export DISTRO_CODENAME=`lsb_release -cs` && echo Using distro $DISTRO_CODENAME
   - echo "deb http://apt.roboception.de/stable $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-stable.list
   - if [ "$TESTING_DEBS" = "true" ]; then echo "deb http://apt.roboception.de/testing $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-testing.list ; fi
   - curl http://apt.roboception.de/archive.key | apt-key add -
@@ -9,6 +10,7 @@ before_script:
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
+  GIT_DEPTH: 0
   GIT_SUBMODULE_STRATEGY: recursive
 
 stages:
