@@ -219,8 +219,8 @@ void Visualization::visualizeGrasps(const std::vector<rc_pick_client::SuctionGra
     rc_pick_client::Rectangle rect;
     for (auto& single_grasp : ros_grasps)
     {
-      rect.x = single_grasp.max_suction_surface_width;
-      rect.y = single_grasp.max_suction_surface_length;
+      rect.x = single_grasp.max_suction_surface_length;
+      rect.y = single_grasp.max_suction_surface_width;
       setMarker(marker, single_grasp.pose.pose, rect, single_grasp.pose.header.frame_id, counter);
       publishTf(single_grasp.pose.pose, single_grasp.pose.header.frame_id, "grasp_" + std::to_string(counter));
       markers_grasps_.markers.push_back(marker);
