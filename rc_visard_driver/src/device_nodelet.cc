@@ -1456,16 +1456,17 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             // if in alternate mode, then make publishers aware of it before
             // publishing
 
-            bool alternate = (out1_mode_on_sensor == "ExposureAlternateActive");
+            bool out1_alternate = (out1_mode_on_sensor == "ExposureAlternateActive");
+            bool out1_low = (out1_mode_on_sensor == "Low");
 
-            limage.setOut1Alternate(alternate);
-            rimage.setOut1Alternate(alternate);
-            points2.setOut1Alternate(alternate);
+            limage.setOut1OnlyLow(out1_alternate || out1_low);
+            rimage.setOut1OnlyLow(out1_alternate || out1_low);
+            points2.setOut1Alternate(out1_alternate);
 
             if (limage_color && rimage_color)
             {
-              limage_color->setOut1Alternate(alternate);
-              rimage_color->setOut1Alternate(alternate);
+              limage_color->setOut1OnlyLow(out1_alternate || out1_low);
+              rimage_color->setOut1OnlyLow(out1_alternate || out1_low);
             }
 
             rc_common_msgs::CameraParam cam_param = extractChunkData(rcgnodemap);

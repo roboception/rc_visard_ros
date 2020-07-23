@@ -85,7 +85,7 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
 
 void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat, bool out1)
 {
-  bool sub = (pub.getNumSubscribers() > 0 && (!out1_alternate || !out1));
+  bool sub = (pub.getNumSubscribers() > 0 && (!out1_only_low || !out1));
 
   if (!out1 && pub_out1_low.getNumSubscribers() > 0)
     sub = true;
@@ -212,7 +212,7 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
 
     // publish message
 
-    if (!out1_alternate || !out1)
+    if (!out1_only_low || !out1)
       pub.publish(im);
     if (!out1)
       pub_out1_low.publish(im);

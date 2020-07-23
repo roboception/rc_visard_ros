@@ -191,8 +191,6 @@ These parameters can be changed during runtime via dynamic reconfigure:
 * `depth_smooth`: Switching smoothing of disparities on or off.
   NOTE: Smoothing requires the 'stereo_plus' license on the rc_visard.
 
-* `depth_median`: Performs median filtering with the given window size.
-
 * `depth_minconf`: Minimal confidence. All disparities with lower confidence
   will be set to invalid.
 

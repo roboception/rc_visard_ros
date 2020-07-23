@@ -61,9 +61,17 @@ public:
 
   bool used() override;
 
-  void setOut1Alternate(bool alternate)
+  /**
+    Set publishing only images with out1 low on the main topic. This does have
+    no effect on the optional ...out1_low and ...out1_high topics.
+
+    This should be true if out1 of the rc_visard is either in mode
+    ExposureAlternateAcive or Low.
+  */
+
+  void setOut1OnlyLow(bool _out1_only_low)
   {
-    out1_alternate = alternate;
+    out1_only_low = _out1_only_low;
   }
 
   void publish(const rcg::Buffer* buffer, uint32_t part, uint64_t pixelformat) override;
@@ -76,7 +84,7 @@ private:
   bool left;
   bool color;
   uint32_t seq;
-  bool out1_alternate;
+  bool out1_only_low;
 
   image_transport::Publisher pub;
   image_transport::Publisher pub_out1_low;
