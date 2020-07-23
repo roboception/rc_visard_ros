@@ -636,7 +636,6 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   cfg.depth_static_scene = rcg::getBoolean(nodemap, "DepthStaticScene", false);
   cfg.depth_disprange = rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
   cfg.depth_seg = rcg::getInteger(nodemap, "DepthSeg", 0, 0, true);
-  cfg.depth_median = rcg::getInteger(nodemap, "DepthMedian", 0, 0, true);
   cfg.depth_fill = rcg::getInteger(nodemap, "DepthFill", 0, 0, true);
   cfg.depth_minconf = rcg::getFloat(nodemap, "DepthMinConf", 0, 0, true);
   cfg.depth_mindepth = rcg::getFloat(nodemap, "DepthMinDepth", 0, 0, true);
@@ -737,7 +736,6 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.param("depth_disprange", cfg.depth_disprange, cfg.depth_disprange);
   pnh.param("depth_seg", cfg.depth_seg, cfg.depth_seg);
   pnh.param("depth_smooth", cfg.depth_smooth, cfg.depth_smooth);
-  pnh.param("depth_median", cfg.depth_median, cfg.depth_median);
   pnh.param("depth_fill", cfg.depth_fill, cfg.depth_fill);
   pnh.param("depth_minconf", cfg.depth_minconf, cfg.depth_minconf);
   pnh.param("depth_mindepth", cfg.depth_mindepth, cfg.depth_mindepth);
@@ -768,7 +766,6 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.setParam("depth_disprange", cfg.depth_disprange);
   pnh.setParam("depth_seg", cfg.depth_seg);
   pnh.setParam("depth_smooth", cfg.depth_smooth);
-  pnh.setParam("depth_median", cfg.depth_median);
   pnh.setParam("depth_fill", cfg.depth_fill);
   pnh.setParam("depth_minconf", cfg.depth_minconf);
   pnh.setParam("depth_mindepth", cfg.depth_mindepth);
@@ -1118,12 +1115,6 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
       {
         lvl &= ~4194304;
         rcg::setBoolean(nodemap, "DepthSmooth", cfg.depth_smooth, false);
-      }
-
-      if (lvl & 128)
-      {
-        lvl &= ~128;
-        rcg::setInteger(nodemap, "DepthMedian", cfg.depth_median, true);
       }
 
       if (lvl & 256)
