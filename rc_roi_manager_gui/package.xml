@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rc_roi_manager_gui</name>
-  <version>3.0.1</version>
+  <version>3.0.2</version>
   <description>The ros client for the region of interest manager of the itempick and boxpick modules</description>
 
   <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>

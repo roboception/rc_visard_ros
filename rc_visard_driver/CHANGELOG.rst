@@ -2,6 +2,15 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.2 (2020-07-28)
+------------------
+
+* Fixed filtering out images with projection if stereo matching is used single shot and controls a random dot projector
+* Removed parameter depth_median as it will be removed on rc_visard >= 20.10.0
+* rc_pick_client: fix grasp markers
+* Fixed dockerfiles
+* Update readme
+
 3.0.1 (2019-05-14)
 ------------------
 
