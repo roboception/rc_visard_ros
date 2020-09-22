@@ -2,6 +2,13 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.3 (2020-09-22)
+------------------
+
+* Removed parameter disparity range as it will be removed on rc_visard >= 20.10.0
+  (Use dynamic parameters depth_mindepth and depth_maxdepth for controlling the
+   depth range and coloring of disparity_color images.)
+
 3.0.2 (2020-07-28)
 ------------------
 
