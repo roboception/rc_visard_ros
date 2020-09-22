@@ -40,18 +40,23 @@
 namespace rc
 {
 DisparityColorPublisher::DisparityColorPublisher(image_transport::ImageTransport& it,
-                                                 const std::string& frame_id_prefix, double _scale)
+  const std::string& frame_id_prefix, double _f, double _t, double _scale)
   : GenICam2RosPublisher(frame_id_prefix)
 {
+  seq = 0;
+  f = _f;
+  t = _t;
   scale = _scale;
-  disprange = 0;
+  mindepth = 2.5*t;
+  maxdepth = 100;
 
   pub = it.advertise("disparity_color", 1);
 }
 
-void DisparityColorPublisher::setDisprange(int _disprange)
+void DisparityColorPublisher::setDepthRange(double _mindepth, double _maxdepth)
 {
-  disprange = _disprange;
+  mindepth = std::max(2.5*t, _mindepth);
+  maxdepth = std::max(mindepth, _maxdepth);
 }
 
 bool DisparityColorPublisher::used()
@@ -63,6 +68,13 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint32_t part, 
 {
   if (pub.getNumSubscribers() > 0 && pixelformat == Coord3D_C16)
   {
+    // compute minimum and maximum disparity
+
+    int dmin=static_cast<int>(std::floor(f*buffer->getWidth(part)*t/maxdepth));
+    int dmax=static_cast<int>(std::ceil(f*buffer->getWidth(part)*t/mindepth));
+    int drange=dmax-dmin+1;
+
+ROS_INFO_STREAM(dmin << " " << dmax << " " << drange);
     // create image and initialize header
 
     sensor_msgs::ImagePtr im = boost::make_shared<sensor_msgs::Image>();
@@ -86,43 +98,9 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint32_t part, 
     size_t px = buffer->getXPadding(part);
     const uint8_t* ps = static_cast<const uint8_t*>(buffer->getBase(part));
 
-    // ensure that current disprange setting is sufficient
+    // convert image data
 
     bool bigendian = buffer->isBigEndian();
-
-    int drange = disprange;
-
-    {
-      int dmax = 0;
-      const uint8_t* p = ps;
-
-      if (bigendian)
-      {
-        for (uint32_t k = 0; k < im->height; k++)
-        {
-          for (uint32_t i = 0; i < im->width; i++)
-          {
-            dmax = std::max(dmax, (static_cast<int>(p[0]) << 8) | p[1]);
-            p+=2;
-          }
-        }
-      }
-      else
-      {
-        for (uint32_t k = 0; k < im->height; k++)
-        {
-          for (uint32_t i = 0; i < im->width; i++)
-          {
-            dmax = std::max(dmax, (static_cast<int>(p[1]) << 8) | p[0]);
-            p+=2;
-          }
-        }
-      }
-
-      drange = std::max(disprange, static_cast<int>(std::ceil(dmax * scale)));
-    }
-
-    // convert image data
 
     im->encoding = sensor_msgs::image_encodings::RGB8;
     im->step = 3 * im->width * sizeof(uint8_t);
@@ -149,7 +127,7 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint32_t part, 
 
         if (d != 0)
         {
-          double v = scale * d / drange;
+          double v = (scale * d - dmin) / drange;
           v = v / 1.15 + 0.1;
 
           double r = std::max(0.0, std::min(1.0, (1.5 - 4 * fabs(v - 0.75))));

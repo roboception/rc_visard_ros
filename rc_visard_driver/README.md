@@ -179,9 +179,6 @@ These parameters can be changed during runtime via dynamic reconfigure:
   the disparity image is taken from the first image that was used for
   accumulation.
 
-* `depth_disprange`: Disparity range in pixel, related to the downscaled
-  image at quality=H. The range is adapted to the quality.
-
 * `depth_fill`: Higher numbers fill gaps with measurments with potentielly
   higher errors.
 

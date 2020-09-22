@@ -49,19 +49,21 @@ public:
     Initialization of publisher.
 
     @param it    Image transport handle.
-    @param left  True for left and false for right camera.
-    @param color True for sending color instead of monochrome images.
+    @param f     Focal length, normalized to image width 1.
+    @param t     Basline in m.
+    @param scale Factor for raw disparities.
   */
 
-  DisparityColorPublisher(image_transport::ImageTransport& it, const std::string& frame_id_prefix, double scale);
+  DisparityColorPublisher(image_transport::ImageTransport& it, const std::string& frame_id_prefix, double f, double t, double scale);
 
   /**
-    Set the disparity range for scaling of images.
+    Set the depth range of the disparity images.
 
-    @param disprange Disparity range for scaling.
+    @param mindepth Minimum depth in m.
+    @param maxdepth Maximum depth in m.
   */
 
-  void setDisprange(int disprange);
+  void setDepthRange(double _mindepth, double _maxdepth);
 
   bool used() override;
 
@@ -72,8 +74,11 @@ private:
   DisparityColorPublisher& operator=(const DisparityColorPublisher&);  // forbidden
 
   uint32_t seq;
-  double scale;
-  int disprange;
+  double f;
+  double t;
+  float scale;
+  double mindepth;
+  double maxdepth;
 
   image_transport::Publisher pub;
 };

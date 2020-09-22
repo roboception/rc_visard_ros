@@ -56,12 +56,13 @@ public:
   DisparityPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double f, double t, double scale);
 
   /**
-    Set the disparity range for scaling of images.
+    Set the depth range of the disparity images.
 
-    @param disprange Disparity range for scaling.
+    @param mindepth Minimum depth in m.
+    @param maxdepth Maximum depth in m.
   */
 
-  void setDisprange(int disprange);
+  void setDepthRange(double _mindepth, double _maxdepth);
 
   bool used() override;
 
@@ -75,7 +76,8 @@ private:
   double f;
   double t;
   float scale;
-  int disprange;
+  double mindepth;
+  double maxdepth;
 
   ros::Publisher pub;
 };

@@ -98,31 +98,6 @@ namespace {
     }
     return device_ids;
   }
-
-  int getDownscaleFromQuality(const std::string &quality)
-  {
-    char q='H';
-    if (quality.size() > 0)
-    {
-      q=quality[0];
-    }
-
-    switch (q)
-    {
-      case 'F':
-        return 1;
-
-      case 'M':
-        return 4;
-
-      case 'L':
-        return 6;
-
-      case 'H':
-      default:
-        return 2;
-    }
-  }
 }
 
 namespace rc
@@ -634,7 +609,6 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   cfg.depth_quality = v;
 
   cfg.depth_static_scene = rcg::getBoolean(nodemap, "DepthStaticScene", false);
-  cfg.depth_disprange = rcg::getInteger(nodemap, "DepthDispRange", 0, 0, true);
   cfg.depth_seg = rcg::getInteger(nodemap, "DepthSeg", 0, 0, true);
   cfg.depth_fill = rcg::getInteger(nodemap, "DepthFill", 0, 0, true);
   cfg.depth_minconf = rcg::getFloat(nodemap, "DepthMinConf", 0, 0, true);
@@ -733,7 +707,6 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.param("depth_acquisition_mode", cfg.depth_acquisition_mode, cfg.depth_acquisition_mode);
   pnh.param("depth_quality", cfg.depth_quality, cfg.depth_quality);
   pnh.param("depth_static_scene", cfg.depth_static_scene, cfg.depth_static_scene);
-  pnh.param("depth_disprange", cfg.depth_disprange, cfg.depth_disprange);
   pnh.param("depth_seg", cfg.depth_seg, cfg.depth_seg);
   pnh.param("depth_smooth", cfg.depth_smooth, cfg.depth_smooth);
   pnh.param("depth_fill", cfg.depth_fill, cfg.depth_fill);
@@ -763,7 +736,6 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.setParam("depth_acquisition_mode", cfg.depth_acquisition_mode);
   pnh.setParam("depth_quality", cfg.depth_quality);
   pnh.setParam("depth_static_scene", cfg.depth_static_scene);
-  pnh.setParam("depth_disprange", cfg.depth_disprange);
   pnh.setParam("depth_seg", cfg.depth_seg);
   pnh.setParam("depth_smooth", cfg.depth_smooth);
   pnh.setParam("depth_fill", cfg.depth_fill);
@@ -1099,12 +1071,6 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         }
       }
 
-      if (lvl & 32)
-      {
-        lvl &= ~32;
-        rcg::setInteger(nodemap, "DepthDispRange", cfg.depth_disprange, true);
-      }
-
       if (lvl & 64)
       {
         lvl &= ~64;
@@ -1353,7 +1319,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
       initConfiguration(rcgnodemap, config, access);
 
-      int disprange = config.depth_disprange/getDownscaleFromQuality(config.depth_quality)*2;
+      float mindepth = config.depth_mindepth;
+      float maxdepth = config.depth_maxdepth;
       bool is_depth_acquisition_continuous = (config.depth_acquisition_mode[0] == 'C');
 
       // prepare chunk adapter for getting chunk data
@@ -1376,7 +1343,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
       ImagePublisher rimage(it, tfPrefix, false, false, iocontrol_avail);
 
       DisparityPublisher disp(nh, tfPrefix, f, t, scale);
-      DisparityColorPublisher cdisp(it, tfPrefix, scale);
+      DisparityColorPublisher cdisp(it, tfPrefix, f, t, scale);
       DepthPublisher depth(nh, tfPrefix, f, t, scale);
 
       ConfidencePublisher confidence(nh, tfPrefix);
@@ -1485,8 +1452,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
                 // the buffer is offered to all publishers
 
-                disp.setDisprange(disprange);
-                cdisp.setDisprange(disprange);
+                disp.setDepthRange(mindepth, maxdepth);
+                cdisp.setDepthRange(mindepth, maxdepth);
 
                 uint64_t pixelformat = buffer->getPixelFormat(part);
 
@@ -1649,7 +1616,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
 
             setConfiguration(rcgnodemap, cfg, lvl, iocontrol_avail);
 
-            disprange = cfg.depth_disprange/getDownscaleFromQuality(cfg.depth_quality)*2;
+            mindepth = cfg.depth_mindepth;
+            maxdepth = cfg.depth_maxdepth;
 
             // if depth acquisition changed to continuous mode, reset last
             // grabbing time to avoid triggering timout if only disparity,

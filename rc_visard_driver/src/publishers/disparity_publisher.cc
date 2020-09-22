@@ -39,22 +39,24 @@
 
 namespace rc
 {
-DisparityPublisher::DisparityPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix, double _f, double _t,
-                                       double _scale)
+DisparityPublisher::DisparityPublisher(ros::NodeHandle& nh, const std::string& frame_id_prefix,
+  double _f, double _t, double _scale)
   : GenICam2RosPublisher(frame_id_prefix)
 {
   seq = 0;
   f = _f;
   t = _t;
   scale = _scale;
-  disprange = 0;
+  mindepth = 2.5*t;
+  maxdepth = 100;
 
   pub = nh.advertise<stereo_msgs::DisparityImage>("disparity", 1);
 }
 
-void DisparityPublisher::setDisprange(int _disprange)
+void DisparityPublisher::setDepthRange(double _mindepth, double _maxdepth)
 {
-  disprange = _disprange;
+  mindepth = std::max(2.5*t, _mindepth);
+  maxdepth = _maxdepth;
 }
 
 bool DisparityPublisher::used()
@@ -148,7 +150,7 @@ void DisparityPublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint6
     p->valid_window.width = p->image.width;
     p->valid_window.height = p->image.height;
     p->min_disparity = 0;
-    p->max_disparity = std::max(dmax, static_cast<float>(disprange));
+    p->max_disparity = std::max(dmax, static_cast<float>(std::ceil(p->f * p->T / mindepth)));
     p->delta_d = scale;
 
     // publish message
