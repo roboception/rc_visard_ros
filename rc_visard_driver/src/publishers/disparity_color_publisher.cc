@@ -74,7 +74,6 @@ void DisparityColorPublisher::publish(const rcg::Buffer* buffer, uint32_t part, 
     int dmax=static_cast<int>(std::ceil(f*buffer->getWidth(part)*t/mindepth));
     int drange=dmax-dmin+1;
 
-ROS_INFO_STREAM(dmin << " " << dmax << " " << drange);
     // create image and initialize header
 
     sensor_msgs::ImagePtr im = boost::make_shared<sensor_msgs::Image>();
