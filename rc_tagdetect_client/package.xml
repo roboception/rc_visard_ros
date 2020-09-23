@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rc_tagdetect_client</name>
-  <version>3.0.3</version>
+  <version>3.0.4</version>
   <description>The ros client for roboception tag detection modules</description>
 
   <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>

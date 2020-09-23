@@ -2,6 +2,11 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.4 (2020-09-23)
+------------------
+
+* Removed forgotten debug log output
+
 3.0.3 (2020-09-22)
 ------------------
 
@@ -18,10 +23,10 @@ Changelog for package rc_visard_driver
 * Fixed dockerfiles
 * Update readme
 
-3.0.1 (2019-05-14)
+3.0.1 (2020-05-14)
 ------------------
 
-3.0.0 (2019-05-13)
+3.0.0 (2020-05-13)
 ------------------
 * rc_visard_driver depends on rc_common_msgs >= 0.5
 * Added estimated noise level of image as extra_data in CameraParam message
