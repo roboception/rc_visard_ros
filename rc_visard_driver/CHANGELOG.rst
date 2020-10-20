@@ -2,6 +2,11 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.5 (2020-10-20)
+------------------
+
+* add noise, test, adaptive_out1_reduction and brightness to CameraParam extra_data if available
+
 3.0.4 (2020-09-23)
 ------------------
 

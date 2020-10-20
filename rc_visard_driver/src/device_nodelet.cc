@@ -1224,16 +1224,57 @@ rc_common_msgs::CameraParam extractChunkData(const std::shared_ptr<GenApi::CNode
   cam_param.gain = rcg::getFloat(rcgnodemap, "ChunkGain", 0, 0, false);
   cam_param.exposure_time = rcg::getFloat(rcgnodemap, "ChunkExposureTime", 0, 0, false) / 1000000l;
 
-  // calculate camera's noise level
-  static float NOISE_BASE = 2.0;
-
-  rc_common_msgs::KeyValue kv;
-
-  kv.key="noise";
-  kv.value=std::to_string(static_cast<float>(NOISE_BASE * std::exp(cam_param.gain * std::log(10)/20)));
-
+  // add extra data
   cam_param.extra_data.clear();
-  cam_param.extra_data.push_back(kv);
+  try
+  {
+    rc_common_msgs::KeyValue kv;
+    kv.key = "noise";
+    kv.value = std::to_string(rcg::getFloat(rcgnodemap, "ChunkRcNoise", 0, 0, true));
+    cam_param.extra_data.push_back(kv);
+  }
+  catch (std::invalid_argument& e)
+  {
+    // calculate camera's noise level
+    static float NOISE_BASE = 2.0;
+    rc_common_msgs::KeyValue kv;
+    kv.key = "noise";
+    kv.value = std::to_string(static_cast<float>(NOISE_BASE * std::exp(cam_param.gain * std::log(10)/20)));
+    cam_param.extra_data.push_back(kv);
+  }
+
+  try
+  {
+    rc_common_msgs::KeyValue kv;
+    kv.key = "test";
+    kv.value = std::to_string(rcg::getBoolean(rcgnodemap, "ChunkRcTest", true));
+    cam_param.extra_data.push_back(kv);
+  }
+  catch (std::invalid_argument& e)
+  {
+  }
+
+  try
+  {
+    rc_common_msgs::KeyValue kv;
+    kv.key = "adaptive_out1_reduction";
+    kv.value = std::to_string(rcg::getFloat(rcgnodemap, "ChunkRcAdaptiveOut1Reduction", 0, 0, true));
+    cam_param.extra_data.push_back(kv);
+  }
+  catch (std::invalid_argument& e)
+  {
+  }
+
+  try
+  {
+    rc_common_msgs::KeyValue kv;
+    kv.key = "brightness";
+    kv.value = std::to_string(rcg::getFloat(rcgnodemap, "ChunkRcBrightness", 0, 0, true));
+    cam_param.extra_data.push_back(kv);
+  }
+  catch (std::invalid_argument& e)
+  {
+  }
 
   return cam_param;
 }
