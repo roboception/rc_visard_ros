@@ -460,6 +460,8 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
       {
         cntConsecutiveRecoveryFails++;
         ROS_ERROR_STREAM("rc_visard_driver: " << ex.what());
+
+        rcg::System::clearSystems();
       }
     }
     if (stopRecoverThread)
