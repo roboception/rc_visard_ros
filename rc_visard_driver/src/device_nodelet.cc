@@ -1380,8 +1380,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
       CameraInfoPublisher lcaminfo(nh, tfPrefix, f, t, true);
       CameraInfoPublisher rcaminfo(nh, tfPrefix, f, t, false);
 
-      ImagePublisher limage(it, tfPrefix, true, false, iocontrol_avail);
-      ImagePublisher rimage(it, tfPrefix, false, false, iocontrol_avail);
+      ImagePublisher limage(it, tfPrefix, true, false, true);
+      ImagePublisher rimage(it, tfPrefix, false, false, true);
 
       DisparityPublisher disp(nh, tfPrefix, f, t, scale);
       DisparityColorPublisher cdisp(it, tfPrefix, f, t, scale);
@@ -1399,8 +1399,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
       std::shared_ptr<ImagePublisher> rimage_color;
       if (dev_supports_color)
       {
-        limage_color = std::make_shared<ImagePublisher>(it, tfPrefix, true, true, iocontrol_avail);
-        rimage_color = std::make_shared<ImagePublisher>(it, tfPrefix, false, true, iocontrol_avail);
+        limage_color = std::make_shared<ImagePublisher>(it, tfPrefix, true, true, true);
+        rimage_color = std::make_shared<ImagePublisher>(it, tfPrefix, false, true, true);
       }
 
       // add camera/image params publishers if the camera supports chunkdata

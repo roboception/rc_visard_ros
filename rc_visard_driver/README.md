@@ -259,9 +259,8 @@ For color sensors, the following topics are additionally available:
 * /stereo/left/image_rect_color (sensor_msgs::Image, format: RGB8)
 * /stereo/right/image_rect_color (sensor_msgs::Image, format: RGB8)
 
-If the connected rc_visard has an `IO Control` license, then the following
-topics are additionally provided for images where the GPIO out1 is either low
-or high. These topics only useful if `out1_mode` is set to the special mode
+There are also topics provided for images where the GPIO out1 is either low
+or high. These topics are especially useful if `out1_mode` is set to the special mode
 `ExposureAlternateActive`.
 
 * /stereo/left/image_rect_out1_low (sensor_msgs::Image, MONO8)
