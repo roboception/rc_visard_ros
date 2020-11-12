@@ -175,7 +175,7 @@ bool Protobuf2RosStream::startReceivingAndPublishingAsRos()
         continue;  // wait for next packet
       }
 
-      ROS_DEBUG_STREAM_THROTTLE(1, "Received protobuf message: " << pbMsg->DebugString());
+      //ROS_DEBUG_STREAM_THROTTLE(1, "Received protobuf message: " << pbMsg->DebugString());
 
       // convert to ROS message(s) and publish
       publishToRos(pbMsg);

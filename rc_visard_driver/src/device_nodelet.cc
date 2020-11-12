@@ -898,6 +898,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
       {
         lvl &= ~1;
         rcg::setFloat(nodemap, "AcquisitionFrameRate", cfg.camera_fps, true);
+        ROS_DEBUG_STREAM("Set AcquisitionFrameRate to " << cfg.camera_fps);
       }
 
       // lvl 2 (camera_exp_auto) is immediately set in dynamic reconfigure callback
@@ -906,42 +907,49 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
       {
         lvl &= ~4;
         rcg::setFloat(nodemap, "ExposureTime", 1000000 * cfg.camera_exp_value, true);
+        ROS_DEBUG_STREAM("Set ExposureTime to " << cfg.camera_exp_value);
       }
 
       if (lvl & 8192)
       {
         lvl &= ~8192;
         rcg::setFloat(nodemap, "Gain", cfg.camera_gain_value, true);
+        ROS_DEBUG_STREAM("Set Gain to " << cfg.camera_gain_value);
       }
 
       if (lvl & 8)
       {
         lvl &= ~8;
         rcg::setFloat(nodemap, "ExposureTimeAutoMax", 1000000 * cfg.camera_exp_max, true);
+        ROS_DEBUG_STREAM("Set ExposureTimeAutoMax to " << cfg.camera_exp_max);
       }
 
       if (lvl & 8388608)
       {
         lvl &= ~8388608;
         rcg::setInteger(nodemap, "ExposureRegionWidth", cfg.camera_exp_width, false);
+        ROS_DEBUG_STREAM("Set ExposureRegionWidth to " << cfg.camera_exp_width);
       }
 
       if (lvl & 16777216)
       {
         lvl &= ~16777216;
         rcg::setInteger(nodemap, "ExposureRegionHeight", cfg.camera_exp_height, false);
+        ROS_DEBUG_STREAM("Set ExposureRegionHeight to " << cfg.camera_exp_height);
       }
 
       if (lvl & 33554432)
       {
         lvl &= ~33554432;
         rcg::setInteger(nodemap, "ExposureRegionOffsetX", cfg.camera_exp_offset_x, false);
+        ROS_DEBUG_STREAM("Set ExposureRegionOffsetX to " << cfg.camera_exp_offset_x);
       }
 
       if (lvl & 67108864)
       {
         lvl &= ~67108864;
         rcg::setInteger(nodemap, "ExposureRegionOffsetY", cfg.camera_exp_offset_y, false);
+        ROS_DEBUG_STREAM("Set ExposureRegionOffsetY to " << cfg.camera_exp_offset_y);
       }
 
       if (lvl & 16384)
@@ -951,10 +959,12 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         if (cfg.camera_wb_auto)
         {
           rcg::setEnum(nodemap, "BalanceWhiteAuto", "Continuous", false);
+          ROS_DEBUG_STREAM("Set BalanceWhiteAuto to " << "Continuous");
         }
         else
         {
           rcg::setEnum(nodemap, "BalanceWhiteAuto", "Off", false);
+          ROS_DEBUG_STREAM("Set BalanceWhiteAuto to " << "Off");
         }
       }
 
@@ -964,6 +974,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
 
         rcg::setEnum(nodemap, "BalanceRatioSelector", "Red", false);
         rcg::setFloat(nodemap, "BalanceRatio", cfg.camera_wb_ratio_red, false);
+        ROS_DEBUG_STREAM("Set BalanceRatio Red to " << cfg.camera_wb_ratio_red);
       }
 
       if (lvl & 65536)
@@ -972,6 +983,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
 
         rcg::setEnum(nodemap, "BalanceRatioSelector", "Blue", false);
         rcg::setFloat(nodemap, "BalanceRatio", cfg.camera_wb_ratio_blue, false);
+        ROS_DEBUG_STREAM("Set BalanceRatio Blue to " << cfg.camera_wb_ratio_blue);
       }
 
       if (lvl & 1048576)
@@ -993,6 +1005,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         if (val.size() > 0)
         {
           rcg::setEnum(nodemap, "DepthAcquisitionMode", val.c_str(), true);
+          ROS_DEBUG_STREAM("Set DepthAcquisitionMode to " << val);
         }
         else
         {
@@ -1034,13 +1047,14 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         if (val.size() > 0)
         {
           rcg::setEnum(nodemap, "DepthQuality", val.c_str(), true);
+          ROS_DEBUG_STREAM("Set DepthQuality to " << val);
         }
       }
 
       if (lvl & 2097152)
       {
         lvl &= ~2097152;
-
+        ROS_DEBUG_STREAM("Set DepthStaticScene to " << cfg.depth_static_scene);
         if (!rcg::setBoolean(nodemap, "DepthStaticScene", cfg.depth_static_scene, false))
         {
           // support for rc_visard < 1.5
@@ -1067,6 +1081,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
           if (val.size() > 0)
           {
             rcg::setEnum(nodemap, "DepthQuality", val.c_str(), true);
+            ROS_DEBUG_STREAM("Set DepthQuality to " << val);
           }
         }
       }
@@ -1075,48 +1090,56 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
       {
         lvl &= ~64;
         rcg::setInteger(nodemap, "DepthSeg", cfg.depth_seg, true);
+        ROS_DEBUG_STREAM("Set DepthSeg to " << cfg.depth_seg);
       }
 
       if (lvl & 4194304)
       {
         lvl &= ~4194304;
         rcg::setBoolean(nodemap, "DepthSmooth", cfg.depth_smooth, false);
+        ROS_DEBUG_STREAM("Set DepthSmooth to " << cfg.depth_smooth);
       }
 
       if (lvl & 256)
       {
         lvl &= ~256;
         rcg::setInteger(nodemap, "DepthFill", cfg.depth_fill, true);
+        ROS_DEBUG_STREAM("Set DepthFill to " << cfg.depth_fill);
       }
 
       if (lvl & 512)
       {
         lvl &= ~512;
         rcg::setFloat(nodemap, "DepthMinConf", cfg.depth_minconf, true);
+        ROS_DEBUG_STREAM("Set DepthMinConf to " << cfg.depth_minconf);
       }
 
       if (lvl & 1024)
       {
         lvl &= ~1024;
         rcg::setFloat(nodemap, "DepthMinDepth", cfg.depth_mindepth, true);
+        ROS_DEBUG_STREAM("Set DepthMinDepth to " << cfg.depth_mindepth);
       }
 
       if (lvl & 2048)
       {
         lvl &= ~2048;
         rcg::setFloat(nodemap, "DepthMaxDepth", cfg.depth_maxdepth, true);
+        ROS_DEBUG_STREAM("Set DepthMaxDepth to " << cfg.depth_maxdepth);
       }
 
       if (lvl & 4096)
       {
         lvl &= ~4096;
         rcg::setFloat(nodemap, "DepthMaxDepthErr", cfg.depth_maxdeptherr, true);
+        ROS_DEBUG_STREAM("Set DepthMaxDepthErr to " << cfg.depth_maxdeptherr);
       }
 
       if (lvl & 131072)
       {
         lvl &= ~131072;
         rcg::setBoolean(nodemap, "GevIEEE1588", cfg.ptp_enabled, true);
+        ROS_DEBUG_STREAM("Set GevIEEE1588 to " << cfg.ptp_enabled);
       }
 
       if (lvl & 262144)
@@ -1127,6 +1150,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         {
           rcg::setEnum(nodemap, "LineSelector", "Out1", true);
           rcg::setEnum(nodemap, "LineSource", cfg.out1_mode.c_str(), true);
+          ROS_DEBUG_STREAM("Set LineSource Out1 to " << cfg.out1_mode);
         }
       }
 
@@ -1138,6 +1162,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         {
           rcg::setEnum(nodemap, "LineSelector", "Out2", true);
           rcg::setEnum(nodemap, "LineSource", cfg.out2_mode.c_str(), true);
+          ROS_DEBUG_STREAM("Set LineSource Out2 to " << cfg.out2_mode);
         }
       }
     }
