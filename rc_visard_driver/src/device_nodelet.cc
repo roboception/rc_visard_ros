@@ -1281,9 +1281,20 @@ rc_common_msgs::CameraParam extractChunkData(const std::shared_ptr<GenApi::CNode
 
   try
   {
+    std::string out1_reduction;
+    try
+    {
+      out1_reduction = std::to_string(rcg::getFloat(rcgnodemap, "ChunkRcOut1Reduction", 0, 0, true));
+    }
+    catch (const std::exception& e)
+    {
+      // try to fallback to older name in versions < 20.10.1
+      out1_reduction = std::to_string(rcg::getFloat(rcgnodemap, "ChunkRcAdaptiveOut1Reduction", 0, 0, true));
+    }
+
     rc_common_msgs::KeyValue kv;
-    kv.key = "adaptive_out1_reduction";
-    kv.value = std::to_string(rcg::getFloat(rcgnodemap, "ChunkRcAdaptiveOut1Reduction", 0, 0, true));
+    kv.key = "out1_reduction";
+    kv.value = out1_reduction;
     cam_param.extra_data.push_back(kv);
   }
   catch (std::invalid_argument& e)
