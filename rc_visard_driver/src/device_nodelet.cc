@@ -136,6 +136,7 @@ DeviceNodelet::DeviceNodelet()
   dev_supports_depth_acquisition_trigger = false;
   perform_depth_acquisition_trigger = false;
   iocontrol_avail = false;
+  dev_supports_double_shot = false;
   level = 0;
 
   stopImageThread = imageRequested = imageSuccess = false;
@@ -644,6 +645,17 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     stereo_plus_avail = false;
   }
 
+  try
+  {
+    cfg.depth_double_shot = rcg::getBoolean(nodemap, "DepthDoubleShot", true);
+    dev_supports_double_shot = true;
+  }
+  catch (const std::exception&)
+  {
+    dev_supports_double_shot = false;
+    ROS_WARN("rc_visard_driver: rc_visard has an older firmware, depth_double_shot is not available.");
+  }
+
   // check if io-control is available and get values
 
   try
@@ -707,6 +719,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.param("depth_acquisition_mode", cfg.depth_acquisition_mode, cfg.depth_acquisition_mode);
   pnh.param("depth_quality", cfg.depth_quality, cfg.depth_quality);
   pnh.param("depth_static_scene", cfg.depth_static_scene, cfg.depth_static_scene);
+  pnh.param("depth_double_shot", cfg.depth_double_shot, cfg.depth_double_shot);
   pnh.param("depth_seg", cfg.depth_seg, cfg.depth_seg);
   pnh.param("depth_smooth", cfg.depth_smooth, cfg.depth_smooth);
   pnh.param("depth_fill", cfg.depth_fill, cfg.depth_fill);
@@ -736,6 +749,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.setParam("depth_acquisition_mode", cfg.depth_acquisition_mode);
   pnh.setParam("depth_quality", cfg.depth_quality);
   pnh.setParam("depth_static_scene", cfg.depth_static_scene);
+  pnh.setParam("depth_double_shot", cfg.depth_double_shot);
   pnh.setParam("depth_seg", cfg.depth_seg);
   pnh.setParam("depth_smooth", cfg.depth_smooth);
   pnh.setParam("depth_fill", cfg.depth_fill);
@@ -768,6 +782,12 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
   {
     c.camera_gain_value = 0;
     l &= ~8192;
+  }
+
+  if (!dev_supports_double_shot)
+  {
+    c.depth_double_shot = false;
+    l &= ~32;
   }
 
   c.camera_gain_value = round(c.camera_gain_value / 6) * 6;
@@ -1049,6 +1069,13 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
           rcg::setEnum(nodemap, "DepthQuality", val.c_str(), true);
           ROS_DEBUG_STREAM("Set DepthQuality to " << val);
         }
+      }
+
+      if (lvl & 32)
+      {
+        lvl &= ~32;
+        rcg::setBoolean(nodemap, "DepthDoubleShot", cfg.depth_double_shot, true);
+        ROS_DEBUG_STREAM("Set DepthDoubleShot to " << cfg.depth_double_shot);
       }
 
       if (lvl & 2097152)

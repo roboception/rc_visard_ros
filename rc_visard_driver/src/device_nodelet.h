@@ -131,6 +131,7 @@ private:
   bool dev_supports_wb;
   bool dev_supports_depth_acquisition_trigger;
   bool dev_supports_chunk_data;
+  bool dev_supports_double_shot;
 
   bool perform_depth_acquisition_trigger;
 
