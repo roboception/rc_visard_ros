@@ -1074,7 +1074,7 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
       if (lvl & 32)
       {
         lvl &= ~32;
-        rcg::setBoolean(nodemap, "DepthDoubleShot", cfg.depth_double_shot, true);
+        rcg::setBoolean(nodemap, "DepthDoubleShot", cfg.depth_double_shot, false);
         ROS_DEBUG_STREAM("Set DepthDoubleShot to " << cfg.depth_double_shot);
       }
 
