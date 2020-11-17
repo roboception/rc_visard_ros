@@ -2,6 +2,16 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.0 (2020-11-17)
+------------------
+
+* Change: publish all images on */image_rect topics, meaning don't filter out1 low in alternate mode
+* Change: always publish *_out1_low and *_out1_high topics even if no iocontrol license is available
+* debug messages when GenICam params are changed
+* rename adaptive_out1_reduction to out1_reduction
+* add Out1High camera_exp_auto_mode (requires rc_visard firmware <= 20.10.1)
+* add depth_double_shot parameter (requires rc_visard firmware <= 20.10.1)
+
 3.0.5 (2020-10-20)
 ------------------
 

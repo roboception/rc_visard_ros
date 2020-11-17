@@ -144,6 +144,8 @@ These parameters can be changed during runtime via dynamic reconfigure:
   up to exp_max as maximum. If false, then exp_value is used as exposure
   time in seconds.
 
+* `camera_exp_auto_mode`: Auto-exposure mode, i.e. `Normal`, `Out1High` or `AdaptiveOut1`.
+
 * `camera_exp_max`: Maximum exposure time in seconds if exp_auto is true.
 
 * `camera_exp_value`: Exposure time in seconds if exp_auto is false.
@@ -178,6 +180,10 @@ These parameters can be changed during runtime via dynamic reconfigure:
   noise. This limits the frame rate to a maximum of 3 Hz. The timestamp of
   the disparity image is taken from the first image that was used for
   accumulation.
+
+* `depth_double_shot`: This parameter can be set to true to combine disparity
+  images from two subsequent stereo image pairs. This is meant to be used in
+  conjunction with a projector and ExposureAlternateActive mode.
 
 * `depth_fill`: Higher numbers fill gaps with measurments with potentielly
   higher errors.
