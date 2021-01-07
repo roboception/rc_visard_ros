@@ -8,6 +8,10 @@ bool success
 # 0: Valid calibration returned
 # 1: Not enough poses
 # 2: Calibration result is not available
+# 3: Grid dimensions are invalid
+# 4: Insufficient rotation without additional constraint
+# 5: Sufficient rotation available, no additional constraint necessary
+# 6: Not enough contraints, poses must be more distinct
 int32 status
 # Human readable message, for development
 string message
@@ -15,5 +19,9 @@ string message
 geometry_msgs/Pose pose
 # Calibration residual error
 float64 error
+# Expected translation error given in meter
+float64 translation_error_meter
+# Expected rotation error in degrees
+float64 rotation_error_degree
 # True if calibration was done with sensor mounted on robot
 bool robot_mounted

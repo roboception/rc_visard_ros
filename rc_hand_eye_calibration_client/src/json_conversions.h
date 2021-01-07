@@ -79,6 +79,19 @@ inline void from_json(const nlohmann::json& j, CalibrationResponse& r)
   j.at("message").get_to(r.message);
   j.at("pose").get_to(r.pose);
   j.at("error").get_to(r.error);
+
+  r.translation_error_meter=0;
+  if (j.count("translation_error_meter"))
+  {
+    j.at("translation_error_meter").get_to(r.translation_error_meter);
+  }
+
+  r.rotation_error_degree=0;
+  if (j.count("rotation_error_degree"))
+  {
+    j.at("rotation_error_degree").get_to(r.rotation_error_degree);
+  }
+
   j.at("robot_mounted").get_to(r.robot_mounted);
 }
 

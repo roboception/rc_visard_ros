@@ -293,7 +293,7 @@ void HandEyeCalibClient::initConfiguration()
 void HandEyeCalibClient::dynamicReconfigureCb(hand_eye_calibrationConfig& config, uint32_t)
 {
   ROS_DEBUG("Reconfigure Request: (%f x %f) %s, 4DOF: %d, offset: %f", config.grid_width, config.grid_height,
-            config.robot_mounted, config.tcp_rotation_axis, config.tcp_offset ? "True" : "False");
+            config.robot_mounted ? "True" : "False", config.tcp_rotation_axis, config.tcp_offset);
 
   // fill json request from dynamic reconfigure request
   json j_params, j_param;
