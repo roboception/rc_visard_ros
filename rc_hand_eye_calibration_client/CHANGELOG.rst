@@ -2,6 +2,11 @@
 Changelog for package rc_hand_eye_calibration_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.0 (2021-01-28)
+------------------
+* update cmake files for better version handling
+* add new error values to hand_eye_calibration_client
+
 3.1.0 (2020-11-17)
 ------------------
 

@@ -2,6 +2,10 @@
 Changelog for package rc_visard_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.0 (2021-01-28)
+------------------
+* update cmake files for better version handling
+
 3.1.0 (2020-11-17)
 ------------------
 
