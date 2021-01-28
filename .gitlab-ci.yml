@@ -461,15 +461,15 @@ package2_stable:rc_roi_manager_gui:bionic:amd64:
 ###############
 # Docker images
 ###############
-#image:rc_visard:melodic:testing:
-#  extends: .docker_build
-#  only:
-#    - master
-#    - /^v[0-9]+\.[0-9]+\.[0-9]+/
-#  variables:
-#    PACKAGE: "rc_visard"
-#    ROS_DISTRO: "melodic"
-#    DOCKERFILE_DIR: "rc_visard/docker"
+image:rc_visard_driver:melodic:wip:
+  extends: .docker_build
+  except:
+    - master
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
+  variables:
+    PACKAGE: "rc_visard_driver"
+    ROS_DISTRO: "melodic"
+    DOCKERFILE_DIR: "rc_visard_driver"
 
 image:rc_visard_driver:melodic:testing:
   extends: .docker_build

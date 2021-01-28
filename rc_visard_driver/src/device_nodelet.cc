@@ -849,6 +849,32 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
     c.out2_mode = "Low";
   }
 
+  // if out1_mode or out2_mode are changed, immediately set new value here
+  // If we do this in the grabbing thread we have a race condition and another parameter update
+  if (l & 262144)
+  {
+    l &= ~262144;
+
+    if (iocontrol_avail && rcgnodemap)
+    {
+      rcg::setEnum(rcgnodemap, "LineSelector", "Out1", false);
+      rcg::setEnum(rcgnodemap, "LineSource", c.out1_mode.c_str(), false);
+      ROS_DEBUG_STREAM("Set LineSource Out1 to " << c.out1_mode);
+    }
+  }
+
+  if (l & 524288)
+  {
+    l &= ~524288;
+
+    if (iocontrol_avail && rcgnodemap)
+    {
+      rcg::setEnum(rcgnodemap, "LineSelector", "Out2", false);
+      rcg::setEnum(rcgnodemap, "LineSource", c.out2_mode.c_str(), false);
+      ROS_DEBUG_STREAM("Set LineSource Out2 to " << c.out2_mode);
+    }
+  }
+
   // If camera_exp_auto (ExposureAuto) is changed, immediately set new value here
   // so that ExposureTime and Gain can be read and published again.
   // If we do this in the grabbing thread we have a race condition and another parameter update
@@ -1169,29 +1195,9 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         ROS_DEBUG_STREAM("Set GevIEEE1588 to " << cfg.ptp_enabled);
       }
 
-      if (lvl & 262144)
-      {
-        lvl &= ~262144;
+      // lvl 262144 (out1_mode) is immediately set in dynamic reconfigure callback
 
-        if (iocontrol_avail)
-        {
-          rcg::setEnum(nodemap, "LineSelector", "Out1", true);
-          rcg::setEnum(nodemap, "LineSource", cfg.out1_mode.c_str(), true);
-          ROS_DEBUG_STREAM("Set LineSource Out1 to " << cfg.out1_mode);
-        }
-      }
-
-      if (lvl & 524288)
-      {
-        lvl &= ~524288;
-
-        if (iocontrol_avail)
-        {
-          rcg::setEnum(nodemap, "LineSelector", "Out2", true);
-          rcg::setEnum(nodemap, "LineSource", cfg.out2_mode.c_str(), true);
-          ROS_DEBUG_STREAM("Set LineSource Out2 to " << cfg.out2_mode);
-        }
-      }
+      // lvl 524288 (out2_mode) is immediately set in dynamic reconfigure callback
     }
     catch (const std::exception& ex)
     {
