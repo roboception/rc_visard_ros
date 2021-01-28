@@ -834,7 +834,7 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
     if (c.out1_mode != "Low" && c.out1_mode != "High" && c.out1_mode != "ExposureActive" &&
         c.out1_mode != "ExposureAlternateActive")
     {
-      c.out1_mode = "ExposureActive";
+      c.out1_mode = "Low";
     }
 
     if (c.out2_mode != "Low" && c.out2_mode != "High" && c.out2_mode != "ExposureActive" &&
@@ -845,7 +845,7 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
   }
   else
   {
-    c.out1_mode = "ExposureActive";
+    c.out1_mode = "Low";
     c.out2_mode = "Low";
   }
 
