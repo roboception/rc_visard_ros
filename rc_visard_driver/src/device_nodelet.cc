@@ -71,7 +71,7 @@ namespace {
   bool isRcVisardDevice(const std::string& vendor, const std::string& model)
   {
     bool isKuka3DPerception = vendor.find("KUKA") != std::string::npos && model.find("3d_perception") != std::string::npos;
-    bool isRcVisard = vendor.find("Roboception") != std::string::npos && model.find("rc_visard") != std::string::npos;
+    bool isRcVisard = model.find("rc_visard") != std::string::npos;
     return isKuka3DPerception || isRcVisard;
   }
 
