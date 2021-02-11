@@ -2,6 +2,9 @@
 Changelog for package rc_tagdetect_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.1 (2021-02-11)
+------------------
+
 3.2.0 (2021-01-28)
 ------------------
 * update cmake files for better version handling
