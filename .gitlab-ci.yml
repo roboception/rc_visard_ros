@@ -1,11 +1,11 @@
 before_script:
   - export DEBIAN_FRONTEND=noninteractive
-  - apt-get update -yq && apt-get install -y curl lsb-release
+  - apt-get update -yq && apt-get install -y curl file git lintian lsb-release
   - export DISTRO_CODENAME=`lsb_release -cs` && echo Using distro $DISTRO_CODENAME
   - echo "deb http://apt.roboception.de/stable $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-stable.list
   - if [ "$TESTING_DEBS" = "true" ]; then echo "deb http://apt.roboception.de/testing $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-testing.list ; fi
   - curl http://apt.roboception.de/archive.key | apt-key add -
-  - apt-get update -yq && apt-get install -y lintian rc-genicam-api rc-dynamics-api ros-$ROS_DISTRO-rc-common-msgs ros-$ROS_DISTRO-rcdiscover
+  - apt-get update -yq && apt-get install -y rc-genicam-api rc-dynamics-api ros-$ROS_DISTRO-rc-common-msgs ros-$ROS_DISTRO-rcdiscover
   - rosdep install --from-paths . --ignore-src -r -y --skip-keys="rc_genicam_api rc_dynamics_api rcdiscover"
 
 variables:
@@ -22,20 +22,20 @@ stages:
 ##################
 # Anchor templates
 ##################
-.amd64_xenial_t: &amd64_xenial_job
-  image: ros:kinetic-perception
+.amd64_bionic_t: &amd64_bionic_job
+  image: ros:melodic-perception
   tags:
     - amd64
     - docker
 
-.armhf_xenial_t: &armhf_xenial_job
-  image: registry.roboception.de/tools/docker_images:armhf-kinetic-perception
+.armhf_bionic_t: &armhf_bionic_job
+  image: registry.roboception.de/tools/docker_images:armhf-melodic-perception
   tags:
     - armhf
     - docker
 
-.amd64_bionic_t: &amd64_bionic_job
-  image: ros:melodic-perception
+.amd64_focal_t: &amd64_focal_job
+  image: ros:noetic-perception
   tags:
     - amd64
     - docker
@@ -152,19 +152,17 @@ stages:
 
 # Test against latest (on every commit)
 #######################################
-test:rc_visard_driver:xenial:amd64:
-  <<: *amd64_xenial_job
-  extends: .test_latest
-
 test:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .test_latest
 
-test:rc_hand_eye_calibration_client:xenial:amd64:
-  <<: *amd64_xenial_job
+test:rc_visard_driver:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .test_latest
-  variables:
-    PACKAGE: "rc_hand_eye_calibration_client"
+
+test:rc_visard_driver:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test_latest
 
 test:rc_hand_eye_calibration_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -172,11 +170,17 @@ test:rc_hand_eye_calibration_client:bionic:amd64:
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
 
-test:rc_pick_client:xenial:amd64:
-  <<: *amd64_xenial_job
+test:rc_hand_eye_calibration_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .test_latest
   variables:
-    PACKAGE: "rc_pick_client"
+    PACKAGE: "rc_hand_eye_calibration_client"
+
+test:rc_hand_eye_calibration_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
 
 test:rc_pick_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -184,11 +188,17 @@ test:rc_pick_client:bionic:amd64:
   variables:
     PACKAGE: "rc_pick_client"
 
-test:rc_tagdetect_client:xenial:amd64:
-  <<: *amd64_xenial_job
+test:rc_pick_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .test_latest
   variables:
-    PACKAGE: "rc_tagdetect_client"
+    PACKAGE: "rc_pick_client"
+
+test:rc_pick_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_pick_client"
 
 test:rc_tagdetect_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -196,11 +206,17 @@ test:rc_tagdetect_client:bionic:amd64:
   variables:
     PACKAGE: "rc_tagdetect_client"
 
-test:rc_silhouettematch_client:xenial:amd64:
-  <<: *amd64_xenial_job
+test:rc_tagdetect_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .test_latest
   variables:
-    PACKAGE: "rc_silhouettematch_client"
+    PACKAGE: "rc_tagdetect_client"
+
+test:rc_tagdetect_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_tagdetect_client"
 
 test:rc_silhouettematch_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -208,11 +224,17 @@ test:rc_silhouettematch_client:bionic:amd64:
   variables:
     PACKAGE: "rc_silhouettematch_client"
 
-test:rc_visard_description:xenial:amd64:
-  <<: *amd64_xenial_job
+test:rc_silhouettematch_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .test_latest
   variables:
-    PACKAGE: "rc_visard_description"
+    PACKAGE: "rc_silhouettematch_client"
+
+test:rc_silhouettematch_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_silhouettematch_client"
 
 test:rc_visard_description:bionic:amd64:
   <<: *amd64_bionic_job
@@ -220,12 +242,17 @@ test:rc_visard_description:bionic:amd64:
   variables:
     PACKAGE: "rc_visard_description"
 
-test:rc_roi_manager_gui:xenial:amd64:
-  <<: *amd64_xenial_job
+test:rc_visard_description:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .test_latest
   variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-kinetic-rc-pick-client"
+    PACKAGE: "rc_visard_description"
+
+test:rc_visard_description:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_visard_description"
 
 test:rc_roi_manager_gui:bionic:amd64:
   <<: *amd64_bionic_job
@@ -234,31 +261,43 @@ test:rc_roi_manager_gui:bionic:amd64:
     PACKAGE: "rc_roi_manager_gui"
     EXTRA_DEBS: "ros-melodic-rc-pick-client"
 
+test:rc_roi_manager_gui:bionic:armhf:
+  <<: *armhf_bionic_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-melodic-rc-pick-client"
+
+test:rc_roi_manager_gui:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test_latest
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-melodic-rc-pick-client"
+
 # Test against stable (is allowed to fail)
 ##########################################
-test_stable:rc_visard_driver:xenial:amd64:
-  <<: *amd64_xenial_job
-  extends: .test_stable
-
 test_stable:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .test_stable
 
+test_stable:rc_visard_driver:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test_stable
+
 # Deploy testing (only on master)
 #################################
-package_testing:rc_visard_driver:xenial:amd64:
-  <<: *amd64_xenial_job
-  extends: .package_testing
-
 package_testing:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .package_testing
 
-package_testing:rc_hand_eye_calibration_client:xenial:amd64:
-  <<: *amd64_xenial_job
+package_testing:rc_visard_driver:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_testing
-  variables:
-    PACKAGE: "rc_hand_eye_calibration_client"
+
+package_testing:rc_visard_driver:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_testing
 
 package_testing:rc_hand_eye_calibration_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -266,11 +305,17 @@ package_testing:rc_hand_eye_calibration_client:bionic:amd64:
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
 
-package_testing:rc_pick_client:xenial:amd64:
-  <<: *amd64_xenial_job
+package_testing:rc_hand_eye_calibration_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_testing
   variables:
-    PACKAGE: "rc_pick_client"
+    PACKAGE: "rc_hand_eye_calibration_client"
+
+package_testing:rc_hand_eye_calibration_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_testing
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
 
 package_testing:rc_pick_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -278,11 +323,17 @@ package_testing:rc_pick_client:bionic:amd64:
   variables:
     PACKAGE: "rc_pick_client"
 
-package_testing:rc_tagdetect_client:xenial:amd64:
-  <<: *amd64_xenial_job
+package_testing:rc_pick_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_testing
   variables:
-    PACKAGE: "rc_tagdetect_client"
+    PACKAGE: "rc_pick_client"
+
+package_testing:rc_pick_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_testing
+  variables:
+    PACKAGE: "rc_pick_client"
 
 package_testing:rc_tagdetect_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -290,11 +341,17 @@ package_testing:rc_tagdetect_client:bionic:amd64:
   variables:
     PACKAGE: "rc_tagdetect_client"
 
-package_testing:rc_silhouettematch_client:xenial:amd64:
-  <<: *amd64_xenial_job
+package_testing:rc_tagdetect_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_testing
   variables:
-    PACKAGE: "rc_silhouettematch_client"
+    PACKAGE: "rc_tagdetect_client"
+
+package_testing:rc_tagdetect_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_testing
+  variables:
+    PACKAGE: "rc_tagdetect_client"
 
 package_testing:rc_silhouettematch_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -302,11 +359,17 @@ package_testing:rc_silhouettematch_client:bionic:amd64:
   variables:
     PACKAGE: "rc_silhouettematch_client"
 
-package_testing:rc_visard_description:xenial:amd64:
-  <<: *amd64_xenial_job
+package_testing:rc_silhouettematch_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_testing
   variables:
-    PACKAGE: "rc_visard_description"
+    PACKAGE: "rc_silhouettematch_client"
+
+package_testing:rc_silhouettematch_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_testing
+  variables:
+    PACKAGE: "rc_silhouettematch_client"
 
 package_testing:rc_visard_description:bionic:amd64:
   <<: *amd64_bionic_job
@@ -314,13 +377,17 @@ package_testing:rc_visard_description:bionic:amd64:
   variables:
     PACKAGE: "rc_visard_description"
 
-package2_testing:rc_roi_manager_gui:xenial:amd64:
-  <<: *amd64_xenial_job
+package_testing:rc_visard_description:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_testing
-  stage: package2
   variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-kinetic-rc-pick-client"
+    PACKAGE: "rc_visard_description"
+
+package_testing:rc_visard_description:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_testing
+  variables:
+    PACKAGE: "rc_visard_description"
 
 package2_testing:rc_roi_manager_gui:bionic:amd64:
   <<: *amd64_bionic_job
@@ -330,19 +397,21 @@ package2_testing:rc_roi_manager_gui:bionic:amd64:
     PACKAGE: "rc_roi_manager_gui"
     EXTRA_DEBS: "ros-melodic-rc-pick-client"
 
-#package2_testing:rc_visard:xenial:amd64:
-#  <<: *amd64_xenial_job
-#  extends: .package_testing
-#  stage: package2
-#  variables:
-#    PACKAGE: "rc_visard"
-#
-#package2_testing:rc_visard:bionic:amd64:
-#  <<: *amd64_bionic_job
-#  extends: .package_testing
-#  stage: package2
-#  variables:
-#    PACKAGE: "rc_visard"
+package2_testing:rc_roi_manager_gui:bionic:armhf:
+  <<: *armhf_bionic_job
+  extends: .package_testing
+  stage: package2
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-melodic-rc-pick-client"
+
+package2_testing:rc_roi_manager_gui:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_testing
+  stage: package2
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-melodic-rc-pick-client"
 
 ################
 # Stable builds
@@ -350,29 +419,27 @@ package2_testing:rc_roi_manager_gui:bionic:amd64:
 
 # Test against stable if it is a release
 ########################################
-test_release:rc_visard_driver:xenial:amd64:
-  <<: *amd64_xenial_job
-  extends: .test_release
-
 test_release:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .test_release
 
+test_release:rc_visard_driver:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test_release
+
 # Deploy stable (only for releases, version tags)
 #################################################
-package_stable:rc_visard_driver:xenial:amd64:
-  <<: *amd64_xenial_job
-  extends: .package_stable
-
 package_stable:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .package_stable
 
-package_stable:rc_hand_eye_calibration_client:xenial:amd64:
-  <<: *amd64_xenial_job
+package_stable:rc_visard_driver:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_stable
-  variables:
-    PACKAGE: "rc_hand_eye_calibration_client"
+
+package_stable:rc_visard_driver:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_stable
 
 package_stable:rc_hand_eye_calibration_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -380,11 +447,17 @@ package_stable:rc_hand_eye_calibration_client:bionic:amd64:
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
 
-package_stable:rc_pick_client:xenial:amd64:
-  <<: *amd64_xenial_job
+package_stable:rc_hand_eye_calibration_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_stable
   variables:
-    PACKAGE: "rc_pick_client"
+    PACKAGE: "rc_hand_eye_calibration_client"
+
+package_stable:rc_hand_eye_calibration_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_stable
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
 
 package_stable:rc_pick_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -392,11 +465,17 @@ package_stable:rc_pick_client:bionic:amd64:
   variables:
     PACKAGE: "rc_pick_client"
 
-package_stable:rc_tagdetect_client:xenial:amd64:
-  <<: *amd64_xenial_job
+package_stable:rc_pick_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_stable
   variables:
-    PACKAGE: "rc_tagdetect_client"
+    PACKAGE: "rc_pick_client"
+
+package_stable:rc_pick_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_stable
+  variables:
+    PACKAGE: "rc_pick_client"
 
 package_stable:rc_tagdetect_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -404,11 +483,17 @@ package_stable:rc_tagdetect_client:bionic:amd64:
   variables:
     PACKAGE: "rc_tagdetect_client"
 
-package_stable:rc_silhouettematch_client:xenial:amd64:
-  <<: *amd64_xenial_job
+package_stable:rc_tagdetect_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_stable
   variables:
-    PACKAGE: "rc_silhouettematch_client"
+    PACKAGE: "rc_tagdetect_client"
+
+package_stable:rc_tagdetect_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_stable
+  variables:
+    PACKAGE: "rc_tagdetect_client"
 
 package_stable:rc_silhouettematch_client:bionic:amd64:
   <<: *amd64_bionic_job
@@ -416,11 +501,17 @@ package_stable:rc_silhouettematch_client:bionic:amd64:
   variables:
     PACKAGE: "rc_silhouettematch_client"
 
-package_stable:rc_visard_description:xenial:amd64:
-  <<: *amd64_xenial_job
+package_stable:rc_silhouettematch_client:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_stable
   variables:
-    PACKAGE: "rc_visard_description"
+    PACKAGE: "rc_silhouettematch_client"
+
+package_stable:rc_silhouettematch_client:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_stable
+  variables:
+    PACKAGE: "rc_silhouettematch_client"
 
 package_stable:rc_visard_description:bionic:amd64:
   <<: *amd64_bionic_job
@@ -428,13 +519,17 @@ package_stable:rc_visard_description:bionic:amd64:
   variables:
     PACKAGE: "rc_visard_description"
 
-package2_stable:rc_roi_manager_gui:xenial:amd64:
-  <<: *amd64_xenial_job
+package_stable:rc_visard_description:bionic:armhf:
+  <<: *armhf_bionic_job
   extends: .package_stable
-  stage: package2
   variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-kinetic-rc-pick-client"
+    PACKAGE: "rc_visard_description"
+
+package_stable:rc_visard_description:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_stable
+  variables:
+    PACKAGE: "rc_visard_description"
 
 package2_stable:rc_roi_manager_gui:bionic:amd64:
   <<: *amd64_bionic_job
@@ -444,19 +539,21 @@ package2_stable:rc_roi_manager_gui:bionic:amd64:
     PACKAGE: "rc_roi_manager_gui"
     EXTRA_DEBS: "ros-melodic-rc-pick-client"
 
-#package2_stable:rc_visard:xenial:amd64:
-#  <<: *amd64_xenial_job
-#  extends: .package_stable
-#  stage: package2
-#  variables:
-#    PACKAGE: "rc_visard"
-#
-#package2_stable:rc_visard:bionic:amd64:
-#  <<: *amd64_bionic_job
-#  extends: .package_stable
-#  stage: package2
-#  variables:
-#    PACKAGE: "rc_visard"
+package2_stable:rc_roi_manager_gui:bionic:armhf:
+  <<: *armhf_bionic_job
+  extends: .package_stable
+  stage: package2
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-melodic-rc-pick-client"
+
+package2_stable:rc_roi_manager_gui:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .package_stable
+  stage: package2
+  variables:
+    PACKAGE: "rc_roi_manager_gui"
+    EXTRA_DEBS: "ros-melodic-rc-pick-client"
 
 ###############
 # Docker images
