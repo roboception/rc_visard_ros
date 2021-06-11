@@ -273,7 +273,7 @@ test:rc_roi_manager_gui:focal:amd64:
   extends: .test_latest
   variables:
     PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-melodic-rc-pick-client"
+    EXTRA_DEBS: "ros-noetic-rc-pick-client"
 
 # Test against stable (is allowed to fail)
 ##########################################
@@ -411,7 +411,7 @@ package2_testing:rc_roi_manager_gui:focal:amd64:
   stage: package2
   variables:
     PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-melodic-rc-pick-client"
+    EXTRA_DEBS: "ros-noetic-rc-pick-client"
 
 ################
 # Stable builds
@@ -553,7 +553,7 @@ package2_stable:rc_roi_manager_gui:focal:amd64:
   stage: package2
   variables:
     PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-melodic-rc-pick-client"
+    EXTRA_DEBS: "ros-noetic-rc-pick-client"
 
 ###############
 # Docker images
