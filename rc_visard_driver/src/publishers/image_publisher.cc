@@ -92,7 +92,7 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
   if (out1 && pub_out1_high.getNumSubscribers() > 0)
     sub = true;
 
-  if (sub && (pixelformat == Mono8 || pixelformat == YCbCr411_8))
+  if (sub && (pixelformat == Mono8 || pixelformat == YCbCr411_8 || pixelformat == RGB8))
   {
     // create image and initialize header
 
@@ -129,6 +129,11 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
     {
       pstep = (im->width >> 2) * 6 + buffer->getXPadding(part);
     }
+    else if (pixelformat == RGB8)
+    {
+      pstep = 3*im->width + buffer->getXPadding(part);
+    }
+
 
     if (!left)
     {
@@ -169,6 +174,20 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
           ps += pstep;
         }
       }
+      else if (pixelformat == RGB8)
+      {
+        for (uint32_t k = 0; k < im->height; k++)
+        {
+          for (uint32_t i = 0; i < im->width; i++)
+          {
+            *pt++ = *ps++;
+            *pt++ = *ps++;
+            *pt++ = *ps++;
+          }
+
+          ps += buffer->getXPadding(part);
+        }
+      }
     }
     else  // convert to monochrome
     {
@@ -206,6 +225,19 @@ void ImagePublisher::publish(const rcg::Buffer* buffer, uint32_t part, uint64_t 
           }
 
           ps += pstep;
+        }
+      }
+      else if (pixelformat == RGB8)
+      {
+        for (uint32_t k = 0; k < im->height; k++)
+        {
+          for (uint32_t i = 0; i < im->width; i++)
+          {
+            *pt++ = static_cast<uint8_t>((9798*ps[0]+19234*ps[1]+3736*ps[2])>>15);
+            ps += 3;
+          }
+
+          ps += buffer->getXPadding(part);
         }
       }
     }

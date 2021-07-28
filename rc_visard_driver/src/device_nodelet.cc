@@ -564,8 +564,16 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     if (format == "YCbCr411_8")
     {
       dev_supports_color = true;
+      color_format = "YCbCr411_8";
       break;
     }
+    if (format == "RGB8")
+    {
+      dev_supports_color = true;
+      color_format = "RGB8";
+      break;
+    }
+
   }
 
   // get optional white balancing values (only for color camera)
@@ -1657,7 +1665,10 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             if (!ccolor)
             {
               rcg::setEnum(rcgnodemap, "ComponentSelector", "Intensity", true);
-              rcg::setEnum(rcgnodemap, "PixelFormat", "YCbCr411_8", true);
+              rcg::setEnum(rcgnodemap, "PixelFormat", color_format.c_str(), false);
+              rcg::setEnum(rcgnodemap, "ComponentSelector", "IntensityCombined", true);
+              rcg::setEnum(rcgnodemap, "PixelFormat", color_format.c_str(), false);
+
               ccolor = true;
             }
           }

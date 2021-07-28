@@ -61,7 +61,7 @@ bool CameraParamPublisher::used()
 void CameraParamPublisher::publish(const rcg::Buffer* buffer, const rc_common_msgs::CameraParam& p,
   uint64_t pixelformat)
 {
-  if (pub.getNumSubscribers() > 0 && (pixelformat == Mono8 || pixelformat == YCbCr411_8))
+  if (pub.getNumSubscribers() > 0 && (pixelformat == Mono8 || pixelformat == YCbCr411_8 || pixelformat == RGB8))
   {
     const uint64_t freq = 1000000000ul;
     uint64_t time = buffer->getTimestampNS();
