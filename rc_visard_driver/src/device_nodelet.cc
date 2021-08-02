@@ -564,8 +564,16 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
     if (format == "YCbCr411_8")
     {
       dev_supports_color = true;
+      color_format = "YCbCr411_8";
       break;
     }
+    if (format == "RGB8")
+    {
+      dev_supports_color = true;
+      color_format = "RGB8";
+      break;
+    }
+
   }
 
   // get optional white balancing values (only for color camera)
@@ -617,7 +625,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   cfg.depth_maxdepth = rcg::getFloat(nodemap, "DepthMaxDepth", 0, 0, true);
   cfg.depth_maxdeptherr = rcg::getFloat(nodemap, "DepthMaxDepthErr", 0, 0, true);
 
-  cfg.ptp_enabled = rcg::getBoolean(nodemap, "GevIEEE1588", false);
+  cfg.ptp_enabled = rcg::getBoolean(nodemap, "PtpEnable", false);
 
   // fix for rc_visard < 1.5
 
@@ -1191,8 +1199,8 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
       if (lvl & 131072)
       {
         lvl &= ~131072;
-        rcg::setBoolean(nodemap, "GevIEEE1588", cfg.ptp_enabled, true);
-        ROS_DEBUG_STREAM("Set GevIEEE1588 to " << cfg.ptp_enabled);
+        rcg::setBoolean(nodemap, "PtpEnable", cfg.ptp_enabled, true);
+        ROS_DEBUG_STREAM("Set PtpEnable to " << cfg.ptp_enabled);
       }
 
       // lvl 262144 (out1_mode) is immediately set in dynamic reconfigure callback
@@ -1657,7 +1665,10 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             if (!ccolor)
             {
               rcg::setEnum(rcgnodemap, "ComponentSelector", "Intensity", true);
-              rcg::setEnum(rcgnodemap, "PixelFormat", "YCbCr411_8", true);
+              rcg::setEnum(rcgnodemap, "PixelFormat", color_format.c_str(), false);
+              rcg::setEnum(rcgnodemap, "ComponentSelector", "IntensityCombined", true);
+              rcg::setEnum(rcgnodemap, "PixelFormat", color_format.c_str(), false);
+
               ccolor = true;
             }
           }

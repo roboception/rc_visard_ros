@@ -126,6 +126,8 @@ private:
 
   dynamic_reconfigure::Server<rc_visard_driver::rc_visard_driverConfig>* reconfig;
 
+  std::string color_format;
+
   bool dev_supports_gain;
   bool dev_supports_color;
   bool dev_supports_wb;
