@@ -2,8 +2,17 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.2 (2021-08-02)
+------------------
+
+Changes supporting rc_sgm_producer:
+
+* Extend color format to RGB8
+* Using parameter PtpEnable instead of deprecated parameter GevIEEE1588 for controlling PTP
+
 3.2.1 (2021-02-11)
 ------------------
+
 * Only checking for rc_visard as model and not for vendor when detecting devices
 
 3.2.0 (2021-01-28)
