@@ -2,6 +2,11 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.3 (2021-08-03)
+------------------
+
+* Fixed building on internal gitlab CI
+
 3.2.2 (2021-08-02)
 ------------------
 
