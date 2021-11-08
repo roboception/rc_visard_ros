@@ -137,6 +137,7 @@ DeviceNodelet::DeviceNodelet()
   perform_depth_acquisition_trigger = false;
   iocontrol_avail = false;
   dev_supports_double_shot = false;
+  dev_supports_depth_exposure_adapt_timeout = false;
   level = 0;
 
   stopImageThread = imageRequested = imageSuccess = false;
@@ -709,6 +710,17 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
 
   }
 
+  try
+  {
+    cfg.depth_exposure_adapt_timeout = rcg::getFloat(nodemap, "DepthExposureAdaptTimeout", 0, 0, true);
+    dev_supports_depth_exposure_adapt_timeout = true;
+  }
+  catch (const std::exception&)
+  {
+    dev_supports_depth_exposure_adapt_timeout = false;
+    NODELET_WARN("rc_visard_driver: rc_visard has an older firmware, depth_exposure_adapt_timeout is not available.");
+  }
+
   // try to get ROS parameters: if parameter is not set in parameter server, default to current sensor configuration
 
   pnh.param("camera_fps", cfg.camera_fps, cfg.camera_fps);
@@ -735,6 +747,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.param("depth_mindepth", cfg.depth_mindepth, cfg.depth_mindepth);
   pnh.param("depth_maxdepth", cfg.depth_maxdepth, cfg.depth_maxdepth);
   pnh.param("depth_maxdeptherr", cfg.depth_maxdeptherr, cfg.depth_maxdeptherr);
+  pnh.param("depth_exposure_adapt_timeout", cfg.depth_exposure_adapt_timeout, cfg.depth_exposure_adapt_timeout);
   pnh.param("ptp_enabled", cfg.ptp_enabled, cfg.ptp_enabled);
   pnh.param("out1_mode", cfg.out1_mode, cfg.out1_mode);
   pnh.param("out2_mode", cfg.out2_mode, cfg.out2_mode);
@@ -765,6 +778,7 @@ void DeviceNodelet::initConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>
   pnh.setParam("depth_mindepth", cfg.depth_mindepth);
   pnh.setParam("depth_maxdepth", cfg.depth_maxdepth);
   pnh.setParam("depth_maxdeptherr", cfg.depth_maxdeptherr);
+  pnh.setParam("depth_exposure_adapt_timeout", cfg.depth_exposure_adapt_timeout);
   pnh.setParam("ptp_enabled", cfg.ptp_enabled);
   pnh.setParam("out1_mode", cfg.out1_mode);
   pnh.setParam("out2_mode", cfg.out2_mode);
@@ -855,6 +869,12 @@ void DeviceNodelet::reconfigure(rc_visard_driver::rc_visard_driverConfig& c, uin
   {
     c.out1_mode = "Low";
     c.out2_mode = "Low";
+  }
+
+  if (!dev_supports_depth_exposure_adapt_timeout)
+  {
+    c.depth_exposure_adapt_timeout = 0.0;
+    l &= ~268435456;
   }
 
   // if out1_mode or out2_mode are changed, immediately set new value here
@@ -1194,6 +1214,13 @@ void setConfiguration(const std::shared_ptr<GenApi::CNodeMapRef>& nodemap,
         lvl &= ~4096;
         rcg::setFloat(nodemap, "DepthMaxDepthErr", cfg.depth_maxdeptherr, true);
         ROS_DEBUG_STREAM("Set DepthMaxDepthErr to " << cfg.depth_maxdeptherr);
+      }
+
+      if (lvl & 268435456)
+      {
+        lvl &= ~268435456;
+        rcg::setFloat(nodemap, "DepthExposureAdaptTimeout", cfg.depth_exposure_adapt_timeout, false);
+        ROS_DEBUG_STREAM("Set DepthExposureAdaptTimeout to " << cfg.depth_exposure_adapt_timeout);
       }
 
       if (lvl & 131072)

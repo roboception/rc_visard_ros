@@ -134,7 +134,7 @@ private:
   bool dev_supports_depth_acquisition_trigger;
   bool dev_supports_chunk_data;
   bool dev_supports_double_shot;
-
+  bool dev_supports_depth_exposure_adapt_timeout;
   bool perform_depth_acquisition_trigger;
 
   std::shared_ptr<rcg::Device> rcgdev;
