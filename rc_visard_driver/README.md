@@ -206,6 +206,9 @@ These parameters can be changed during runtime via dynamic reconfigure:
 * `depth_maxdeptherr`: Maximum depth error in meter. All disparities with a
   higher depth error will be set to invalid.
 
+* `depth_exposure_adapt_timeout`: Maximum time in seconds to wait after triggering
+  in SingleFrame modes until auto exposure has finished adjustments.
+
 * `out1_mode`: Mode for the digital GPIO out1. Possible values are:
 
   * `Low` for switching out1 permanently off.
