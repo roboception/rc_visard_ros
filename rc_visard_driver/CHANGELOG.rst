@@ -2,6 +2,13 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.4 (2021-11-15)
+------------------
+
+* Add exposure_adapt_timeout parameter
+* update parameter description with enum values in square brackets
+* fix line_source and add more extra_data to CameraParam
+
 3.2.3 (2021-08-03)
 ------------------
 
