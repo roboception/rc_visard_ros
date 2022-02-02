@@ -23,7 +23,6 @@
   <exec_depend>rc_pick_client</exec_depend>
   <exec_depend>rc_tagdetect_client</exec_depend>
   <exec_depend>rc_silhouettematch_client</exec_depend>
-  <exec_depend>rc_roi_manager_gui</exec_depend>
 
   <export>
     <metapackage />

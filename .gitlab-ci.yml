@@ -254,27 +254,6 @@ test:rc_visard_description:focal:amd64:
   variables:
     PACKAGE: "rc_visard_description"
 
-test:rc_roi_manager_gui:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .test_latest
-  variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-melodic-rc-pick-client"
-
-test:rc_roi_manager_gui:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .test_latest
-  variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-melodic-rc-pick-client"
-
-test:rc_roi_manager_gui:focal:amd64:
-  <<: *amd64_focal_job
-  extends: .test_latest
-  variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-noetic-rc-pick-client"
-
 # Test against stable (is allowed to fail)
 ##########################################
 test_stable:rc_visard_driver:bionic:amd64:
@@ -388,30 +367,6 @@ package_testing:rc_visard_description:focal:amd64:
   extends: .package_testing
   variables:
     PACKAGE: "rc_visard_description"
-
-package2_testing:rc_roi_manager_gui:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .package_testing
-  stage: package2
-  variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-melodic-rc-pick-client"
-
-package2_testing:rc_roi_manager_gui:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .package_testing
-  stage: package2
-  variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-melodic-rc-pick-client"
-
-package2_testing:rc_roi_manager_gui:focal:amd64:
-  <<: *amd64_focal_job
-  extends: .package_testing
-  stage: package2
-  variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-noetic-rc-pick-client"
 
 ################
 # Stable builds
@@ -530,30 +485,6 @@ package_stable:rc_visard_description:focal:amd64:
   extends: .package_stable
   variables:
     PACKAGE: "rc_visard_description"
-
-package2_stable:rc_roi_manager_gui:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .package_stable
-  stage: package2
-  variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-melodic-rc-pick-client"
-
-package2_stable:rc_roi_manager_gui:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .package_stable
-  stage: package2
-  variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-melodic-rc-pick-client"
-
-package2_stable:rc_roi_manager_gui:focal:amd64:
-  <<: *amd64_focal_job
-  extends: .package_stable
-  stage: package2
-  variables:
-    PACKAGE: "rc_roi_manager_gui"
-    EXTRA_DEBS: "ros-noetic-rc-pick-client"
 
 ###############
 # Docker images
