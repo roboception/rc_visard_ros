@@ -1,4 +1,4 @@
-ARG ROS_DISTRO=melodic
+ARG ROS_DISTRO=noetic
 
 FROM ros:${ROS_DISTRO}-ros-base as builder
 ARG RC_REPO
@@ -12,7 +12,7 @@ RUN if [ -n "${RC_REPO}" ]; then \
 WORKDIR /workspace
 COPY . rc_hand_eye_calibration_client
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y file "rcdiscover$|ros-melodic-rcdiscover$" \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y file "rcdiscover$|ros-$ROS_DISTRO-rcdiscover$" \
     && rosdep install --from-paths . --ignore-src -r -y
 RUN mkdir build && cd build \
     && . /opt/ros/${ROS_DISTRO}/setup.sh \
@@ -30,6 +30,6 @@ RUN if [ -n "${RC_REPO}" ]; then \
     fi
 COPY --from=builder /workspace/build/*.deb /tmp
 RUN DEBIAN_FRONTEND=noninteractive apt update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y "rcdiscover$|ros-melodic-rcdiscover$" \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y "rcdiscover$|ros-$ROS_DISTRO-rcdiscover$" \
     && DEBIAN_FRONTEND=noninteractive apt install -y /tmp/*.deb  \
     && rm -rf /var/lib/apt/lists/*

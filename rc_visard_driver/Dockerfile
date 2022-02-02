@@ -1,4 +1,4 @@
-ARG ROS_DISTRO=melodic
+ARG ROS_DISTRO=noetic
 
 FROM ros:${ROS_DISTRO}-perception as builder
 ARG RC_REPO

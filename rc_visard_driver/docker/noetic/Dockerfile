@@ -1,4 +1,4 @@
-FROM ros:kinetic-ros-base
+FROM ros:noetic-ros-base
 LABEL maintainer="felix.ruess@roboception.de"
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
