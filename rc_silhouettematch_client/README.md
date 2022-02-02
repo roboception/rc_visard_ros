@@ -57,11 +57,6 @@ The following services are offered by the node:
 * `calibrate_base_plane`: Triggers base-plane calibration.
 * `get_base_plane_calibration`: Returns the configured base-plane calibration.
 * `delete_base_plane_calibration`: Deletes the configured base-plane calibration.
-* `set_region_of_interest`: Sets a region of interest.
-* `get_regions_of_interest`: Returns the configured regions of interest with the requested ids.
-  If no ids are provided, all configured regions of interest are returned.
-* `delete_regions_of_interest`: Deletes the configured regions of interest with the requested ids.
-
 
 Launching
 ---------

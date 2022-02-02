@@ -25,7 +25,6 @@
   <depend>rcdiscover</depend>
   <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
-  <depend>shape_msgs</depend>
   <depend>visualization_msgs</depend>
   <depend>tf</depend>
   <depend>dynamic_reconfigure</depend>

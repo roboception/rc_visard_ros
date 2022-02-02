@@ -40,7 +40,6 @@ PickClient::PickClient(const string& host, const string& node_name, const ros::N
   : nh_(nh), rest_helper_(host, node_name, 10000), visualizer_(nh)
 {
   initConfiguration();
-  advertiseServices();
   startPick();
 }
 
@@ -70,81 +69,15 @@ void PickClient::stopPick()
   rest_helper_.servicePutRequest("stop");
 }
 
-bool PickClient::setLoadCarrier(rc_pick_client::SetLoadCarrierRequest& request,
-                                rc_pick_client::SetLoadCarrierResponse& response)
-{
-  callService("set_load_carrier", request, response);
-  return true;
-}
-
-bool PickClient::getLoadCarriers(rc_pick_client::GetLoadCarriersRequest& request,
-                                 rc_pick_client::GetLoadCarriersResponse& response)
-{
-  callService("get_load_carriers", request, response);
-  return true;
-}
-
-bool PickClient::deleteLoadCarriersSrv(rc_pick_client::DeleteLoadCarriersRequest& request,
-                                       rc_pick_client::DeleteLoadCarriersResponse& response)
-{
-  callService("delete_load_carriers", request, response);
-  return true;
-}
-
-bool PickClient::detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest& request,
-                                       rc_pick_client::DetectLoadCarriersResponse& response)
-{
-  callService("detect_load_carriers", request, response);
-  visualizer_.visualizeLoadCarriers(response.load_carriers);
-  return true;
-}
-
-bool PickClient::detectFillingLevelSrv(rc_pick_client::DetectFillingLevelRequest& request,
-                                       rc_pick_client::DetectFillingLevelResponse& response)
-{
-  callService("detect_filling_level", request, response);
-  visualizer_.visualizeLoadCarriers(response.load_carriers);
-  return true;
-}
-
-bool PickClient::setROI(rc_pick_client::SetRegionOfInterestRequest& request,
-                        rc_pick_client::SetRegionOfInterestResponse& response)
-{
-  callService("set_region_of_interest", request, response);
-  return true;
-}
-
-bool PickClient::getROIs(rc_pick_client::GetRegionsOfInterestRequest& request,
-                         rc_pick_client::GetRegionsOfInterestResponse& response)
-{
-  callService("get_regions_of_interest", request, response);
-  return true;
-}
-
-bool PickClient::deleteROISrv(rc_pick_client::DeleteRegionsOfInterestRequest& request,
-                              rc_pick_client::DeleteRegionsOfInterestResponse& response)
-{
-  callService("delete_regions_of_interest", request, response);
-  return true;
-}
-
-void PickClient::advertiseServices()
-{
-  srv_detect_lc_ = nh_.advertiseService("detect_load_carriers", &PickClient::detectLoadCarriersSrv, this);
-  srv_delete_lcs_ = nh_.advertiseService("delete_load_carriers", &PickClient::deleteLoadCarriersSrv, this);
-  srv_get_lcs_ = nh_.advertiseService("get_load_carriers", &PickClient::getLoadCarriers, this);
-  srv_set_lc_ = nh_.advertiseService("set_load_carrier", &PickClient::setLoadCarrier, this);
-  srv_delete_rois_ = nh_.advertiseService("delete_regions_of_interest", &PickClient::deleteROISrv, this);
-  srv_get_rois_ = nh_.advertiseService("get_regions_of_interest", &PickClient::getROIs, this);
-  srv_set_roi_ = nh_.advertiseService("set_region_of_interest", &PickClient::setROI, this);
-  srv_detect_filling_level_ = nh_.advertiseService("detect_filling_level", &PickClient::detectFillingLevelSrv, this);
-}
-
 void PickClient::paramsToCfg(const json& params, rc_pick_client::pickModuleConfig& cfg)
 {
   for (const auto& param : params)
   {
     const auto& name = param["name"];
+    if (name == "max_grasps")
+    {
+      cfg.max_grasps = param["value"];
+    }
     if (name == "cluster_max_curvature")
     {
       cfg.cluster_max_curvature = param["value"];
@@ -164,14 +97,6 @@ void PickClient::paramsToCfg(const json& params, rc_pick_client::pickModuleConfi
     else if (name == "clustering_patch_size")
     {
       cfg.clustering_patch_size = param["value"];
-    }
-    else if (name == "load_carrier_crop_distance")
-    {
-      cfg.load_carrier_crop_distance = param["value"];
-    }
-    else if (name == "load_carrier_model_tolerance")
-    {
-      cfg.load_carrier_model_tolerance = param["value"];
     }
   }
 }
@@ -193,8 +118,7 @@ void PickClient::initConfiguration()
             cfg.clustering_discontinuity_factor);
   nh_.param("clustering_max_surface_rmse", cfg.clustering_max_surface_rmse, cfg.clustering_max_surface_rmse);
   nh_.param("clustering_patch_size", cfg.clustering_patch_size, cfg.clustering_patch_size);
-  nh_.param("load_carrier_crop_distance", cfg.load_carrier_crop_distance, cfg.load_carrier_crop_distance);
-  nh_.param("load_carrier_model_tolerance", cfg.load_carrier_model_tolerance, cfg.load_carrier_model_tolerance);
+  nh_.param("max_grasps", cfg.max_grasps, cfg.max_grasps);
 
   // set parameters on parameter server so that dynamic reconfigure picks them up
   nh_.setParam("cluster_max_curvature", cfg.cluster_max_curvature);
@@ -202,8 +126,7 @@ void PickClient::initConfiguration()
   nh_.setParam("clustering_discontinuity_factor", cfg.clustering_discontinuity_factor);
   nh_.setParam("clustering_max_surface_rmse", cfg.clustering_max_surface_rmse);
   nh_.setParam("clustering_patch_size", cfg.clustering_patch_size);
-  nh_.setParam("load_carrier_crop_distance", cfg.load_carrier_crop_distance);
-  nh_.setParam("load_carrier_model_tolerance", cfg.load_carrier_model_tolerance);
+  nh_.setParam("max_grasps", cfg.max_grasps);
 
   // instantiate dynamic reconfigure server that will initially read those values
   using ReconfServer = dynamic_reconfigure::Server<rc_pick_client::pickModuleConfig>;
@@ -219,14 +142,12 @@ json PickClient::createSharedParameters(rc_pick_client::pickModuleConfig& config
   js_params.push_back(js_param);
   js_param["name"] = "clustering_discontinuity_factor";
   js_param["value"] = config.clustering_discontinuity_factor;
+  js_params.push_back(js_param);
   js_param["name"] = "clustering_max_surface_rmse";
   js_param["value"] = config.clustering_max_surface_rmse;
   js_params.push_back(js_param);
-  js_param["name"] = "load_carrier_crop_distance";
-  js_param["value"] = config.load_carrier_crop_distance;
-  js_params.push_back(js_param);
-  js_param["name"] = "load_carrier_model_tolerance";
-  js_param["value"] = config.load_carrier_model_tolerance;
+  js_param["name"] = "max_grasps";
+  js_param["value"] = config.max_grasps;
   js_params.push_back(js_param);
   return js_params;
 }

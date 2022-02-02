@@ -48,9 +48,6 @@ SilhouetteMatchClient::SilhouetteMatchClient(const std::string& host, ros::NodeH
       nh.advertiseService("get_base_plane_calibration", &SilhouetteMatchClient::getBasePlaneCalib, this));
   srvs_.emplace_back(
       nh.advertiseService("delete_base_plane_calibration", &SilhouetteMatchClient::deleteBasePlaneCalib, this));
-  srvs_.emplace_back(nh.advertiseService("set_region_of_interest_2d", &SilhouetteMatchClient::setROI, this));
-  srvs_.emplace_back(nh.advertiseService("get_regions_of_interest_2d", &SilhouetteMatchClient::getROIs, this));
-  srvs_.emplace_back(nh.advertiseService("delete_regions_of_interest_2d", &SilhouetteMatchClient::deleteROIs, this));
 
   initParameters();
 }
@@ -114,24 +111,6 @@ bool SilhouetteMatchClient::deleteBasePlaneCalib(DeleteBasePlaneCalibration::Req
                                                  DeleteBasePlaneCalibration::Response& res)
 {
   callService("delete_base_plane_calibration", req, res);
-  return true;
-}
-
-bool SilhouetteMatchClient::setROI(SetRegionOfInterest::Request& req, SetRegionOfInterest::Response& res)
-{
-  callService("set_region_of_interest_2d", req, res);
-  return true;
-}
-
-bool SilhouetteMatchClient::getROIs(GetRegionsOfInterest::Request& req, GetRegionsOfInterest::Response& res)
-{
-  callService("get_regions_of_interest_2d", req, res);
-  return true;
-}
-
-bool SilhouetteMatchClient::deleteROIs(DeleteRegionsOfInterest::Request& req, DeleteRegionsOfInterest::Response& res)
-{
-  callService("delete_regions_of_interest_2d", req, res);
   return true;
 }
 

@@ -37,19 +37,14 @@ find_package(RCDISCOVER REQUIRED)
 ## Generate messages in the 'msg' folder
 add_message_files(FILES
         Box.msg
-        CellFillingLevel.msg
         CollisionDetection.msg
         Compartment.msg
-        GridSize.msg
         Item.msg
         ItemModel.msg
         LoadCarrier.msg
-        LoadCarrierWithFillingLevel.msg
         RangeBox.msg
         RangeRectangle.msg
-        RangeValue.msg
         Rectangle.msg
-        RegionOfInterest.msg
         SuctionGrasp.msg
 )
 
@@ -57,22 +52,13 @@ add_message_files(FILES
 add_service_files(FILES
         ComputeBoxGrasps.srv
         ComputeGrasps.srv
-        DeleteLoadCarriers.srv
-        DeleteRegionsOfInterest.srv
-        DetectFillingLevel.srv
         DetectItems.srv
-        DetectLoadCarriers.srv
-        GetLoadCarriers.srv
-        GetRegionsOfInterest.srv
-        SetLoadCarrier.srv
-        SetRegionOfInterest.srv
 )
 
 # Generate added messages and services with any dependencies listed here
 generate_messages(
         DEPENDENCIES
         geometry_msgs
-        shape_msgs
         rc_common_msgs
 
 )
