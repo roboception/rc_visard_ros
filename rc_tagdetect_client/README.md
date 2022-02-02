@@ -1,6 +1,9 @@
 ROS client for Roboception's tag detection modules
 ==================================================
 
+**This package is not developed anymore**. New clients are available in the
+[rc_reason_clients_ros repository](https://github.com/roboception/rc_reason_clients_ros/tree/master/rc_reason_clients#rc_april_tag_detect_client-and-rc_qr_code_detect_client).
+
 This node provides ROS service calls and parameters for TagDetect node.
 For detail description of the TagDetect check rc_visard manual: https://doc.rc-visard.com/latest/en/tagdetect.html
 

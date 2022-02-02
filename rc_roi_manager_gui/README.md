@@ -1,6 +1,8 @@
 Region of interest Graphical User Interface
 ===========================================
 
+**This package is not developed anymore**.
+
 Overview
 --------
 This component provides an interactive markers based graphical interface on rviz.

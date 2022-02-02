@@ -1,5 +1,8 @@
-ROS client for Roboception's grasp generation modules
-=====================================================
+ROS client for Roboception's ItemPick and BoxPick modules
+=========================================================
+
+**This package is not developed anymore**. New clients are available in the
+[rc_reason_clients_ros repository](https://github.com/roboception/rc_reason_clients_ros/tree/master/rc_reason_clients#rc_itempick_client).
 
 This node provides ROS service calls and parameters for ItemPick node.
 For detail description of the ItemPick module check rc_visard manual: https://doc.rc-visard.com/latest/en/itempick.html

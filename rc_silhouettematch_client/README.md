@@ -1,6 +1,9 @@
 ROS client for Roboception's SilhouetteMatch module
 ===================================================
 
+**This package is not developed anymore**. A new client is available in the
+[rc_reason_clients_ros repository](https://github.com/roboception/rc_reason_clients_ros/tree/master/rc_reason_clients#rc_silhouettematch_client).
+
 This node provides ROS services and parameters for Roboception's SilhouetteMatch node.
 For a detailed description of the SilhouetteMatch module, check the rc_visard manual: https://doc.rc-visard.com/latest/en/silhouettematch.html.
 
