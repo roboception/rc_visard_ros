@@ -39,9 +39,6 @@
 #include <rc_silhouettematch_client/CalibrateBasePlane.h>
 #include <rc_silhouettematch_client/DeleteBasePlaneCalibration.h>
 #include <rc_silhouettematch_client/GetBasePlaneCalibration.h>
-#include <rc_silhouettematch_client/SetRegionOfInterest.h>
-#include <rc_silhouettematch_client/GetRegionsOfInterest.h>
-#include <rc_silhouettematch_client/DeleteRegionsOfInterest.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <rc_silhouettematch_client/SilhouetteMatchConfig.h>
@@ -67,12 +64,6 @@ protected:
   bool getBasePlaneCalib(GetBasePlaneCalibration::Request& req, GetBasePlaneCalibration::Response& res);
 
   bool deleteBasePlaneCalib(DeleteBasePlaneCalibration::Request& req, DeleteBasePlaneCalibration::Response& res);
-
-  bool setROI(SetRegionOfInterest::Request& req, SetRegionOfInterest::Response& res);
-
-  bool getROIs(GetRegionsOfInterest::Request& req, GetRegionsOfInterest::Response& res);
-
-  bool deleteROIs(DeleteRegionsOfInterest::Request& req, DeleteRegionsOfInterest::Response& res);
 
   void initParameters();
 

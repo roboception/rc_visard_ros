@@ -40,15 +40,11 @@
 #include <rc_silhouettematch_client/Instance.h>
 #include <rc_silhouettematch_client/Plane.h>
 #include <rc_silhouettematch_client/EstimatedPlane.h>
-#include <rc_silhouettematch_client/RegionOfInterest.h>
 #include <rc_silhouettematch_client/ObjectToDetect.h>
 
 #include <rc_silhouettematch_client/CalibrateBasePlane.h>
 #include <rc_silhouettematch_client/GetBasePlaneCalibration.h>
 #include <rc_silhouettematch_client/DeleteBasePlaneCalibration.h>
-#include <rc_silhouettematch_client/SetRegionOfInterest.h>
-#include <rc_silhouettematch_client/GetRegionsOfInterest.h>
-#include <rc_silhouettematch_client/DeleteRegionsOfInterest.h>
 #include <rc_silhouettematch_client/DetectObject.h>
 
 namespace rc_common_msgs
@@ -83,24 +79,6 @@ inline void from_json(const nlohmann::json& j, EstimatedPlane& r)
   j.at("pose_frame").get_to(r.pose_frame);
   j.at("distance").get_to(r.distance);
   j.at("normal").get_to(r.normal);
-}
-
-inline void to_json(nlohmann::json& j, const RegionOfInterest& r)
-{
-  j["id"] = r.id;
-  j["offset_x"] = r.offset_x;
-  j["offset_y"] = r.offset_y;
-  j["width"] = r.width;
-  j["height"] = r.height;
-}
-
-inline void from_json(const nlohmann::json& j, RegionOfInterest& r)
-{
-  j.at("id").get_to(r.id);
-  j.at("offset_x").get_to(r.offset_x);
-  j.at("offset_y").get_to(r.offset_y);
-  j.at("width").get_to(r.width);
-  j.at("height").get_to(r.height);
 }
 
 inline void to_json(nlohmann::json& j, const ObjectToDetect& r)
@@ -173,37 +151,6 @@ inline void to_json(nlohmann::json& j, const DeleteBasePlaneCalibration::Request
 }
 
 inline void from_json(const nlohmann::json& j, DeleteBasePlaneCalibration::Response& r)
-{
-  j.at("return_code").get_to(r.return_code);
-}
-
-inline void to_json(nlohmann::json& j, const SetRegionOfInterest::Request& r)
-{
-  j["region_of_interest_2d"] = r.region_of_interest_2d;
-}
-
-inline void from_json(const nlohmann::json& j, SetRegionOfInterest::Response& r)
-{
-  j.at("return_code").get_to(r.return_code);
-}
-
-inline void to_json(nlohmann::json& j, const GetRegionsOfInterest::Request& r)
-{
-  j["region_of_interest_2d_ids"] = r.region_of_interest_2d_ids;
-}
-
-inline void from_json(const nlohmann::json& j, GetRegionsOfInterest::Response& r)
-{
-  j.at("regions_of_interest").get_to(r.regions_of_interest);
-  j.at("return_code").get_to(r.return_code);
-}
-
-inline void to_json(nlohmann::json& j, const DeleteRegionsOfInterest::Request& r)
-{
-  j["region_of_interest_2d_ids"] = r.region_of_interest_2d_ids;
-}
-
-inline void from_json(const nlohmann::json& j, DeleteRegionsOfInterest::Response& r)
 {
   j.at("return_code").get_to(r.return_code);
 }

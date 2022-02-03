@@ -1,6 +1,9 @@
 ROS Hand-eye calibration client for Roboception's rc_visard
 =========================================================
 
+**This package is not developed anymore**. A new client is available in the
+[rc_reason_clients_ros repository](https://github.com/roboception/rc_reason_clients_ros/tree/master/rc_reason_clients#rc_hand_eye_calibration_client).
+
 This node provides ROS service calls and topics to calibrate the rc_visard to a robot (aka hand-eye calibration).
 
 It also provides the new or pre-existing calibration via `/tf` or `/tf_static`.

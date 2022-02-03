@@ -1,8 +1,0 @@
-# Description: Sets a region of interest.
-
-# Required
-RegionOfInterest region_of_interest_2d
-
----
-
-rc_common_msgs/ReturnCode return_code

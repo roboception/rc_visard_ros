@@ -39,14 +39,6 @@
 #include <dynamic_reconfigure/server.h>
 
 #include <memory>
-#include <rc_pick_client/DetectLoadCarriers.h>
-#include <rc_pick_client/DeleteLoadCarriers.h>
-#include <rc_pick_client/DeleteRegionsOfInterest.h>
-#include <rc_pick_client/GetLoadCarriers.h>
-#include <rc_pick_client/DetectFillingLevel.h>
-#include <rc_pick_client/GetRegionsOfInterest.h>
-#include <rc_pick_client/SetLoadCarrier.h>
-#include <rc_pick_client/SetRegionOfInterest.h>
 #include <rc_pick_client/pickModuleConfig.h>
 #include "json/json.hpp"
 #include "json_conversions.h"
@@ -73,15 +65,6 @@ protected:
 
   pick_visualization::Visualization visualizer_;
 
-  ros::ServiceServer srv_detect_lc_;
-  ros::ServiceServer srv_detect_filling_level_;
-  ros::ServiceServer srv_set_lc_;
-  ros::ServiceServer srv_get_lcs_;
-  ros::ServiceServer srv_delete_lcs_;
-  ros::ServiceServer srv_set_roi_;
-  ros::ServiceServer srv_get_rois_;
-  ros::ServiceServer srv_delete_rois_;
-
   json createSharedParameters(rc_pick_client::pickModuleConfig& config);
   void paramsToCfg(const json& params, rc_pick_client::pickModuleConfig& cfg);
 
@@ -104,34 +87,9 @@ protected:
     }
   }
 
-  bool detectLoadCarriersSrv(rc_pick_client::DetectLoadCarriersRequest& request,
-                             rc_pick_client::DetectLoadCarriersResponse& response);
-
-  bool deleteLoadCarriersSrv(rc_pick_client::DeleteLoadCarriersRequest& request,
-                             rc_pick_client::DeleteLoadCarriersResponse& response);
-
-  bool getLoadCarriers(rc_pick_client::GetLoadCarriersRequest& request,
-                       rc_pick_client::GetLoadCarriersResponse& response);
-
-  bool setLoadCarrier(rc_pick_client::SetLoadCarrierRequest& request, rc_pick_client::SetLoadCarrierResponse& response);
-
-  bool detectFillingLevelSrv(rc_pick_client::DetectFillingLevelRequest& request,
-                             rc_pick_client::DetectFillingLevelResponse& response);
-
-  bool deleteROISrv(rc_pick_client::DeleteRegionsOfInterestRequest& request,
-                    rc_pick_client::DeleteRegionsOfInterestResponse& response);
-
-  bool getROIs(rc_pick_client::GetRegionsOfInterestRequest& request,
-               rc_pick_client::GetRegionsOfInterestResponse& response);
-
-  bool setROI(rc_pick_client::SetRegionOfInterestRequest& request,
-              rc_pick_client::SetRegionOfInterestResponse& response);
-
   void startPick();
 
   void stopPick();
-
-  void advertiseServices();
 
   void initConfiguration();
 

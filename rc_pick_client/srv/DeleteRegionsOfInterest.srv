@@ -1,8 +1,0 @@
-# Description: Deletes the configured regions of interest with the requested ids. If no ids are provided, all configured regions of interest are deleted.
-
-# Optional
-string[] region_of_interest_ids
-
----
-
-rc_common_msgs/ReturnCode return_code

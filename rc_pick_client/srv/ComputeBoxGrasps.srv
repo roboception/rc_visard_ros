@@ -17,7 +17,7 @@ string load_carrier_id
 # Optional
 Compartment load_carrier_compartment
 
-# Optional. If empty, means one item of type unknown without dimensions
+# Required
 ItemModel[] item_models
 
 # Required. Dimensions of the gripper suction surface
