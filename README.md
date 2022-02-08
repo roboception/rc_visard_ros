@@ -5,7 +5,12 @@ This repositorty contains ROS interfaces for the [Roboception rc_visard][] 3D se
 
 Please also consult the manual for more details: https://doc.rc-visard.com
 
-The `rc_visard` ROS package is a convenience metapackage which depends on all others.
+**This stack is mostly in maintenance mode!** Please consider migrating to
+
+* [rc_genicam_driver for ROS1](https://github.com/roboception/rc_genicam_driver_ros)
+* [rc_genicam_driver for ROS2](https://github.com/roboception/rc_genicam_driver_ros2)
+* [rc_reason_clients for ROS1](https://github.com/roboception/rc_reason_clients_ros)
+* [rc_reason_clients for ROS2](https://github.com/roboception/rc_reason_clients_ros2)
 
 Installation
 ------------
@@ -15,6 +20,11 @@ On Debian/Ubuntu add the ROS sources and
 ```bash
 sudo apt-get install ros-${ROS_DISTRO}-rc-visard
 ```
+
+rc_visard
+---------
+
+The `rc_visard` ROS package is a convenience metapackage which depends on all others.
 
 rc_visard_driver
 ----------------

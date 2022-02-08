@@ -2,6 +2,11 @@
 Changelog for package rc_pick_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.3.0 (2022-02-08)
+------------------
+* remove load_carrier and ROI services
+* remove load_carrier parameters
+
 3.2.4 (2021-11-15)
 ------------------
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rc_pick_client</name>
-  <version>3.2.4</version>
+  <version>3.3.0</version>
   <description>The ros client for roboception grasp generation modules</description>
 
   <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>
