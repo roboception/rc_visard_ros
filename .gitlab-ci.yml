@@ -28,12 +28,6 @@ stages:
     - amd64
     - docker
 
-.armhf_bionic_t: &armhf_bionic_job
-  image: registry.roboception.de/tools/docker_images:armhf-melodic-perception
-  tags:
-    - armhf
-    - docker
-
 .amd64_focal_t: &amd64_focal_job
   image: ros:noetic-perception
   tags:
@@ -156,22 +150,12 @@ test:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .test_latest
 
-test:rc_visard_driver:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .test_latest
-
 test:rc_visard_driver:focal:amd64:
   <<: *amd64_focal_job
   extends: .test_latest
 
 test:rc_hand_eye_calibration_client:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .test_latest
-  variables:
-    PACKAGE: "rc_hand_eye_calibration_client"
-
-test:rc_hand_eye_calibration_client:bionic:armhf:
-  <<: *armhf_bionic_job
   extends: .test_latest
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
@@ -188,12 +172,6 @@ test:rc_pick_client:bionic:amd64:
   variables:
     PACKAGE: "rc_pick_client"
 
-test:rc_pick_client:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .test_latest
-  variables:
-    PACKAGE: "rc_pick_client"
-
 test:rc_pick_client:focal:amd64:
   <<: *amd64_focal_job
   extends: .test_latest
@@ -202,12 +180,6 @@ test:rc_pick_client:focal:amd64:
 
 test:rc_tagdetect_client:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .test_latest
-  variables:
-    PACKAGE: "rc_tagdetect_client"
-
-test:rc_tagdetect_client:bionic:armhf:
-  <<: *armhf_bionic_job
   extends: .test_latest
   variables:
     PACKAGE: "rc_tagdetect_client"
@@ -224,12 +196,6 @@ test:rc_silhouettematch_client:bionic:amd64:
   variables:
     PACKAGE: "rc_silhouettematch_client"
 
-test:rc_silhouettematch_client:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .test_latest
-  variables:
-    PACKAGE: "rc_silhouettematch_client"
-
 test:rc_silhouettematch_client:focal:amd64:
   <<: *amd64_focal_job
   extends: .test_latest
@@ -238,12 +204,6 @@ test:rc_silhouettematch_client:focal:amd64:
 
 test:rc_visard_description:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .test_latest
-  variables:
-    PACKAGE: "rc_visard_description"
-
-test:rc_visard_description:bionic:armhf:
-  <<: *armhf_bionic_job
   extends: .test_latest
   variables:
     PACKAGE: "rc_visard_description"
@@ -270,22 +230,12 @@ package_testing:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .package_testing
 
-package_testing:rc_visard_driver:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .package_testing
-
 package_testing:rc_visard_driver:focal:amd64:
   <<: *amd64_focal_job
   extends: .package_testing
 
 package_testing:rc_hand_eye_calibration_client:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .package_testing
-  variables:
-    PACKAGE: "rc_hand_eye_calibration_client"
-
-package_testing:rc_hand_eye_calibration_client:bionic:armhf:
-  <<: *armhf_bionic_job
   extends: .package_testing
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
@@ -302,12 +252,6 @@ package_testing:rc_pick_client:bionic:amd64:
   variables:
     PACKAGE: "rc_pick_client"
 
-package_testing:rc_pick_client:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .package_testing
-  variables:
-    PACKAGE: "rc_pick_client"
-
 package_testing:rc_pick_client:focal:amd64:
   <<: *amd64_focal_job
   extends: .package_testing
@@ -316,12 +260,6 @@ package_testing:rc_pick_client:focal:amd64:
 
 package_testing:rc_tagdetect_client:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .package_testing
-  variables:
-    PACKAGE: "rc_tagdetect_client"
-
-package_testing:rc_tagdetect_client:bionic:armhf:
-  <<: *armhf_bionic_job
   extends: .package_testing
   variables:
     PACKAGE: "rc_tagdetect_client"
@@ -338,12 +276,6 @@ package_testing:rc_silhouettematch_client:bionic:amd64:
   variables:
     PACKAGE: "rc_silhouettematch_client"
 
-package_testing:rc_silhouettematch_client:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .package_testing
-  variables:
-    PACKAGE: "rc_silhouettematch_client"
-
 package_testing:rc_silhouettematch_client:focal:amd64:
   <<: *amd64_focal_job
   extends: .package_testing
@@ -352,12 +284,6 @@ package_testing:rc_silhouettematch_client:focal:amd64:
 
 package_testing:rc_visard_description:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .package_testing
-  variables:
-    PACKAGE: "rc_visard_description"
-
-package_testing:rc_visard_description:bionic:armhf:
-  <<: *armhf_bionic_job
   extends: .package_testing
   variables:
     PACKAGE: "rc_visard_description"
@@ -388,22 +314,12 @@ package_stable:rc_visard_driver:bionic:amd64:
   <<: *amd64_bionic_job
   extends: .package_stable
 
-package_stable:rc_visard_driver:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .package_stable
-
 package_stable:rc_visard_driver:focal:amd64:
   <<: *amd64_focal_job
   extends: .package_stable
 
 package_stable:rc_hand_eye_calibration_client:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .package_stable
-  variables:
-    PACKAGE: "rc_hand_eye_calibration_client"
-
-package_stable:rc_hand_eye_calibration_client:bionic:armhf:
-  <<: *armhf_bionic_job
   extends: .package_stable
   variables:
     PACKAGE: "rc_hand_eye_calibration_client"
@@ -420,12 +336,6 @@ package_stable:rc_pick_client:bionic:amd64:
   variables:
     PACKAGE: "rc_pick_client"
 
-package_stable:rc_pick_client:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .package_stable
-  variables:
-    PACKAGE: "rc_pick_client"
-
 package_stable:rc_pick_client:focal:amd64:
   <<: *amd64_focal_job
   extends: .package_stable
@@ -434,12 +344,6 @@ package_stable:rc_pick_client:focal:amd64:
 
 package_stable:rc_tagdetect_client:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .package_stable
-  variables:
-    PACKAGE: "rc_tagdetect_client"
-
-package_stable:rc_tagdetect_client:bionic:armhf:
-  <<: *armhf_bionic_job
   extends: .package_stable
   variables:
     PACKAGE: "rc_tagdetect_client"
@@ -456,12 +360,6 @@ package_stable:rc_silhouettematch_client:bionic:amd64:
   variables:
     PACKAGE: "rc_silhouettematch_client"
 
-package_stable:rc_silhouettematch_client:bionic:armhf:
-  <<: *armhf_bionic_job
-  extends: .package_stable
-  variables:
-    PACKAGE: "rc_silhouettematch_client"
-
 package_stable:rc_silhouettematch_client:focal:amd64:
   <<: *amd64_focal_job
   extends: .package_stable
@@ -470,12 +368,6 @@ package_stable:rc_silhouettematch_client:focal:amd64:
 
 package_stable:rc_visard_description:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .package_stable
-  variables:
-    PACKAGE: "rc_visard_description"
-
-package_stable:rc_visard_description:bionic:armhf:
-  <<: *armhf_bionic_job
   extends: .package_stable
   variables:
     PACKAGE: "rc_visard_description"
