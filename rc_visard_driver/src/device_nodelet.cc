@@ -1618,7 +1618,17 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             bool out1_alternate = (out1_mode_on_sensor == "ExposureAlternateActive");
             points2.setOut1Alternate(out1_alternate);
 
-            rc_common_msgs::CameraParam cam_param = extractChunkData(rcgnodemap);
+            rc_common_msgs::CameraParam cam_param;
+
+            {
+              // protect against concurent changes of selector (i.e. LineSelector),
+              // before reading the corresponding value
+
+              boost::recursive_mutex::scoped_lock lock(mtx);
+
+              cam_param = extractChunkData(rcgnodemap);
+            }
+
             cam_param.is_color_camera = dev_supports_color;
             out1 = (cam_param.line_status_all & 0x1);
 
