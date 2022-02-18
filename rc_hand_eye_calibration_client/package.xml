@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rc_hand_eye_calibration_client</name>
-  <version>3.3.1</version>
+  <version>3.3.2</version>
   <description>The rc_hand_eye_calibration_client package</description>
 
   <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>
