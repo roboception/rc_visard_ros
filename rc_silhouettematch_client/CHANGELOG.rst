@@ -2,6 +2,9 @@
 Changelog for package rc_silhouettematch_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.3.1 (2022-02-18)
+------------------
+
 3.3.0 (2022-02-08)
 ------------------
 * remove ROI services

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rc_visard_description</name>
-  <version>3.3.0</version>
+  <version>3.3.1</version>
   <description>Visualization package for rc_visard </description>
 
   <maintainer email="felix.ruess@roboception.de">Felix Ruess</maintainer>

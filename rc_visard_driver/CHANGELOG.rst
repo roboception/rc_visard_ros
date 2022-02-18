@@ -2,6 +2,10 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.3.1 (2022-02-18)
+------------------
+* Protected translation from GenICam to CamParam message with mutex to avoid race condition when changing out1_mode
+
 3.3.0 (2022-02-08)
 ------------------
 
