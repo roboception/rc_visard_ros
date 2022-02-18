@@ -98,7 +98,21 @@ namespace {
     }
     return device_ids;
   }
-}
+
+  void split(std::vector<std::string>& list, const std::string& s, char delim, bool skip_empty = true)
+  {
+    std::stringstream in(s);
+    std::string elem;
+
+    while (getline(in, elem, delim))
+    {
+      if (!skip_empty || elem.size() > 0)
+      {
+        list.push_back(elem);
+      }
+    }
+  }
+}  // namespace
 
 namespace rc
 {
@@ -350,12 +364,11 @@ void DeviceNodelet::keepAliveAndRecoverFromFails()
         dev_version = rcg::getString(rcgnodemap, "DeviceVersion");
 
         std::vector<std::string> list;
-        split(list, device_version, '.');
+        split(list, dev_version, '.');
 
         if (list.size() < 3 || std::stoi(list[0]) < 20 || (std::stoi(list[0]) == 20 && std::stoi(list[1]) < 4))
         {
-          running = false;
-          throw std::invalid_argument("Device version must be 20.04 or higher: " + device_version);
+          throw std::invalid_argument("Device version must be 20.04 or higher: " + dev_version);
         }
 
         // check if device is ready
