@@ -1636,9 +1636,10 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
               {
                 // reset counter of consecutive missing images and failures
                 double dt = (ros::SteadyTime::now() - tlastimage).toSec();
-                if (dt > (2.0/camera_fps))
+                double warn_limit = 3.0/camera_fps;
+                if (dt > warn_limit)
                 {
-                  ROS_WARN_STREAM("rc_visard_driver: more than " << dt << "s between published images.");
+                  ROS_WARN("rc_visard_driver: time between image publish more than %.3fs: %.3fs.", warn_limit, dt);
                 }
                 tlastimage = ros::SteadyTime::now();
                 cntConsecutiveFails = 0;
