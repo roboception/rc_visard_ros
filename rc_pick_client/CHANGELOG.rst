@@ -2,6 +2,9 @@
 Changelog for package rc_pick_client
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.3.3 (2022-03-03)
+------------------
+
 3.3.2 (2022-02-18)
 ------------------
 * actually remove dependency on shape_msgs

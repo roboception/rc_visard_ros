@@ -2,6 +2,10 @@
 Changelog for package rc_visard_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.3.3 (2022-03-03)
+------------------
+* rc_visard_driver: warn if images can't be published fast enough
+
 3.3.2 (2022-02-18)
 ------------------
 * require at least rc_visard firmware version 22.04
