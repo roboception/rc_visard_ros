@@ -422,3 +422,45 @@ image:rc_hand_eye_calibration_client:melodic:stable:
     PACKAGE: "rc_hand_eye_calibration_client"
     ROS_DISTRO: "melodic"
     DOCKERFILE_DIR: "rc_hand_eye_calibration_client"
+
+image:rc_visard_driver:noetic:wip:
+  extends: .docker_build
+  except:
+    - master
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
+  variables:
+    PACKAGE: "rc_visard_driver"
+    ROS_DISTRO: "noetic"
+    DOCKERFILE_DIR: "rc_visard_driver"
+
+image:rc_visard_driver:noetic:testing:
+  extends: .docker_build
+  only:
+    - master
+  variables:
+    PACKAGE: "rc_visard_driver"
+    ROS_DISTRO: "noetic"
+    DOCKERFILE_DIR: "rc_visard_driver"
+
+image:rc_hand_eye_calibration_client:noetic:testing:
+  extends: .docker_build
+  only:
+    - master
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
+    ROS_DISTRO: "noetic"
+    DOCKERFILE_DIR: "rc_hand_eye_calibration_client"
+
+image:rc_visard_driver:noetic:stable:
+  extends: .docker_build_stable
+  variables:
+    PACKAGE: "rc_visard_driver"
+    ROS_DISTRO: "noetic"
+    DOCKERFILE_DIR: "rc_visard_driver"
+
+image:rc_hand_eye_calibration_client:noetic:stable:
+  extends: .docker_build_stable
+  variables:
+    PACKAGE: "rc_hand_eye_calibration_client"
+    ROS_DISTRO: "noetic"
+    DOCKERFILE_DIR: "rc_hand_eye_calibration_client"
