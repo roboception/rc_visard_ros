@@ -1613,6 +1613,7 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
             points2.setOut1Alternate(out1_alternate);
 
             rc_common_msgs::CameraParam cam_param;
+            double camera_fps;
 
             {
               // protect against concurent changes of selector (i.e. LineSelector),
@@ -1621,6 +1622,8 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
               boost::recursive_mutex::scoped_lock lock(mtx);
 
               cam_param = extractChunkData(rcgnodemap);
+
+              camera_fps = config.camera_fps;
             }
 
             cam_param.is_color_camera = dev_supports_color;
@@ -1632,11 +1635,18 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
               if (buffer->getImagePresent(part))
               {
                 // reset counter of consecutive missing images and failures
+                double dt = (ros::SteadyTime::now() - tlastimage).toSec();
+                if (dt > (2.0/camera_fps))
+                {
+                  ROS_WARN_STREAM("rc_visard_driver: more than " << dt << "s between published images.");
+                }
                 tlastimage = ros::SteadyTime::now();
                 cntConsecutiveFails = 0;
                 imageSuccess = true;
 
                 // the buffer is offered to all publishers
+
+                ros::SteadyTime publish_start = ros::SteadyTime::now();
 
                 disp.setDepthRange(mindepth, maxdepth);
                 cdisp.setDepthRange(mindepth, maxdepth);
@@ -1670,6 +1680,12 @@ void DeviceNodelet::grab(std::string device, rcg::Device::ACCESS access)
                 error_depth.publish(buffer, part, pixelformat);
 
                 points2.publish(buffer, part, pixelformat, out1);
+
+                dt = (ros::SteadyTime::now() - publish_start).toSec();
+                if (dt > 0.1)
+                {
+                  ROS_WARN_STREAM("rc_visard_driver: publishing took " << dt << "s!");
+                }
 
                 // use out1_mode for updating dynamic parameters (below) only
                 // from buffers with intensity images
